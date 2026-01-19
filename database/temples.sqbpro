@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/sriram/Desktop/yard/rest/database/temples.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2802"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,7:maintemples"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="temples" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort><column index="7" mode="0"/></sort><column_widths><column index="1" value="72"/><column index="2" value="113"/><column index="3" value="300"/><column index="4" value="300"/><column index="5" value="405"/><column index="6" value="167"/><column index="7" value="245"/><column index="8" value="60"/><column index="9" value="56"/><column index="10" value="300"/><column index="11" value="300"/><column index="12" value="50"/><column index="13" value="123"/><column index="14" value="60"/><column index="15" value="103"/><column index="16" value="300"/><column index="17" value="300"/><column index="18" value="200"/><column index="19" value="93"/><column index="20" value="299"/><column index="21" value="140"/><column index="22" value="67"/><column index="23" value="50"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">--  select count(*) from temples; 
+
+-- commit;
+
+select count(temple_id) from temples where source = 'a';    -- 12103
+select count(temple_id) from temples where source = 's';    -- 318173
+-- total = 330276
+
+select * from temples where marked = 'y' and dm is not null and visit_dt is null;
+
+SELECT dm, name, tags, visit_dt FROM  temples where dm = 'kurktykatk';
+
+SELECT  * FROM  temples where marked = 'y';
+SELECT  * FROM  temples where dm is not null and visit_dt is null;
+
+
+SELECT  name,  place  FROM  temples where sthalapuranam = 'y';
+	
+UPDATE temples
+SET tags = REPLACE(tags, 'marriage', 'kalyana-parikaram')
+WHERE tags LIKE '%marriage%';
+
+SELECT 
+	name,
+	deity,
+	tags,
+	place,
+    weight,
+	substr(latlong, 1, instr(latlong, ',') - 1) AS lat,
+    substr(latlong, instr(latlong, ',') +1) AS long
+FROM 
+	temples
+where 
+	marked = 'y';
+
+	UPDATE temples SET old_deity = deity;
+	
+	update temples set deity = 'shakthi' where deity = 'amman';
+	select count(*) from temples where deity not in ( 'shakthi' , 'shiva', 'vishnu', 'ganesh', 'murugan' );
+	update temples set deity = 'other' where deity not in ( 'shakthi' , 'shiva', 'vishnu', 'ganesh', 'murugan' ,'nomatch');
+	
+select name , latlong , deity , tags , place  from temples where marked = 'y' and tags like '%marriage%' or tags like '%health%' or tags like '%wealth%' or tags like '%puthra%'
+
+select name , latlong , deity , tags , place  from temples where complete = 'y' and tags like '%educa%' 
+
+update temples set place = 'doddamallur' where temple_id = 1375805
+
+ ALTER TABLE temples RENAME COLUMN complete TO marked;
+
+ select count(*) from temples where type  is  not null;
+ select * from temples where address  is  not null;
+ 
+UPDATE temples set tags = NULL where tags = '';
+
+UPDATE temples SET remark = COALESCE(type, '') || ' || ' || COALESCE(comment, '')
+
+ UPDATE temples SET remark = null where remark = ' || '
+
+UPDATE temples
+SET weight = (
+    CASE 
+        WHEN dm IS NOT NULL AND tags IS NOT NULL THEN 7 + ABS(RANDOM() % 3) 
+        WHEN dm IS NOT NULL AND tags IS NULL THEN 4 + ABS(RANDOM() % 3) 
+        WHEN dm IS  NULL AND tags IS not NULL THEN 6 + ABS(RANDOM() % 3) 
+		else 1
+    END
+)
+
+-- json for temple weight calc , now using a random number - mar 28,24
+-- {
+--   &quot;age&quot;: 7,
+--   &quot;puranic&quot;: 4,
+--   &quot;contemporary&quot;: 3,
+--   &quot;size&quot;: 5,
+--   &quot;architecture&quot;: 8,
+--   &quot;features&quot;: 2
+-- }
+
+
+WITH 
+source_a_temples AS (
+  SELECT 
+    temple_id AS id_1,
+    source AS source_1, 
+    name AS n1, 
+    place AS p1,
+    deity AS deity1,
+    substr(latlong, 1, instr(latlong, ',') - 1) * 1.0 AS lat1,
+    substr(latlong, instr(latlong, ',') + 1) * 1.0 AS long1  
+  FROM 
+    temples
+  WHERE 
+    latlong &lt; '13.40'
+),
+
+source_b_temples AS (
+  SELECT 
+    temple_id AS id_2,
+    source AS source_2, 
+    name AS n2, 
+    place AS p2,
+    deity AS deity2,
+    substr(latlong, 1, instr(latlong, ',') - 1) * 1.0 AS lat2,
+    substr(latlong, instr(latlong, ',') + 1) * 1.0 AS long2  
+  FROM 
+    temples
+  WHERE  
+    latlong &lt; '13.40'
+)
+
+SELECT 
+  a.id_1, 
+  a.source_1,  
+  a.n1, 
+  a.p1,
+  a.deity1,
+  b.id_2,   
+  b.source_2,  
+  b.n2, 
+  b.p2,
+  b.deity2,
+  -- Calculate distance in meters using Haversine formula
+  6371000 * 2 * ASIN(
+    SQRT(
+      POWER(SIN((RADIANS(b.lat2) - RADIANS(a.lat1)) / 2), 2) +
+      COS(RADIANS(a.lat1)) * COS(RADIANS(b.lat2)) *
+      POWER(SIN((RADIANS(b.long2) - RADIANS(a.long1)) / 2), 2)
+    )
+  ) AS distance_meters
+FROM source_a_temples a
+JOIN source_b_temples b
+WHERE 
+  -- Distance less than 50 meters
+  6371000 * 2 * ASIN(
+    SQRT(
+      POWER(SIN((RADIANS(b.lat2) - RADIANS(a.lat1)) / 2), 2) +
+      COS(RADIANS(a.lat1)) * COS(RADIANS(b.lat2)) *
+      POWER(SIN((RADIANS(b.long2) - RADIANS(a.long1)) / 2), 2)
+    )
+  ) &lt; 50
+  -- Add deity match condition (case-insensitive)
+  AND LOWER(TRIM(a.deity1)) = LOWER(TRIM(b.deity2))
+ORDER BY distance_meters ASC;
+
+select count(temple_id) from temples where  latlong &lt; '14' and deity != 'nomatch'
+select *  from temples where  latlong &lt; '14' and deity != 'nomatch'
+select *  from temples where  source = 'a' or marked = 'y'
+
+SELECT 
+    deity,
+    COUNT(*) AS temple_count
+FROM 
+    temples
+WHERE 
+--     deity != 'nomatch'
+    latlong &lt; '14'   -- north of thirupathi roughly
+GROUP BY 
+    deity
+ORDER BY 
+    temple_count DESC;
+
+SELECT 
+  count(*)
+FROM 
+    temples
+where 
+    deity not in ( 'nomatch' , 'shakthi' , 'other' )
+--     and latlong &lt; '17.72'   -- hyderabad roughly
+	and latlong &lt; '20' -- upto 60% of maharashtra
+--      and latlong &lt; '14'   -- north of thirupathi roughly
+	
+-- for the temple export to ndmobile.db for mobile app - jun 6,2025
+CREATE TABLE mobile_app_temples AS
+SELECT 
+    temple_id,
+    name,
+    deity,
+    latlong,
+    tags,
+    place,
+    weight,
+    visit_dt
+FROM 
+    temples
+where 
+    deity not in ( 'nomatch' , 'shakthi' , 'other' )
+--     and latlong &lt; '20'   -- hyderabad roughly
+
+ SELECT * FROM temples
+                     WHERE CAST(SUBSTR(latlong, 1, INSTR(latlong, ',') - 1) AS REAL) BETWEEN 10.747331949141344 AND 10.834170050858656
+                    AND CAST(SUBSTR(latlong, INSTR(latlong, ',') + 1) AS REAL) BETWEEN 79.08453257090083 AND 79.17293382909916
+																									  
+UPDATE temples
+SET weight = 0
+select * from temples 
+WHERE weight IS NULL;
+
+delete from temples where temple_id in ( 
+202138,212807,1212717,207383,204211,204988,1242389,1226242,1226238,1226239,97273,210753
+);
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>

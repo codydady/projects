@@ -1,0 +1,71 @@
+import os
+import numpy as np
+from PIL import Image
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+from tensorflow.keras.models import Model
+
+# Paths
+data_dir = os.path.expanduser("../../data/")
+model_dir = os.path.expanduser("./")    # modeil is in the current directory itself as we are gonna have multiple models to try. they will have their dirs
+os.makedirs(model_dir, exist_ok=True)
+
+# Image settings
+img_size = (224, 224)
+
+# Data generator with augmentation
+datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    horizontal_flip=True,
+    validation_split=0.2
+)
+
+# Load and prepare data
+train_generator = datagen.flow_from_directory(
+    data_dir,
+    target_size=img_size,
+    batch_size=8,
+    class_mode='categorical',
+    subset='training'
+)
+
+val_generator = datagen.flow_from_directory(
+    data_dir,
+    target_size=img_size,
+    batch_size=8,
+    class_mode='categorical',
+    subset='validation'
+)
+
+# Load pre-trained MobileNetV2
+base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+base_model.trainable = False
+
+# Explicitly build the functional model
+inputs = base_model.input
+x = base_model(inputs)  # Pass inputs through base_model
+x = GlobalAveragePooling2D()(x)
+x = Dense(128, activation='relu')(x)
+outputs = Dense(7, activation='softmax')(x)    # the first argument 5 indicates the number of classes
+
+# Define the model
+model = Model(inputs=inputs, outputs=outputs)
+
+# Compile
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train
+model.fit(
+    train_generator,
+    epochs=10,
+    validation_data=val_generator
+)
+
+# Save model
+model.save(os.path.join(model_dir, "idol_classifier.keras"))
+print("Model saved to", os.path.join(model_dir, "idol_classifier.keras"))

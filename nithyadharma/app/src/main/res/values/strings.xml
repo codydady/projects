@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Nithya Dharma</string>
+<!--    <string name="about">Namaskar,\n\nAmidst incessant distractions from external media, the yearning for true happiness often slips the conscious thought. What ensues is a vicious cycle of endless consumption of content we don\'t need with time we don\'t have. It tires both physically and mentally. \n\nUnlike brute faith, Contemplation and Self Reflection are core Sanathanic traits. Without Gurus, we need some help illuminating a path towards a more mindful journey. Nithya Dharma aims to be your technological agent!\n\nConsuming is plodding whereas Dharma is momentous. It paves way for happiness. \n\n🙏</string>-->
+    <string name="lal">"This 1000-year-old temple ( and many others we serve ) once echoed with chants. Today, its walls crumble silently, with no funds even for oil 🪔 or incense. Your contribution brings warmth to abandoned shrines and hope to forgotten keepers."</string>
+<!--    <string name="imp_notification_detail">Settings->Apps->Nithyadharma->Battery should be \"Unrestricted\" for daily notifications to be visible.</string>-->
+    <string name="default_notification_channel_id">general_notifications_channel</string>
+    <string name="default_notification_channel_name">Nithya Dharma Notification</string>
+</resources>

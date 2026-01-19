@@ -1,0 +1,21 @@
+    <div class="header">
+        <h1>Nithya Dharma Trust Accounts</h1>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Table Viewer</a>
+            <a href="{{ url_for('kainkaryam_entry') }}">Kainkaryam Entry</a>
+            <a href="{{ url_for('reports') }}" class="text-white underline">Reports</a>
+        </div>
+        <div class="header-stats">
+            <div class="header-item">Petty Cash: ₹{{ header_data.pcbal }}</div>
+            <div class="header-item">Bank Balance: ₹{{ header_data.bbal }}</div>
+            <div class="header-item">Purchase Amt: ₹{{ header_data.purchase_bal }}</div>
+            <div class="header-item">Total Expense: ₹{{ header_data.total_expense }}</div>
+            <div class="header-item">Total Donation: ₹{{ header_data.total_donation }}</div>
+            <div class="header-item">
+                Discrepancy: 
+                <span class="{% if header_data.discrepancy != 0 %}discrepancy{% endif %}">
+                    ₹{{ header_data.discrepancy }}
+                </span>
+            </div>
+        </div>
+    </div>
