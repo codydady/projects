@@ -23,6 +23,54 @@
     before the browser attempts to fetch any other relative resources.
   -->
     <script>
+        // 1. Dynamic root detection
+        const isCustomDomain = window.location.hostname === 'templepages.com';
+        const SITE_ROOT = isCustomDomain ? '/' : '/projects/';
+
+        // 2. Set the <base> tag
+        const baseTag = document.createElement('base');
+        baseTag.href = SITE_ROOT;
+        document.head.prepend(baseTag);
+
+        // 3. Updated Slug function to ignore 'projects' only if it's there
+        function getPostSlugFromUrl() {
+            const path = window.location.pathname;
+            const parts = path.split('/').filter(p => p && p !== 'projects' && p !== 'posts');
+            return parts.length > 0 ? parts[parts.length - 1] : null;
+        }
+
+        const currentSlug = getPostSlugFromUrl();
+
+        // 4. Config matches index.html logic
+        const CONFIG = {
+            MAX_IMGS_TO_FETCH: 12,
+            POSTS_JSON_URL: 'posts.json',
+            POSTS_DATA: [],
+            SITE_ROOT: SITE_ROOT,
+            POST_SLUG: currentSlug,
+            SLUG_ROOT: `posts/${currentSlug}`, 
+            NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
+        };
+
+        // 5. UI and Menu Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const navbarBrand = document.querySelector('.navbar-brand');
+            if (navbarBrand) navbarBrand.href = CONFIG.SITE_ROOT;
+            
+            const logoImg = document.querySelector('.navbar-logo');
+            if (logoImg) logoImg.src = 'static/logo.png'; 
+
+            document.addEventListener('click', function(event) {
+                const nav = document.getElementById('floatingNav');
+                const toggle = document.querySelector('.menu-toggle');
+                if (nav && toggle && !nav.contains(event.target) && !toggle.contains(event.target)) {
+                    nav.classList.remove('show');
+                }
+            });
+        });
+    </script>
+
+    <!-- <script>
         // 1. The root is always /projects/ because of your repo name
         const SITE_ROOT = '/projects/';
 
@@ -73,7 +121,7 @@
                 }
             });
         });
-    </script>
+    </script> -->
 
   <!-- <script>
         const repoName = 'templepages'; // IMPORTANT: Change this to your repository name

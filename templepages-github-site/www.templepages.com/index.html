@@ -16,6 +16,33 @@
     </script>
 
     <script>
+        // Dynamically detect if we are on the custom domain or the github subfolder
+        const isCustomDomain = window.location.hostname === 'templepages.com';
+        const detectedRoot = isCustomDomain ? '/' : '/projects/';
+
+        const CONFIG = {
+            RECENT_POSTS_COUNT: 20,
+            POSTS_JSON_URL: './posts.json',
+            POSTS_DATA: [],
+            SITE_ROOT: detectedRoot,
+            NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoImg = document.getElementById('nav-logo');
+            if (logoImg) {
+                // Use path joining logic to avoid double slashes
+                logoImg.src = `${CONFIG.SITE_ROOT.replace(/\/$/, '')}/static/logo.png`;
+            }
+
+            const navbarBrand = document.querySelector('.navbar-brand');
+            if (navbarBrand) {
+                navbarBrand.href = CONFIG.SITE_ROOT;
+            }
+        });
+    </script>
+
+    <!-- <script>
         // No <base> tag needed — GitHub Pages serves the subfolder as root
         // All relative paths (no leading /) will now work correctly
 
@@ -41,7 +68,7 @@
                 navbarBrand.href = CONFIG.SITE_ROOT;
             }
         });
-    </script>
+    </script> -->
 
     <!-- <script>
         // CRITICAL: This script now runs immediately as the browser parses the HTML.
