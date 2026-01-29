@@ -40,7 +40,7 @@
         const pplogoImg = document.getElementById('pp-logo');
         if (pplogoImg) {
             // Use path joining logic to avoid double slashes
-            pplogoImg.src = `${CONFIG.SITE_ROOT.replace(/\/$/, '')}/static/logo.png`;
+            pplogoImg.src =  window.location.origin + CONFIG.SITE_ROOT + 'static/logo.png';
         }
         
         // Fix the navbar brand link
