@@ -374,7 +374,7 @@ fun TempleMapScreen(
                 // --- NEW: Skip if temple is visited and user wants to hide visited temples ---
                 // This is the core logic for filtering based on the toggle and visit_dt
                 if (hideVisitedTemples && temple.visit_dt != null) {
-                    Log.d("TempleMapScreen", "Skipping marker for visited temple ${temple.name} (ID: ${temple.temple_id}) as 'hide Visited' is true.")
+//                    Log.d("TempleMapScreen", "Skipping marker for visited temple ${temple.name} (ID: ${temple.temple_id}) as 'hide Visited' is true.")
                     return@forEach // Skip to the next temple in the loop
                 }
 
@@ -636,6 +636,7 @@ fun TempleMapScreen(
                                                 temple.temple_id?.let { id ->
                                                     scope.launch {
                                                         preferencesManager.addDeletedTempleId(id)
+                                                        // delete from table as weall ?? todo
                                                         Log.d("TempleMapScreen", "Marked temple ID $id for deletion.")
                                                         item.closeInfoWindow() // Close info window after action
                                                     }

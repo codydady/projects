@@ -40,7 +40,6 @@ import com.sd.nithyadharma.screen.TempleMapScreen
 import com.sd.nithyadharma.ui.theme.NithyaDharmaTheme
 import com.sd.nithyadharma.util.FirebaseAppAnalytics
 import com.sd.nithyadharma.util.PreferencesManager
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
@@ -56,7 +55,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             // 1. Create a state to track the splash visibility
-            var showSplash by remember { mutableStateOf(true) }
+            // todo make this true again to show splash
+            var showSplash by remember { mutableStateOf(false) }
 
             val requestPermissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
                 if (isGranted) {
                     Log.d("Permission", "POST_NOTIFICATIONS permission granted.")
                 } else {
-                    Log.w("Permission", "POST_NOTIFICATIONS permission denied. Notifications may not appear.")
+//                    Log.w("Permission", "POST_NOTIFICATIONS permission denied. Notifications may not appear.")
                     Toast.makeText(this@MainActivity, "Notifications disabled. Please enable in settings.", Toast.LENGTH_LONG).show()
                 }
             }

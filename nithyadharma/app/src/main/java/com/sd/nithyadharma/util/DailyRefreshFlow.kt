@@ -1,8 +1,10 @@
 package com.sd.nithyadharma.util
 
 import android.util.Log
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -39,27 +41,27 @@ object DailyRefreshFlow {
         calculator: (LocalDateTime) -> T,
         getExpiry: (T) -> LocalDateTime
     ) = flow {
-        val zone = ZoneId.of("Asia/Kolkata")
+        val zone = ZoneId.of("Asia/Kolkata") //todo
 
-        while (true) {
+        while (currentCoroutineContext().isActive) {
             val now = LocalDateTime.now(zone)
 
             val data = try {
                 calculator(now)
             } catch (e: Exception) {
                 Log.e("DynamicRefresh", "Calculation failed", e)
-                delay(60_000)
+                delay(7000)
                 continue
             }
 
             emit(data)
 
             val expiryTime = getExpiry(data)
-
             val delayMillis = ChronoUnit.MILLIS.between(now, expiryTime)
-
-            if (delayMillis <= 0) continue
-
+            if (delayMillis <= 0) {
+                delay(1000) // Wait at least 1 second before recalculating
+                continue
+            }
             delay(delayMillis)
         }
     }

@@ -16,7 +16,7 @@ var_file_dir = os.path.join(app.root_path, 'var')
 var_file_path = os.path.join(var_file_dir, 'whatsapp_messages.txt')
 
 # Ensure DB_NAME points to the correct path where your database is located
-DB_NAME = '/Users/sriram/Desktop/yard/rest/database/temples.db'
+DB_NAME = '/Users/sriram/Desktop/yard/rest/bin/database/temples.db'
 
 TABLES = [
     'nd_donors', 'nd_donation', 'nd_expense_type', 'nd_expense', 

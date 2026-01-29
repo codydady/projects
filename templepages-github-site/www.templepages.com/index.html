@@ -16,6 +16,23 @@
     </script>
 
     <script>
+        // No need for dynamic detection — we are always on GitHub Pages from a subfolder
+        // Set the <base> href to the subfolder path where index.html lives
+        const baseTag = document.createElement('base');
+        baseTag.href = '/projects/templepages-github-site/www.templepages.com/';
+        document.head.prepend(baseTag);
+
+        // Global config — use relative paths from now on
+        const CONFIG = {
+            RECENT_POSTS_COUNT: 20,
+            POSTS_JSON_URL: './posts.json',          // relative — works with <base>
+            POSTS_DATA: [],
+            SITE_ROOT: '/projects/templepages-github-site/www.templepages.com/',
+            NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
+        };
+    </script>
+
+    <!-- <script>
         // CRITICAL: This script now runs immediately as the browser parses the HTML.
         // It does not wait for the DOM to load, ensuring the <base> tag is set
         // before the browser attempts to fetch any other relative resources.
@@ -51,7 +68,7 @@
             NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
         };
 
-    </script>
+    </script> -->
 
     <!-- Using the standard Bootstrap CDN for dark/light themes -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

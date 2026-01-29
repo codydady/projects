@@ -153,19 +153,19 @@ val vaaraQualityMap: Map<Vaara, VaaraQuality> = mapOf(
     Vaara.SHANI  to VaaraQuality.WEAK       // Saturday
 )
 
-fun tithiScoreForNallaNeram(tithi: String): Int =
-    when {
-        tithi.contains("Pournami") -> 3
-        tithi.contains("Amavasya") -> -3
-        else -> 1
-    }
-
-fun yogaScoreForNallaNeram(yoga: String): Int =
-    when (yoga) {
-        "Siddha", "Shubha", "Variyan" -> 2
-        "Vyatipata", "Vaidhruti" -> -3
-        else -> 0
-    }
+//fun tithiScoreForNallaNeram(tithi: String): Int =
+//    when {
+//        tithi.contains("Pournami") -> 3
+//        tithi.contains("Amavasya") -> -3
+//        else -> 1
+//    }
+//
+//fun yogaScoreForNallaNeram(yoga: String): Int =
+//    when (yoga) {
+//        "Siddha", "Shubha", "Variyan" -> 2
+//        "Vyatipata", "Vaidhruti" -> -3
+//        else -> 0
+//    }
 
 //private val formatter = DateTimeFormatter.ofPattern("d MMM h:mm a")
 private const val SID_FLAGS = SweConst.SEFLG_SWIEPH or SweConst.SEFLG_SIDEREAL
@@ -466,11 +466,13 @@ object PanchangamCalculator {
             sunrise = sunriseLocal
         )
 
+        // for calculating auspicious score, we need more accurate yama ,
+        // rahu and gulikai kalams based on sunrise
+        val (rahuKalam, yamaGandam, gulikai) = calculateRahuYamaGulikai(sunriseLocal, sunsetLocal)
+
         // calculate score based on panchangam parameters
         Log.i(TAG, "going to call calculateAuspiciousnessScore")
         val currentScore = calculateAuspiciousnessScore(
-            sunriseLocal,
-            sunsetLocal,
             baseTithi,
             nakshatra,
             yoga,
@@ -478,6 +480,9 @@ object PanchangamCalculator {
             vaara,
             userRasi,
             affectedJanmaRasi,
+            rahuKalam,
+            yamaGandam,
+            gulikai,
             currDttm  // passing it for rahu kalam , yama gandam calc and adjustment
         )
 
@@ -485,9 +490,16 @@ object PanchangamCalculator {
         val nakshatraEndTime = julianDayUtToLocalDttm(nakshatraEndTimeJulian)
         val yogaEndTime = julianDayUtToLocalDttm(yogaEndTimeJulian)
         val karanaEndTime = julianDayUtToLocalDttm(karanaEndJd)
+        // on 28 jan,2026 12 noon, priyam found a bug, i dont include rahu kalam and yama gandam
+        // end times in this tho they fall within this timeframe
+        val rahuKalamStartTime = rahuKalam.start
+        val rahuKalamEndTime = rahuKalam.end
+        val yamaGandamStartTime = yamaGandam.start
+        val yamaGandamEndTime = yamaGandam.end
 
         // we set this back in object for the daily flow
-        var nextRefreshTime = getNextPanchangamRefreshTime(thithiEndTime, nakshatraEndTime, yogaEndTime, karanaEndTime)
+        var nextRefreshTime = getNextPanchangamRefreshTime(thithiEndTime, nakshatraEndTime, yogaEndTime, karanaEndTime,
+            rahuKalamStartTime, rahuKalamEndTime, yamaGandamStartTime, yamaGandamEndTime)
 
         var currentDynamicPanchangam = DynamicPanchangam(
             calcDttm = currDttm,
@@ -548,8 +560,6 @@ object PanchangamCalculator {
 
 
     private fun calculateAuspiciousnessScore(
-        sunrise: LocalDateTime,
-        sunset: LocalDateTime,
         thithi: Thithi,
         nakshatra: Nakshatra,
         yoga: Yoga,
@@ -557,6 +567,9 @@ object PanchangamCalculator {
         vaara: Vaara,
         userRasi: Rasi,
         affectedJanmaRasi: Rasi,
+        rahuKalam: TimeRange,
+        yamaGandam: TimeRange,
+        gulikai: TimeRange, // todo use this as weall
         currentDttm: LocalDateTime
     ): Int {
         val dayOfWeek = getDayOfWeek(currentDttm)
@@ -583,35 +596,13 @@ object PanchangamCalculator {
         }
 
         // ---- RAHU KALAM AND YAMA GANDAM PENALTIES (−20 pts each) ----
-        // Get day duration and calculate segment duration
-        val dayDurationMinutes = Duration.between(sunrise, sunset).toMinutes()
-        val segmentDurationMinutes = dayDurationMinutes / 8.0
-
-        // Calculate Rahu Kalam time range
-        val rahuSegment = getRahukalamSegment(currentDttm.dayOfWeek)
-        val rahuStartMinutes = (rahuSegment - 1) * segmentDurationMinutes
-        val rahuEndMinutes = rahuSegment * segmentDurationMinutes
-
-        val rahuStart: LocalDateTime =
-            sunrise.plusMinutes(rahuStartMinutes.toLong())
-
-        val rahuEnd: LocalDateTime =
-            sunrise.plusMinutes(rahuEndMinutes.toLong())
-
-        if (!currentDttm.isBefore(rahuStart) && !currentDttm.isAfter(rahuEnd)) {
-            // current time is within Rahu Kalam
+        Log.i(TAG, "Rahu Kalam range new "+rahuKalam.start+" -- " + rahuKalam.end)
+        if (currentDttm >= rahuKalam.start && currentDttm <= rahuKalam.end) {
             score -= 20
-            Log.i(TAG, "Rahu Kalam condition met. Penalty applied.")
+            Log.i(TAG, "Rahu Kalam period active (${rahuKalam.start} – ${rahuKalam.end}). Score penalty: -20")
         }
 
-// Calculate Yama Gandam time range
-        val yamaSegment = getYamakandamSegment(currentDttm.dayOfWeek)
-        val yamaStartMinutes = (yamaSegment - 1) * segmentDurationMinutes
-        val yamaEndMinutes = yamaSegment * segmentDurationMinutes
-        val yamaStart = sunrise.plusMinutes(yamaStartMinutes.toLong())
-        val yamaEnd = sunrise.plusMinutes(yamaEndMinutes.toLong())
-
-        if (!currentDttm.isBefore(yamaStart) && !currentDttm.isAfter(yamaEnd)) {
+        if (!currentDttm.isBefore(yamaGandam.start) && !currentDttm.isAfter(yamaGandam.end)) {
             score -= 20
             Log.i(TAG, "Yama Gandam condition met. Penalty applied.")
         }
@@ -1025,7 +1016,8 @@ object PanchangamCalculator {
 
 
 private fun getNextPanchangamRefreshTime(
-    thithiEndTime: LocalDateTime, nakshatraEndTime: LocalDateTime, yogaEndTime: LocalDateTime, karanaEndTime: LocalDateTime
+    thithiEndTime: LocalDateTime, nakshatraEndTime: LocalDateTime, yogaEndTime: LocalDateTime, karanaEndTime: LocalDateTime,
+    rahuKalamStartTime: LocalDateTime, rahuKalamEndTime: LocalDateTime, yamaGandamStartTime: LocalDateTime, yamaGandamEndTime: LocalDateTime
 ): LocalDateTime {
 
     val now = LocalDateTime.now()
@@ -1034,9 +1026,14 @@ private fun getNextPanchangamRefreshTime(
         thithiEndTime,
         nakshatraEndTime,
         yogaEndTime,
-        karanaEndTime
+        karanaEndTime,
+        rahuKalamStartTime,
+        rahuKalamEndTime,
+        yamaGandamStartTime,
+        yamaGandamEndTime,
+//        LocalDateTime.now().plusMinutes(2)  // todo remove it after test
     )
-        .filter { it.isAfter(now) }
+        .filter { it.isAfter(now) } // todo, how does timezones affect this ??
         .minOrNull()
 
     // If nothing is upcoming, force refresh before next sunrise

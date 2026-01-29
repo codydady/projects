@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/sriram/Desktop/yard/rest/bin/database/temples.db" readonly="0" foreign_keys="" case_sensitive_like="" temp_store="" wal_autocheckpoint="" synchronous=""/><attached/><window><main_tabs open="structure browser pragmas query" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2802"/><column_width id="4" width="0"/></tab_structure><tab_browse><current_table name="0,0:"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="temples.sqbpro.sql">--  select count(*) from temples; 
-
-select count(temple_id) from temples where length(dm) &gt; 0;
+--  select count(*) from temples; 
 
 -- commit;
 
@@ -70,12 +68,12 @@ SET weight = (
 
 -- json for temple weight calc , now using a random number - mar 28,24
 -- {
---   &quot;age&quot;: 7,
---   &quot;puranic&quot;: 4,
---   &quot;contemporary&quot;: 3,
---   &quot;size&quot;: 5,
---   &quot;architecture&quot;: 8,
---   &quot;features&quot;: 2
+--   "age": 7,
+--   "puranic": 4,
+--   "contemporary": 3,
+--   "size": 5,
+--   "architecture": 8,
+--   "features": 2
 -- }
 
 
@@ -92,7 +90,7 @@ source_a_temples AS (
   FROM 
     temples
   WHERE 
-    latlong &lt; '13.40'
+    latlong < '13.40'
 ),
 
 source_b_temples AS (
@@ -107,7 +105,7 @@ source_b_temples AS (
   FROM 
     temples
   WHERE  
-    latlong &lt; '13.40'
+    latlong < '13.40'
 )
 
 SELECT 
@@ -139,13 +137,13 @@ WHERE
       COS(RADIANS(a.lat1)) * COS(RADIANS(b.lat2)) *
       POWER(SIN((RADIANS(b.long2) - RADIANS(a.long1)) / 2), 2)
     )
-  ) &lt; 50
+  ) < 50
   -- Add deity match condition (case-insensitive)
   AND LOWER(TRIM(a.deity1)) = LOWER(TRIM(b.deity2))
 ORDER BY distance_meters ASC;
 
-select count(temple_id) from temples where  latlong &lt; '14' and deity != 'nomatch'
-select *  from temples where  latlong &lt; '14' and deity != 'nomatch'
+select count(temple_id) from temples where  latlong < '14' and deity != 'nomatch'
+select *  from temples where  latlong < '14' and deity != 'nomatch'
 select *  from temples where  source = 'a' or marked = 'y'
 
 SELECT 
@@ -155,7 +153,7 @@ FROM
     temples
 WHERE 
 --     deity != 'nomatch'
-    latlong &lt; '14'   -- north of thirupathi roughly
+    latlong < '14'   -- north of thirupathi roughly
 GROUP BY 
     deity
 ORDER BY 
@@ -167,9 +165,9 @@ FROM
     temples
 where 
     deity not in ( 'nomatch' , 'shakthi' , 'other' )
---     and latlong &lt; '17.72'   -- hyderabad roughly
-	and latlong &lt; '20' -- upto 60% of maharashtra
---      and latlong &lt; '14'   -- north of thirupathi roughly
+--     and latlong < '17.72'   -- hyderabad roughly
+	and latlong < '20' -- upto 60% of maharashtra
+--      and latlong < '14'   -- north of thirupathi roughly
 	
 -- for the temple export to ndmobile.db for mobile app - jun 6,2025
 CREATE TABLE mobile_app_temples AS
@@ -186,7 +184,7 @@ FROM
     temples
 where 
     deity not in ( 'nomatch' , 'shakthi' , 'other' )
---     and latlong &lt; '20'   -- hyderabad roughly
+--     and latlong < '20'   -- hyderabad roughly
 
  SELECT * FROM temples
                      WHERE CAST(SUBSTR(latlong, 1, INSTR(latlong, ',') - 1) AS REAL) BETWEEN 10.747331949141344 AND 10.834170050858656
@@ -199,31 +197,3 @@ WHERE weight IS NULL;
 
 delete from temples where temple_id in ( 203284,203597,204509,202953,206676,1226152,98028,1229597,1229612,1229629,1229618,1232660,207706,206592,208973,1220980, 1216263,1216264,30915,1201996,1203756,1201999,207957,212099,210829,1177272,212097,1171171,210830);
 
-CREATE TABLE mobile_app_temples (
-    temple_id TEXT NOT NULL PRIMARY KEY, -- not null wasnt added by default tho it was there in temples.db. i had to make the change
-    name TEXT NOT NULL,
-    deity TEXT NOT NULL,
-    latlong TEXT NOT NULL,
-    tags TEXT,
-    place TEXT,
-    weight INTEGER NOT NULL,
-    visit_dt TEXT,
-    marked TEXT
-);
-
-INSERT INTO mobile_app_temples
-SELECT 
-    temple_id,
-    name,
-    deity,
-    latlong,
-    tags,
-    place,
-    weight,
-    visit_dt,
-    marked
-FROM 
-    temples
-WHERE 
-    deity NOT IN ('nomatch', 'shakthi', 'other')
-	 and latlong &lt; '20'   -- hyderabad roughly</sql><current_tab id="0"/></tab_sql></sqlb_project>
