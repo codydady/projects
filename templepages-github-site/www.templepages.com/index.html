@@ -23,7 +23,7 @@
             RECENT_POSTS_COUNT: 20,
             POSTS_JSON_URL: './posts.json',          // relative — loads from same folder as index.html
             POSTS_DATA: [],
-            SITE_ROOT: '/projects/',                 // root of the deployed site, both / are important
+            SITE_ROOT: '/projects/templepages-github-site/www.templepages.com/',
             NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
         };
     </script>
@@ -598,7 +598,7 @@
         <div class="container mt-2 mb-2">
             <nav class="navbar navbar-expand-lg rounded-3 px-3">
                 <a class="navbar-brand d-flex align-items-center flex-wrap" href="/">
-                    <img src="./static/logo.png" alt="My Logo" class="navbar-logo me-2 rounded-circle" />
+                    <img src="${CONFIG.SITE_ROOT}/static/logo.png" alt="My Logo" class="navbar-logo me-2 rounded-circle" />
                     <span class="header-title">Temples - The Heart of Sanathana dharma</span>
                 </a>
             </nav>
@@ -796,7 +796,7 @@
                 pinnedHtml += `
                     <div class="pinned-post-wrapper">
                         <a href="${getSlugUrl(post.slug)}" class="pinned-post-btn" style="text-decoration: none;">
-                            <img src="./static/logo.png" alt="" aria-hidden="true">
+                            <img src="${CONFIG.SITE_ROOT}/static/logo.png" alt="" aria-hidden="true">
                         </a>
                         <span class="tooltip">${post.title}</span>
                     </div>
