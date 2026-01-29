@@ -16,18 +16,14 @@
     </script>
 
     <script>
-        // No need for dynamic detection — we are always on GitHub Pages from a subfolder
-        // Set the <base> href to the subfolder path where index.html lives
-        const baseTag = document.createElement('base');
-        baseTag.href = '/projects/templepages-github-site/www.templepages.com/';
-        document.head.prepend(baseTag);
+        // No <base> tag needed — GitHub Pages serves the subfolder as root
+        // All relative paths (no leading /) will now work correctly
 
-        // Global config — use relative paths from now on
         const CONFIG = {
             RECENT_POSTS_COUNT: 20,
-            POSTS_JSON_URL: './posts.json',          // relative — works with <base>
+            POSTS_JSON_URL: './posts.json',          // relative — loads from same folder as index.html
             POSTS_DATA: [],
-            SITE_ROOT: '/projects/templepages-github-site/www.templepages.com/',
+            SITE_ROOT: '/',                          // root of the deployed site
             NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
         };
     </script>
