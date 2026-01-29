@@ -42,12 +42,12 @@
 
         // 4. Clean CONFIG matching your main index.html
         const CONFIG = {
-            RECENT_POSTS_COUNT: 20,
+            MAX_IMGS_TO_FETCH: 12,
             POSTS_JSON_URL: 'posts.json', // base tag handles the /projects/ prefix
             POSTS_DATA: [],
             SITE_ROOT: SITE_ROOT,
             POST_SLUG: currentSlug,
-            SLUG_ROOT: `posts/${currentSlug}/`, // Path to the post's folder
+            SLUG_ROOT: `posts/${currentSlug}`, // Path to the post's folder
             NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
         };
 
@@ -619,8 +619,8 @@
         // for this to work with both git and local , we sud do a basePath check as weall
         function getSlugUrl(slug) {
             // we cant do this as floating nav bar has multiple items and config.slug_url gives only one
-            console.log(' getslugurl is ' +  `${CONFIG.SITE_ROOT}${slug}/`);
-            return `${CONFIG.SITE_ROOT}${slug}/`;
+            console.log(' getslugurl is ' +  `${CONFIG.SITE_ROOT}/${slug}/`);
+            return `${CONFIG.SITE_ROOT}/${slug}/`;
 
             // now
             // console.log(' getslugurl 2 is ' +  `${CONFIG.SLUG_URL}/`);
@@ -706,7 +706,6 @@
                     if (response.ok) {
                         imgurl = `${CONFIG.SLUG_ROOT}/img${index + 1}.jpg` ;
                         // console.log(`valid images found out of 7 are  ${imgurl} .`);
-
                         postImages.push(imgurl);
                         foundImages = true;
                     }
