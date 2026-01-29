@@ -15,53 +15,10 @@
           gtag('config', 'G-3RH9RHE93K');
     </script>
 
-<script>
-    // 1. Dynamic Root Detection - Consistent with 404.html
-    const isCustomDomain = window.location.hostname === 'templepages.com';
-    const detectedRoot = isCustomDomain ? '/' : '/projects/';
-
-    const CONFIG = {
-        RECENT_POSTS_COUNT: 20,
-        POSTS_JSON_URL: './posts.json',
-        POSTS_DATA: [],
-        SITE_ROOT: detectedRoot,
-        NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
-    };
-
-    // 2. Fix the navigation and branding paths
-    document.addEventListener('DOMContentLoaded', () => {
-        // Fix the logo image (nav-logo)
-        const logoImg = document.getElementById('nav-logo');
-        if (logoImg) {
-            // Combine origin + root + path to be 100% sure of the URL
-            logoImg.src = window.location.origin + CONFIG.SITE_ROOT + 'static/logo.png';
-        }
-
-        const pplogoImg = document.getElementById('pp-logo');
-        if (pplogoImg) {
-            // Use path joining logic to avoid double slashes
-            pplogoImg.src =  window.location.origin + CONFIG.SITE_ROOT + 'static/logo.png';
-        }
-        
-        // Fix the navbar brand link
-        const navbarBrand = document.querySelector('.navbar-brand');
-        if (navbarBrand) {
-            navbarBrand.href = CONFIG.SITE_ROOT;
-        }
-    });
-
-    // 3. Centralized link generation function
-    function getSlugUrl(slug) {
-        // This ensures the URL is /projects/slug/ or /slug/
-        // It prevents the "disappearing domain" by using a clean relative path
-        return CONFIG.SITE_ROOT + slug + '/';
-    }
-</script>
-<!-- 
     <script>
-        // Dynamically detect if we are on the custom domain or the github subfolder
+        // 1. Dynamic Root Detection - Consistent with 404.html
         const isCustomDomain = window.location.hostname === 'templepages.com';
-        const detectedRoot = isCustomDomain ? '/' : '/projects';
+        const detectedRoot = isCustomDomain ? '/' : '/projects/';
 
         const CONFIG = {
             RECENT_POSTS_COUNT: 20,
@@ -71,91 +28,29 @@
             NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
         };
 
+        // 2. Fix the navigation and branding paths
         document.addEventListener('DOMContentLoaded', () => {
+            // Fix the logo image (nav-logo)
             const logoImg = document.getElementById('nav-logo');
             if (logoImg) {
-                // Use path joining logic to avoid double slashes
-                logoImg.src = `${CONFIG.SITE_ROOT.replace(/\/$/, '')}/static/logo.png`;
+                // Combine origin + root + path to be 100% sure of the URL
+                logoImg.src = window.location.origin + CONFIG.SITE_ROOT + 'static/logo.png';
             }
-
-            const pplogoImg = document.getElementById('pp-logo');
-            if (logoImg) {
-                // Use path joining logic to avoid double slashes
-                pplogoImg.src = `${CONFIG.SITE_ROOT.replace(/\/$/, '')}/static/logo.png`;
-            }
-
+            
+            // Fix the navbar brand link
             const navbarBrand = document.querySelector('.navbar-brand');
             if (navbarBrand) {
                 navbarBrand.href = CONFIG.SITE_ROOT;
             }
         });
-    </script> -->
 
-    <!-- <script>
-        // No <base> tag needed — GitHub Pages serves the subfolder as root
-        // All relative paths (no leading /) will now work correctly
-
-        const CONFIG = {
-            RECENT_POSTS_COUNT: 20,
-            POSTS_JSON_URL: './posts.json',          // relative — loads from same folder as index.html
-            POSTS_DATA: [],
-            SITE_ROOT: '/projects',
-            NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // 1. Fix the logo image
-            const logoImg = document.getElementById('nav-logo'); // or querySelector('.navbar-logo')
-            if (logoImg) {
-                // Now JavaScript can correctly expand the variable
-                logoImg.src = `${CONFIG.SITE_ROOT}/static/logo.png`;
-            }
-
-            // 2. Fix the navbar brand link
-            const navbarBrand = document.querySelector('.navbar-brand');
-            if (navbarBrand) {
-                navbarBrand.href = CONFIG.SITE_ROOT;
-            }
-        });
-    </script> -->
-
-    <!-- <script>
-        // CRITICAL: This script now runs immediately as the browser parses the HTML.
-        // It does not wait for the DOM to load, ensuring the <base> tag is set
-        // before the browser attempts to fetch any other relative resources.
-        const repoName = 'templepages'; // IMPORTANT: Change this to your repository name
-        const path = window.location.pathname;
-        const baseTag = document.createElement('base');
-        let basePath;
-
-        // Global variables
-        // let CONFIG.POSTS_DATA = [];
-        // let currentPosts = [];
-        // const POSTS_JSON_URL = './posts.json';
-
-        if (path.includes(`/${repoName}/`)) {
-          // We are on GitHub Pages, the base path is the repo name
-          basePath = `/${repoName}/`;
-          baseTag.href = basePath;
-        } else {
-          // We are running locally, the base path is the root
-          basePath = '/';
-          baseTag.href = basePath;
+        // 3. Centralized link generation function
+        function getSlugUrl(slug) {
+            // This ensures the URL is /projects/slug/ or /slug/
+            // It prevents the "disappearing domain" by using a clean relative path
+            return CONFIG.SITE_ROOT + slug + '/';
         }
-
-        // Add the base tag to the head of the document
-        document.head.prepend(baseTag);
-
-        // Global variables
-        const CONFIG = {
-            RECENT_POSTS_COUNT: 20,
-            POSTS_JSON_URL : './posts.json',
-            POSTS_DATA: [],
-            SITE_ROOT:basePath,
-            NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
-        };
-
-    </script> -->
+    </script>
 
     <!-- Using the standard Bootstrap CDN for dark/light themes -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -876,18 +771,18 @@
             return CONFIG.POSTS_DATA.filter(post => post.pinned && !post.hide);
         }
 
-                            // <img src="${basePath}static/logo.png" alt="" aria-hidden="true">
-
         function displayPinnedPosts() {
             const pinnedPosts = getPinnedPosts();
             const container = document.getElementById('pinnedPostsContainer');
             if (!container) return;
             let pinnedHtml = '';
+            const logoPath = window.location.origin + CONFIG.SITE_ROOT + 'static/logo.png';
+
             pinnedPosts.forEach(post => {
                 pinnedHtml += `
                     <div class="pinned-post-wrapper">
                         <a href="${getSlugUrl(post.slug)}" class="pinned-post-btn" style="text-decoration: none;">
-                            <img id="pp-logo" src="" alt="" aria-hidden="true">
+                            <img id="pp-logo" src="${logoPath}" alt="" aria-hidden="true">
                         </a>
                         <span class="tooltip">${post.title}</span>
                     </div>
