@@ -23,7 +23,7 @@
             RECENT_POSTS_COUNT: 20,
             POSTS_JSON_URL: './posts.json',          // relative — loads from same folder as index.html
             POSTS_DATA: [],
-            SITE_ROOT: '/projects/templepages-github-site/www.templepages.com/',
+            SITE_ROOT: '/projects',
             NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
         };
     </script>
@@ -884,7 +884,7 @@
 
         function getSlugUrl(slug) {
             // return `${basePath}${slug}/`;
-            return `${CONFIG.SITE_ROOT}${slug}/`;
+            return `${CONFIG.SITE_ROOT}/${slug}/`;
         }
 
         function navigateToPost(slug) {
