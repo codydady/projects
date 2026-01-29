@@ -15,10 +15,54 @@
           gtag('config', 'G-3RH9RHE93K');
     </script>
 
+<script>
+    // 1. Dynamic Root Detection - Consistent with 404.html
+    const isCustomDomain = window.location.hostname === 'templepages.com';
+    const detectedRoot = isCustomDomain ? '/' : '/projects/';
+
+    const CONFIG = {
+        RECENT_POSTS_COUNT: 20,
+        POSTS_JSON_URL: './posts.json',
+        POSTS_DATA: [],
+        SITE_ROOT: detectedRoot,
+        NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
+    };
+
+    // 2. Fix the navigation and branding paths
+    document.addEventListener('DOMContentLoaded', () => {
+        // Fix the logo image (nav-logo)
+        const logoImg = document.getElementById('nav-logo');
+        if (logoImg) {
+            // Combine origin + root + path to be 100% sure of the URL
+            logoImg.src = window.location.origin + CONFIG.SITE_ROOT + 'static/logo.png';
+        }
+
+        // Fix the pinned post logos (pp-logo)
+        // Note: Using querySelectorAll since there might be multiple pinned posts
+        const pinnedLogos = document.querySelectorAll('#pp-logo');
+        pinnedLogos.forEach(img => {
+            img.src = window.location.origin + CONFIG.SITE_ROOT + 'static/logo.png';
+        });
+
+        // Fix the navbar brand link
+        const navbarBrand = document.querySelector('.navbar-brand');
+        if (navbarBrand) {
+            navbarBrand.href = CONFIG.SITE_ROOT;
+        }
+    });
+
+    // 3. Centralized link generation function
+    function getSlugUrl(slug) {
+        // This ensures the URL is /projects/slug/ or /slug/
+        // It prevents the "disappearing domain" by using a clean relative path
+        return CONFIG.SITE_ROOT + slug + '/';
+    }
+</script>
+<!-- 
     <script>
         // Dynamically detect if we are on the custom domain or the github subfolder
         const isCustomDomain = window.location.hostname === 'templepages.com';
-        const detectedRoot = isCustomDomain ? '/' : '/projects/';
+        const detectedRoot = isCustomDomain ? '/' : '/projects';
 
         const CONFIG = {
             RECENT_POSTS_COUNT: 20,
@@ -35,12 +79,18 @@
                 logoImg.src = `${CONFIG.SITE_ROOT.replace(/\/$/, '')}/static/logo.png`;
             }
 
+            const pplogoImg = document.getElementById('pp-logo');
+            if (logoImg) {
+                // Use path joining logic to avoid double slashes
+                pplogoImg.src = `${CONFIG.SITE_ROOT.replace(/\/$/, '')}/static/logo.png`;
+            }
+
             const navbarBrand = document.querySelector('.navbar-brand');
             if (navbarBrand) {
                 navbarBrand.href = CONFIG.SITE_ROOT;
             }
         });
-    </script>
+    </script> -->
 
     <!-- <script>
         // No <base> tag needed — GitHub Pages serves the subfolder as root
@@ -838,7 +888,7 @@
                 pinnedHtml += `
                     <div class="pinned-post-wrapper">
                         <a href="${getSlugUrl(post.slug)}" class="pinned-post-btn" style="text-decoration: none;">
-                            <img src="${CONFIG.SITE_ROOT}/static/logo.png" alt="" aria-hidden="true">
+                            <img id="pp-logo" src="" alt="" aria-hidden="true">
                         </a>
                         <span class="tooltip">${post.title}</span>
                     </div>
@@ -868,7 +918,6 @@
                 day: 'numeric'
             });
             const isNew = (now - postDate) < CONFIG.NEW_HIGHLIGHT_FOR_POST_DURATION_MS;
-//            const isNew = (now - postDate) < oneWeekInMilliseconds;
             if (isNew) {
                 return `${formattedDate} <span class="badge bg-warning ms-2">New</span>`;
             } else {
@@ -924,10 +973,9 @@
             return cardHtml;
         }
 
-        function getSlugUrl(slug) {
-            // return `${basePath}${slug}/`;
-            return `${CONFIG.SITE_ROOT}/${slug}/`;
-        }
+        // function getSlugUrl(slug) {
+        //     return `${CONFIG.SITE_ROOT}/${slug}/`;
+        // }
 
         function navigateToPost(slug) {
             window.location.href = getSlugUrl(slug);
