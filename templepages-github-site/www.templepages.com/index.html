@@ -26,6 +26,21 @@
             SITE_ROOT: '/projects',
             NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
         };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Fix the logo image
+            const logoImg = document.getElementById('nav-logo'); // or querySelector('.navbar-logo')
+            if (logoImg) {
+                // Now JavaScript can correctly expand the variable
+                logoImg.src = `${CONFIG.SITE_ROOT}static/logo.png`;
+            }
+
+            // 2. Fix the navbar brand link
+            const navbarBrand = document.querySelector('.navbar-brand');
+            if (navbarBrand) {
+                navbarBrand.href = CONFIG.SITE_ROOT;
+            }
+        });
     </script>
 
     <!-- <script>
@@ -598,7 +613,7 @@
         <div class="container mt-2 mb-2">
             <nav class="navbar navbar-expand-lg rounded-3 px-3">
                 <a class="navbar-brand d-flex align-items-center flex-wrap" href="/">
-                    <img src="${CONFIG.SITE_ROOT}/static/logo.png" alt="My Logo" class="navbar-logo me-2 rounded-circle" />
+                    <img id="nav-logo" src="" alt="My Logo" class="navbar-logo me-2 rounded-circle" />
                     <span class="header-title">Temples - The Heart of Sanathana dharma</span>
                 </a>
             </nav>
