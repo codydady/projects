@@ -22,7 +22,60 @@
     It does not wait for the DOM to load, ensuring the <base> tag is set
     before the browser attempts to fetch any other relative resources.
   -->
-  <script>
+    <script>
+        // 1. The root is always /projects/ because of your repo name
+        const SITE_ROOT = '/projects/';
+
+        // 2. Set the <base> tag so all relative links work automatically
+        const baseTag = document.createElement('base');
+        baseTag.href = SITE_ROOT;
+        document.head.prepend(baseTag);
+
+        // 3. Simple function to get the post name from the URL
+        function getPostSlugFromUrl() {
+            const path = window.location.pathname;
+            const parts = path.split('/').filter(p => p && p !== 'projects' && p !== 'posts');
+            return parts.length > 0 ? parts[parts.length - 1] : null;
+        }
+
+        const currentSlug = getPostSlugFromUrl();
+
+        // 4. Clean CONFIG matching your main index.html
+        const CONFIG = {
+            RECENT_POSTS_COUNT: 20,
+            POSTS_JSON_URL: 'posts.json', // base tag handles the /projects/ prefix
+            POSTS_DATA: [],
+            SITE_ROOT: SITE_ROOT,
+            POST_SLUG: currentSlug,
+            SLUG_ROOT: `posts/${currentSlug}/`, // Path to the post's folder
+            NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
+        };
+
+        // 5. Fix UI elements (Home link and Logo)
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fix UI branding
+            const navbarBrand = document.querySelector('.navbar-brand');
+            if (navbarBrand) navbarBrand.href = CONFIG.SITE_ROOT;
+            
+            const logoImg = document.querySelector('.navbar-logo');
+            if (logoImg) logoImg.src = 'static/logo.png'; 
+
+            // Menu "Click Outside to Close" Logic
+            document.addEventListener('click', function(event) {
+                const nav = document.getElementById('floatingNav');
+                const toggle = document.querySelector('.menu-toggle');
+                
+                // Check if elements exist before calling .contains
+                if (nav && toggle) {
+                    if (!nav.contains(event.target) && !toggle.contains(event.target)) {
+                        nav.classList.remove('show');
+                    }
+                }
+            });
+        });
+    </script>
+
+  <!-- <script>
         const repoName = 'templepages'; // IMPORTANT: Change this to your repository name
         const path = window.location.pathname;
         const baseTag = document.createElement('base');
@@ -87,7 +140,7 @@
             }
         });
 
-  </script>
+  </script> -->
 
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
