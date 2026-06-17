@@ -97,7 +97,8 @@ class AlarmReceiver : BroadcastReceiver() {
 
                         val title = when {
                             daysDiff == 0 -> LocaleManager.getString("cmn_todaysevent", currentLang)
-                            daysDiff in 1..earlyReminderDays && Constants.PAYING_CUSTOMER -> LocaleManager.getString("cmn_futureevent", currentLang)
+                            daysDiff == 1 -> LocaleManager.getString("cmn_tomorrowevent", currentLang)
+                            daysDiff in 2..earlyReminderDays && Constants.PAYING_CUSTOMER -> LocaleManager.getString("cmn_futureevent", currentLang)
                             else -> null
                         } ?: continue
 
@@ -133,7 +134,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     val nowIst = LocalDateTime.now(ZoneId.of("Asia/Kolkata"))
 
                     // 3. Call the calculation function directly
-                    val panchangamData = calculateDynamicPanchangamDetails(nowIst, userRasi)
+                    val panchangamData = calculateDynamicPanchangamDetails(nowIst, userRasi, true)
 
                     if ( panchangamData.chandrashtamaRasi == userRasi) {
                         val title = LocaleManager.getString("str_crtoday", currentLang)

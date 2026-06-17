@@ -35,7 +35,6 @@ fun CounterScreen(
     onBackClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-//    val preferencesManager = remember { PreferencesManager(context) }
     val soundManager = remember { SoundManager.getInstance(context) }
 
     var count by rememberSaveable { mutableStateOf(0) }

@@ -109,9 +109,6 @@ fun TempleMapScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope() // Coroutine scope for launching suspend functions
 
-    // NEW: Instantiate PreferencesManager
-//    val preferencesManager = remember { PreferencesManager(context) }
-
     val currentLang by preferencesManager.getSelectedLanguage()
         .collectAsState(initial = NDLanguage.EN)
 
@@ -123,11 +120,12 @@ fun TempleMapScreen(
     // State to control if the map should automatically track the user's location
     var isTrackingMyLocation by remember { mutableStateOf(true) }
 
-    // NEW: Collect the showVisitedTemples preference as state
-    val hideVisitedTemples by preferencesManager.getHideVisitedTemples().collectAsState(initial = true)
+    val hideVisitedTemplesRaw by preferencesManager.getHideVisitedTemples().collectAsState(initial = false)
+    val showOnlyMarkedTemplesRaw by preferencesManager.getShowOnlyMarkedTemples().collectAsState(initial = false)
 
-    // NEW: Collect the showVisitedTemples preference as state
-    val showOnlyMarkedTemples by preferencesManager.getShowOnlyMarkedTemples().collectAsState(initial = true)
+    // Derived / overridden values (read-only)
+    val hideVisitedTemples = if (Constants.PAYING_CUSTOMER) hideVisitedTemplesRaw else false
+    val showOnlyMarkedTemples = if (Constants.PAYING_CUSTOMER) showOnlyMarkedTemplesRaw else false
 
     // NEW: State for showing the debug dialog for deleted IDs
     var showDeletedIdsDialog by remember { mutableStateOf(false) }

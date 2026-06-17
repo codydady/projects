@@ -6,9 +6,10 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 from tensorflow.keras.models import Model
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 
 # Paths
-data_dir = os.path.expanduser("../../data/")
+data_dir = os.path.expanduser("data")
 model_dir = os.path.expanduser("./")    # modeil is in the current directory itself as we are gonna have multiple models to try. they will have their dirs
 os.makedirs(model_dir, exist_ok=True)
 
@@ -52,7 +53,7 @@ inputs = base_model.input
 x = base_model(inputs)  # Pass inputs through base_model
 x = GlobalAveragePooling2D()(x)
 x = Dense(128, activation='relu')(x)
-outputs = Dense(7, activation='softmax')(x)    # the first argument 5 indicates the number of classes
+outputs = Dense(6, activation='softmax')(x)    # the first argument 6 indicates the number of classes
 
 # Define the model
 model = Model(inputs=inputs, outputs=outputs)

@@ -11,16 +11,20 @@ object LocaleManager {
             NDLanguage.TA to "நித்ய தர்மா"
         ),
         "app_motto" to mapOf(
-            NDLanguage.EN to "Know (Thithi), Apply (Tilaka), Chant/Listen (Manthra), Go (Sthala), Meditate, Do (Dharma)",
-            NDLanguage.TA to "நாளறிந்து கோளறிந்து நல்ல தலங்கள் சென்று நீறுடுத்தி தமையறிந்து தர்மம் அறிவோம் "
+            NDLanguage.EN to "Dharmo Rakṣati Rakṣitaḥa\nAll things perish; Dharma alone endures",
+            NDLanguage.TA to "அன்றறிவாம் என்னாது அறஞ்செய்க; மற்றது பொன்றுங்காற் பொன்றாத் துணை"
         ),
         "advance_title" to mapOf(
             NDLanguage.EN to "Advance yourself",
             NDLanguage.TA to "அறம் செய விரும்பு"
         ),
+        "nextndays" to mapOf(
+            NDLanguage.EN to "Next %s days",
+            NDLanguage.TA to "அடுத்த %s நாட்கள்"
+        ),
         "btn_hc" to mapOf(
             NDLanguage.EN to "Hindu Calendar",
-            NDLanguage.TA to "பண்டிகை நாள்காட்டி"
+            NDLanguage.TA to "பண்டிகை நாட்கள்"
         ),
         "btn_mc" to mapOf(
             NDLanguage.EN to "Manthra Counter",
@@ -32,7 +36,7 @@ object LocaleManager {
         ),
         "btn_ll" to mapOf(
             NDLanguage.EN to "Light a Lamp",
-            NDLanguage.TA to "கோயில் தீபம் ஏற்றுவோம்"
+            NDLanguage.TA to "தீபம் ஏற்றுவோம்"
         ),
         "btn_mp" to mapOf(
             NDLanguage.EN to "Manthra Player",
@@ -62,17 +66,53 @@ object LocaleManager {
             NDLanguage.EN to "About",
             NDLanguage.TA to "எதற்கு இது"
         ),
+        "btn_hr" to mapOf(
+            NDLanguage.EN to "Horoscope",
+            NDLanguage.TA to "ஜாதகம்"
+        ),
+        "str_nm" to mapOf(
+            NDLanguage.EN to "Name",
+            NDLanguage.TA to "பெயர்"
+        ),
+        "str_bdt" to mapOf(
+            NDLanguage.EN to "Birth Date & Time",
+            NDLanguage.TA to "பிறந்தநாள் நேரம்"
+        ),
+        "str_lat" to mapOf(
+            NDLanguage.EN to "Latitude",
+            NDLanguage.TA to "அட்ச ரேகை"
+        ),
+        "str_lon" to mapOf(
+            NDLanguage.EN to "Longitude",
+            NDLanguage.TA to "தீர்க்க ரேகை"
+        ),
+        "str_sunrise" to mapOf(
+            NDLanguage.EN to "Sunrise",
+            NDLanguage.TA to "சூர்யோதயம்"
+        ),
+        "str_sunset" to mapOf(
+            NDLanguage.EN to "Sunset",
+            NDLanguage.TA to "சூர்யாஸ்தமனம்"
+        ),
+        "str_sunriseset" to mapOf(
+            NDLanguage.EN to "Sunrise/Sunset",
+            NDLanguage.TA to "சூர்யோதய/அஸ்தமனம்"
+        ),
         "str_rg" to mapOf(
-            NDLanguage.EN to "Raahu Kaalam",
+            NDLanguage.EN to "Raahu Kaala",
             NDLanguage.TA to "ராகு காலம்"
         ),
         "str_ya" to mapOf(
-            NDLanguage.EN to "Yama Gandam",
+            NDLanguage.EN to "Yama Ganda",
             NDLanguage.TA to "எம கண்டம்"
         ),
         "str_gk" to mapOf(
             NDLanguage.EN to "Gulikai",
             NDLanguage.TA to "குளிகை"
+        ),
+        "str_nn" to mapOf(
+            NDLanguage.EN to "Auspicious Times",
+            NDLanguage.TA to "நல்ல நேரம்"
         ),
         "str_tt" to mapOf(
             NDLanguage.EN to "Thithi",
@@ -80,7 +120,7 @@ object LocaleManager {
         ),
         "str_vr" to mapOf(
             NDLanguage.EN to "Day",
-            NDLanguage.TA to "நாள்"
+            NDLanguage.TA to "கிழமை"
         ),
         "str_nk" to mapOf(
             NDLanguage.EN to "Nakshatra",
@@ -96,7 +136,15 @@ object LocaleManager {
         ),
         "str_cr" to mapOf(
             NDLanguage.EN to "Chandrashtama",
-            NDLanguage.TA to "சந்திராஷ்டமம்"
+            NDLanguage.TA to "சந்த்ராஷ்டமம்"
+        ),
+        "str_month" to mapOf(
+            NDLanguage.EN to "Maasam",
+            NDLanguage.TA to "மாதம்"
+        ),
+        "str_muhurtha" to mapOf(
+            NDLanguage.EN to "Subha Muhurtham",
+            NDLanguage.TA to "சுப முகூர்த்தம்"
         ),
         "str_st" to mapOf(
             NDLanguage.EN to "Status",
@@ -115,7 +163,7 @@ object LocaleManager {
             NDLanguage.TA to "சுமார்"
         ),
         "str_ex" to mapOf(
-            NDLanguage.EN to "Excellant",
+            NDLanguage.EN to "Excellent",
             NDLanguage.TA to "அருமை"
         ),
         "str_pd" to mapOf(
@@ -131,12 +179,20 @@ object LocaleManager {
             NDLanguage.TA to "நாளை"
         ),
         "str_timeend" to mapOf(
-            NDLanguage.EN to "%1s, until %2s %3s %4s %5s",
-            NDLanguage.TA to "%1s, %2s %3s %4s மணி வரை"
+            NDLanguage.EN to "%1\$s, until %2\$s %3\$s %4\$s %5\$s",
+            NDLanguage.TA to "%1\$s, %2\$s %3\$s %4\$s மணி வரை"
+        ),
+        "str_fut_timeend" to mapOf(
+            NDLanguage.EN to "%1\$s, until %2\$s %3\$s %4\$s, then %5\$s",
+            NDLanguage.TA to "%1\$s, %2\$s %3\$s மணி வரை, பின்னர் %5\$s"
         ),
         "str_currastrostatus" to mapOf(
-            NDLanguage.EN to "From %1s %2s - %3s %4s· Status: %5s",
-            NDLanguage.TA to "%1s, %2s - %3s %4s வரை, நிலை: %5s"
+            NDLanguage.EN to "From %1s %2s - %3s %4s, Status: %5s",
+            NDLanguage.TA to "%1s %2s - %3s %4s வரை, நிலை: %5s"
+        ),
+        "str_currastrostatus_sameday" to mapOf(
+            NDLanguage.EN to "From %1s %2s - %3s, Status: %5s",
+            NDLanguage.TA to "%1s %2s - %3s வரை, நிலை: %5s"
         ),
         "about_title" to mapOf(
             NDLanguage.EN to "Why the App?",
@@ -147,8 +203,8 @@ object LocaleManager {
             NDLanguage.TA to "வணக்கம்,\n\nவெளியிலிருந்து வரும் ஓயாத கவனச் சிதறல்களுக்கு மத்தியில், உண்மையான மகிழ்ச்சிக்கான ஏக்கம் பெரும்பாலும் நினைவில் இருப்பதில்லை. அதன் விளைவாக தேவையில்லாதவற்றைத் தொடர்ந்து உள்வாங்கிக் கொண்டே இருக்கும் குப்பைத் தொட்டியாக நாம் மாறி வருகிறோம். இது உடலையும் மனதையும் களைப்படையச் செய்கிறது.\n\nமூடநம்பிக்கையைப் போலல்லாமல், சிந்தனையும் சுய பரிசீலனையும் சனாதன தர்மத்தின் மையப் பண்புகளாகும். \n\nகுருக்கள் இல்லாத நிலையில், நாம் ஒரு சிந்தனைமிக்க பயணத்திற்கு வழிகாட்டும் ஒளியைத் தேட வேண்டியுள்ளது. நித்ய-தர்மா உங்கள் தொழில்நுட்ப உதவியாளராக இருக்க முயல்கிறது!\n\nவெற்று மத நம்பிக்கை என்பது மெதுவான பயணம்; ஆனால் தர்மம் என்பது வேகமானது, உயிர்த்துடிப்பானது. அது மகிழ்ச்சிக்கு வழிவகுக்கிறது. \n\n🙏"
         ),
         "about_other" to mapOf(
-            NDLanguage.EN to "Our website: www.templepages.com\nVersion: 8s",
-            NDLanguage.TA to "வலை தளம்: www.templepages.com\nபதிப்பு: 8s"
+            NDLanguage.EN to "Our website: www.templepages.com\nVersion: %1s",
+            NDLanguage.TA to "வலை தளம்: www.templepages.com\nபதிப்பு: %1s"
         ),
         "hc_bottom" to mapOf(
             NDLanguage.EN to "Dates are in accordance with Tamizh calendar. Alarm time ",
@@ -163,12 +219,28 @@ object LocaleManager {
             NDLanguage.TA to "நிகழ்வு"
         ),
         "cmn_todaysevent" to mapOf(
-            NDLanguage.EN to "Today's Event!",
-            NDLanguage.TA to "இன்றைய நிகழ்வு!"
+            NDLanguage.EN to "Today!",
+            NDLanguage.TA to "இன்று!"
+        ),
+        "cmn_tomorrowevent" to mapOf(
+            NDLanguage.EN to "Tomorrow!",
+            NDLanguage.TA to "நாளை!"
         ),
         "cmn_futureevent" to mapOf(
-            NDLanguage.EN to "Early Reminder",
-            NDLanguage.TA to "வரும் நாட்களில்"
+            NDLanguage.EN to "Down the line",
+            NDLanguage.TA to "வரும் நாட்களில் ..."
+        ),
+        "hs_birthdtls" to mapOf(
+            NDLanguage.EN to "Birth details",
+            NDLanguage.TA to "பிறப்புத் தகவல்கள்"
+        ),
+        "hs_birthchart" to mapOf(
+            NDLanguage.EN to "Birth Chart",
+            NDLanguage.TA to "ஜாதகம்"
+        ),
+        "hs_dba" to mapOf(
+            NDLanguage.EN to "Dasha Bukthi",
+            NDLanguage.TA to "தசா புக்தி"
         ),
         "ct_finalct" to mapOf(
             NDLanguage.EN to "Final Count",
@@ -312,6 +384,10 @@ object LocaleManager {
         "fb_bottom" to mapOf(
             NDLanguage.EN to "Name must be set in preferences",
             NDLanguage.TA to "விருப்பங்களில் வாடிக்கையாளர் பெயரை நிரப்பவும்"
+        ),
+        "hr_bottom" to mapOf(
+            NDLanguage.EN to "Set Name,Date and Time of birth, lat and long in preferences",
+            NDLanguage.TA to "விருப்பங்களில் பெயர், பிறந்த தேதி/நேரம், அட்சரேகை, தீர்க்க ரேகை நிரப்பவும்"
         ),
         "cmn_products" to mapOf(
             NDLanguage.EN to "Products",

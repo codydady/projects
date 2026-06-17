@@ -41,6 +41,7 @@ import com.sd.nithyadharma.ui.theme.NithyaDharmaTheme
 import com.sd.nithyadharma.util.FirebaseAppAnalytics
 import com.sd.nithyadharma.util.PreferencesManager
 import androidx.compose.runtime.setValue
+import com.sd.nithyadharma.screen.HoroscopeScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -52,8 +53,15 @@ class MainActivity : ComponentActivity() {
 
         // NOTE: Google Sign-In and setUserId(email) removed for privacy and simplicity.
         // Firebase Analytics still works automatically behind the scenes.
+        // 1. Fetch the REAL saved value once, synchronously
+        val initialLang = preferencesManager.getSavedLanguageDirectly()
 
         setContent {
+            val navController = rememberNavController()
+
+            val currentLang by preferencesManager.getSelectedLanguage()
+                .collectAsState(initial = initialLang)
+
             // 1. Create a state to track the splash visibility
             // todo make this true again to show splash
             var showSplash by remember { mutableStateOf(false) }
@@ -69,8 +77,6 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(this@MainActivity, "Notifications disabled. Please enable in settings.", Toast.LENGTH_LONG).show()
                 }
             }
-
-            val navController = rememberNavController()
 
             // Replacing above with this to check - nov 18
             LaunchedEffect(Unit) {
@@ -99,8 +105,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val currentLang by preferencesManager.getSelectedLanguage()
-                .collectAsState(initial = NDLanguage.EN)
+            // 2. Add a simple "isReady" check
+            // We check if the Flow has actually emitted its first value yet
+//            val isReady by preferencesManager.isLanguageLoaded()
+//                .collectAsState(initial = false)
 
             NithyaDharmaTheme(currentLang) {
 
@@ -135,6 +143,7 @@ class MainActivity : ComponentActivity() {
                                 onPreferencesClick = { navController.navigate("preferences") },
                                 onRALClick = { navController.navigate("requestHelp") },
                                 onFeedbackClick = { navController.navigate("feedback") },
+                                onHoroscopeClick = { navController.navigate("horoscope") },
                                 onAboutClick = { navController.navigate("about") }
                             )
                         }
@@ -196,6 +205,12 @@ class MainActivity : ComponentActivity() {
                         composable("requestHelp") {
                             FirebaseAppAnalytics.logScreenView("RequestHelpScreen", "MainActivity")
                             RequestHelpScreen(
+                                preferencesManager = preferencesManager,
+                                onBackClick = { navController.popBackStack() })
+                        }
+                        composable("horoscope") {
+                            FirebaseAppAnalytics.logScreenView("HoroscopeScreen", "MainActivity")
+                            HoroscopeScreen(
                                 preferencesManager = preferencesManager,
                                 onBackClick = { navController.popBackStack() })
                         }

@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.sd.nithyadharma.util.Constants
+import java.time.LocalDateTime
 
 // for puja product order
 data class Product(
@@ -25,7 +26,7 @@ data class Order(
         get() = subtotal + shippingCost
 }
 
-// for puja product order
+// for puja product order & horoscope
 data class CustomerInfo(
     val name: String,
     val email: String,
@@ -34,7 +35,10 @@ data class CustomerInfo(
     val address2: String,
     val city: String,
     val state: String,
-    val pincode: String
+    val pincode: String,
+    val dttmOfBirth: String,
+    val lat: String,
+    val lon: String
 )
 
 // for daily schedule

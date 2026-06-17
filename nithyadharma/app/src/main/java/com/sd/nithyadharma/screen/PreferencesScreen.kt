@@ -1,5 +1,12 @@
 package com.sd.nithyadharma.screen
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,14 +25,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.sd.nithyadharma.model.languageName
-import com.sd.nithyadharma.model.Astrology
+import com.sd.nithyadharma.model.PanchangaAttributes
 
 import com.sd.nithyadharma.util.PreferencesManager
 import com.sd.nithyadharma.util.Constants
 import kotlinx.coroutines.launch
 import com.sd.nithyadharma.model.CustomerInfo
 import com.sd.nithyadharma.model.NDLanguage
-import com.sd.nithyadharma.model.Rasi
+import java.time.LocalDateTime
+
+import androidx.compose.runtime.remember
+import com.sd.nithyadharma.model.PanchangaAttributes.Rasi
+import com.sd.nithyadharma.util.Constants.dttmFormatter
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,13 +54,13 @@ fun PreferencesScreen(
     val earlyReminder by preferencesManager.getEarlyReminder().collectAsState(initial = Constants.DEFAULT_EARLY_REMINDER_DAYS)
     val alertInterval by preferencesManager.getAlertInterval().collectAsState(initial = Constants.DEFAULT_ALERT_INTERVAL)
     val finalCount by preferencesManager.getFinalCount().collectAsState(initial = Constants.DEFAULT_FINAL_COUNT)
-    val showVisitedTemples by preferencesManager.getHideVisitedTemples().collectAsState(initial = true)
-    val showOnlyMarkedTemples by preferencesManager.getShowOnlyMarkedTemples().collectAsState(initial = true)
+    val showVisitedTemples by preferencesManager.getHideVisitedTemples().collectAsState(initial = false)
+    val showOnlyMarkedTemples by preferencesManager.getShowOnlyMarkedTemples().collectAsState(initial = false)
 
     var saveMessage by remember { mutableStateOf("") }
 
     val customerInfoFlow = preferencesManager.getCustomerInfo()
-    val customerInfo by customerInfoFlow.collectAsState(initial = CustomerInfo("", "", "", "", "", "", "", ""))
+    val customerInfo by customerInfoFlow.collectAsState(initial = CustomerInfo("", "", "", "", "", "", "", "", "", "", ""))
 
     var name by remember { mutableStateOf(customerInfo.name) }
     var email by remember { mutableStateOf(customerInfo.email) }
@@ -59,6 +71,13 @@ fun PreferencesScreen(
     var state by remember { mutableStateOf(customerInfo.state) }
     var pincode by remember { mutableStateOf(customerInfo.pincode) }
 
+    // for horoscope to work but part of customer profile
+    var dttmOfBirth by remember { mutableStateOf(customerInfo.dttmOfBirth) }
+    var lat by remember { mutableStateOf(customerInfo.lat) }
+    var lon by remember { mutableStateOf(customerInfo.lon) }
+    // this is to convert dttmofbirth to a datetime field
+    var birthDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+
 //    var sliderValue by remember { mutableStateOf(112f) } // Initialize with the starting value
     val stepValues = listOf(112f, 224f, 336f, 448f, 560f, 672f, 784f, 896f, 1008f)
     val steps = stepValues.size - 2 // 8 steps for 9 values
@@ -66,9 +85,11 @@ fun PreferencesScreen(
     // --- Breathing Timings --- along the lines of 4-7-8 ratio
     // These collectAsState are essential for getting the initial and updated values
     val inhaleTime by preferencesManager.getInhaleTime().collectAsState(initial = 6f)
-    val holdTime by preferencesManager.getHoldTime().collectAsState(initial = 10.5f)
-    val exhaleTime by preferencesManager.getExhaleTime().collectAsState(initial = 12f)
-    val pauseTime by preferencesManager.getPauseTime().collectAsState(initial = 0.01f)
+    val holdTime by preferencesManager.getHoldTime().collectAsState(initial = 12f)
+    val exhaleTime by preferencesManager.getExhaleTime().collectAsState(initial = 16f)
+    val pauseTime by preferencesManager.getPauseTime().collectAsState(initial = 4f)
+
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy  HH:mm")
 
     LaunchedEffect(customerInfo) {
         Log.d("--Preferencesscren--", "LaunchedEffect(customerInfo)" )
@@ -81,6 +102,18 @@ fun PreferencesScreen(
         city = customerInfo.city
         state = customerInfo.state
         pincode = customerInfo.pincode
+        dttmOfBirth = customerInfo.dttmOfBirth
+        lat = customerInfo.lat
+        lon = customerInfo.lon
+
+        if (customerInfo.dttmOfBirth.isNotBlank()) {
+            try {
+                birthDateTime =
+                    LocalDateTime.parse(customerInfo.dttmOfBirth, formatter)
+            } catch (e: Exception) {
+                birthDateTime = LocalDateTime.now()
+            }
+        }
     }
 
     Scaffold(
@@ -174,7 +207,7 @@ fun PreferencesScreen(
                     modifier = Modifier.fillMaxWidth(0.7f)
                 ) {
                     TextField(
-                        value = Astrology.rasiName(selectedRasi, currentLang),
+                        value = PanchangaAttributes.rasiName(selectedRasi, currentLang),
 
                         onValueChange = {},
                         readOnly = true,
@@ -193,7 +226,7 @@ fun PreferencesScreen(
                     ) {
                         Rasi.entries.forEach { rasi ->
                             DropdownMenuItem(
-                                text = { Text(Astrology.rasiName(rasi, currentLang)) },
+                                text = { Text(PanchangaAttributes.rasiName(rasi, currentLang)) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(Color(0xFFFFFFF0)),
@@ -266,8 +299,6 @@ fun PreferencesScreen(
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = Color(0xFFF5F5DC),
                                 unfocusedContainerColor = Color(0xFFF5F5DC),
-//                                focusedTextColor = Color.Black,
-//                                unfocusedTextColor = Color.Black
                             )
                         )
                     }
@@ -281,7 +312,6 @@ fun PreferencesScreen(
                     Text(
                         "Current Total Cycle: ${"%.2f".format(totalCycleDuration)}s",
                         style = MaterialTheme.typography.bodySmall,
-//                        color = Color.DarkGray
                     )
                 }
 
@@ -296,12 +326,7 @@ fun PreferencesScreen(
                         onValueChange = { scope.launch { preferencesManager.saveEarlyReminder(it.toInt()) } },
                         valueRange = 2f..4f,
                         steps = 0,
-                        modifier = Modifier.fillMaxWidth(0.7f),
-//                    colors = SliderDefaults.colors(
-//                        thumbColor = Color(0xFF1A0D04),
-//                        activeTrackColor = Color(0xFF2C1708),
-//                        inactiveTrackColor = Color(0xFFFFFFF0)
-//                    )
+                        modifier = Modifier.fillMaxWidth(0.7f)
                     )
                 }
 
@@ -355,11 +380,6 @@ fun PreferencesScreen(
                     valueRange = 18f..36f,
                     steps = 1,
                     modifier = Modifier.fillMaxWidth(0.7f),
-//                    colors = SliderDefaults.colors(
-//                        thumbColor = Color(0xFF1A0D04),
-//                        activeTrackColor = Color(0xFF2C1708),
-//                        inactiveTrackColor = Color(0xFFFFFFF0)
-//                    )
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -370,12 +390,7 @@ fun PreferencesScreen(
                     onValueChange = { scope.launch { preferencesManager.saveFinalCount(it.toInt()) } },
                     valueRange = 112f..1008f,
                     steps = steps,
-                    modifier = Modifier.fillMaxWidth(0.7f) ,
-//                    colors = SliderDefaults.colors(
-//                        thumbColor = Color(0xFF1A0D04),
-//                        activeTrackColor = Color(0xFF2C1708),
-//                        inactiveTrackColor = Color(0xFFFFFFF0)
-//                    )
+                    modifier = Modifier.fillMaxWidth(0.7f)
                 )
             }
 
@@ -384,11 +399,9 @@ fun PreferencesScreen(
                 Spacer(Modifier.height(8.dp))
 
                 fun save() {
-//                    Log.d("--Preferencesscren--", "Saved CustomerInfo: " + gmail)
-
                     scope.launch {
                         preferencesManager.saveCustomerInfo(
-                            CustomerInfo(name, email, phone, address1, address2, city, state, pincode)
+                            CustomerInfo(name, email, phone, address1, address2, city, state, pincode, dttmOfBirth, lat, lon)
                         )
                     }
                 }
@@ -397,10 +410,6 @@ fun PreferencesScreen(
                 fun input(label: String, value: String, onValueChange: (String) -> Unit) {
                     OutlinedTextField(
                         value = value,
-//                        onValueChange = {
-//                            onValueChange(it)
-//                            save()
-//                        },
                         onValueChange = { newValue -> // Use newValue here
                             onValueChange(newValue.trim()) // <--- Apply .trim() here!
                             save()
@@ -421,6 +430,27 @@ fun PreferencesScreen(
                 input("City", city) { city = it }
                 input("State", state) { state = it }
                 input("Pincode", pincode) { pincode = it }
+                // adding the horoscope related details as weall - 2nd feb 2026
+                input("Latitude", lat) { lat = it }
+                input("Longitude", lon) { lon = it }
+
+//                birthDateTime = parseDob(customerInfo.dttmOfBirth, formatter)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Date and Time of Birth",
+                        modifier = Modifier.fillMaxWidth(0.5f)
+                    )
+
+                    DateTimePicker(birthDateTime) {
+                        birthDateTime = it
+                        dttmOfBirth = it.format(formatter)
+                        save()
+                    }
+                }
             }
 
             if (saveMessage.isNotEmpty()) {
@@ -431,6 +461,55 @@ fun PreferencesScreen(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateTimePicker(
+    value: LocalDateTime,
+    onChange: (LocalDateTime) -> Unit
+) {
+    val context = LocalContext.current
+
+    OutlinedButton(onClick = {
+        val now = value
+
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+
+                TimePickerDialog(
+                    context,
+                    { _, hour, minute ->
+                        onChange(
+                            now.withYear(year)
+                                .withMonth(month + 1)
+                                .withDayOfMonth(dayOfMonth)
+                                .withHour(hour)
+                                .withMinute(minute)
+                        )
+                    },
+                    now.hour,
+                    now.minute,
+                    true
+                ).show()
+
+            },
+            now.year,
+            now.monthValue - 1,
+            now.dayOfMonth
+        ).show()
+    }) {
+        Text(value.format(dttmFormatter))
+    }
+}
+
+//fun parseDob(value: String, formatter: DateTimeFormatter): LocalDateTime =
+//    try {
+//        LocalDateTime.parse(value, formatter)
+//    } catch (e: Exception) {
+//        LocalDateTime.now()
+//    }
+
 
 // --- Helper Card Composable for section styling (Unchanged) ---
 @Composable
@@ -444,54 +523,3 @@ fun SectionCard(background: Color, content: @Composable ColumnScope.() -> Unit) 
         Column(modifier = Modifier.padding(16.dp), content = content)
     }
 }
-
-// The suspend function Context.getUserEmail() (Unchanged)
-// ...
-//suspend fun Context.getUserEmail(): String? = withContext(Dispatchers.IO) {
-//    // Debug marker
-//    Log.d("EmailDebug", "=== Starting email fetch ===")
-//
-//    // Attempt 1: AccountManager
-//    try {
-//        val accountManager = AccountManager.get(this@getUserEmail)
-//        Log.d("EmailDebug", "AccountManager instance: $accountManager")
-//
-//        val googleAccounts = accountManager.getAccountsByType("com.google")
-//        Log.d("EmailDebug", "Found ${googleAccounts.size} Google accounts")
-//
-//        googleAccounts.firstOrNull()?.let { account ->
-//            Log.d("EmailDebug", "First Google account: ${account.name} (type: ${account.type})")
-//            return@withContext account.name
-//        }
-//    } catch (e: Exception) {
-//        Log.e("EmailDebug", "AccountManager error", e)
-//    }
-//
-//    // Attempt 2: Google Sign-In
-//    try {
-//        Log.d("EmailDebug", "Attempting Google Sign-In fallback...")
-//        val account = GoogleSignIn.getLastSignedInAccount(this@getUserEmail)
-//        account?.email?.let { email ->
-//            Log.d("EmailDebug", "Google Sign-In email: $email")
-//            return@withContext email
-//        }
-//    } catch (e: Exception) {
-//        Log.e("EmailDebug", "Google Sign-In error", e)
-//    }
-//
-//    // Final attempt: Any email pattern
-//    try {
-//        Log.d("EmailDebug", "Trying generic account search...")
-//        AccountManager.get(this@getUserEmail).accounts
-//            .firstOrNull { it.name.contains("@") }
-//            ?.let { account ->
-//                Log.d("EmailDebug", "Found generic account: ${account.name}")
-//                return@withContext account.name
-//            }
-//    } catch (e: Exception) {
-//        Log.e("EmailDebug", "Generic search error", e)
-//    }
-//
-//    Log.w("EmailDebug", "No email found after all attempts")
-//    null
-//}

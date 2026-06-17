@@ -49,7 +49,7 @@ fun FeedbackScreen(
     val context = LocalContext.current // Get context in Composable scope
     val preferencesManager = remember { PreferencesManager(context) }
     val customerInfoFlow = preferencesManager.getCustomerInfo()
-    val customerInfo by customerInfoFlow.collectAsState(initial = CustomerInfo("", "", "", "", "", "", "", ""))
+    val customerInfo by customerInfoFlow.collectAsState(initial = CustomerInfo("", "", "", "", "", "", "", "", "", "", ""))
 
     // --- DIALOG CONTROL STATES ---
     var showConfirmation by remember { mutableStateOf(false) } // Controls AlertDialog visibility

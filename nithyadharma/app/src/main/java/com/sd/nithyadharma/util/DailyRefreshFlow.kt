@@ -57,11 +57,13 @@ object DailyRefreshFlow {
             emit(data)
 
             val expiryTime = getExpiry(data)
-            val delayMillis = ChronoUnit.MILLIS.between(now, expiryTime)
-            if (delayMillis <= 0) {
-                delay(1000) // Wait at least 1 second before recalculating
-                continue
-            }
+
+            // Get CURRENT time for accurate delay calculation
+            val currentTime = LocalDateTime.now(zone)
+            val delayMillis = ChronoUnit.MILLIS.between(currentTime, expiryTime)
+                .coerceAtLeast(60_000L) // Minimum
+            Log.d("DynamicRefresh", "Next refresh at: $expiryTime (in ${delayMillis/1000}s)")
+
             delay(delayMillis)
         }
     }

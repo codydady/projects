@@ -1,0 +1,136 @@
+import numpy as np
+from PIL import Image
+import tensorflow as tf
+import os
+import time
+from collections import defaultdict
+from functools import wraps
+from tqdm import tqdm
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+
+# Settings
+CONFIDENCE_THRESHOLD = 0.80  
+img_size = (224, 224)
+batch_size = 32 
+class_names = ['ambal', 'hanuman', 'murugan', 'others', 'pillaiyar', 'shivan']
+
+# Disable TensorFlow logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+tf.get_logger().setLevel('ERROR')
+
+def timing_decorator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        print(f"\nTIMING: {func.__name__} took {time.perf_counter() - start_time:.2f}s")
+        return result
+    return wrapper
+
+@timing_decorator
+def load_model():
+    print("🔮 Loading TensorFlow model...")
+    return tf.keras.models.load_model("./idol_classifier.keras")
+
+model = load_model()
+
+def is_prefixed(filename):
+    return any(filename.lower().startswith(f"{cls}_") for cls in class_names)
+
+def process_image_batch(batch_args):
+    batch_paths, rename_files = batch_args
+    results = []
+    
+    try:
+        batch_images = []
+        valid_paths = []
+        for img_path in batch_paths:
+            if rename_files and is_prefixed(os.path.basename(img_path)):
+                results.append(("skip", 1.0, img_path, None))
+                continue
+            
+            img = Image.open(img_path).convert('RGB').resize(img_size)
+            batch_images.append(np.array(img, dtype=np.float32))
+            valid_paths.append(img_path)
+        
+        if valid_paths:
+            final_batch = preprocess_input(np.array(batch_images))
+            predictions = model.predict(final_batch, verbose=0)
+            
+            for i, img_path in enumerate(valid_paths):
+                max_conf = float(np.max(predictions[i]))
+                predicted_class = class_names[np.argmax(predictions[i])]
+                base_name = os.path.basename(img_path)
+                
+                if max_conf < CONFIDENCE_THRESHOLD:
+                    results.append(("low_confidence", max_conf, img_path, predicted_class))
+                elif rename_files:
+                    new_name = f"{predicted_class}_{base_name}"
+                    new_path = os.path.join(os.path.dirname(img_path), new_name)
+                    os.rename(img_path, new_path)
+                    results.append((predicted_class, max_conf, img_path, None))
+    except Exception as e:
+        print(f"Error processing batch: {e}")
+    return results
+
+@timing_decorator
+def run_classification(directory):
+    image_paths = []
+    for root, _, files in os.walk(os.path.expanduser(directory)):
+        for file in files:
+            if file.lower().endswith(('.jpg', '.jpeg', '.png')):
+                image_paths.append(os.path.join(root, file))
+
+    total_images = len(image_paths)
+    batches = [(image_paths[i:i+batch_size], True) for i in range(0, len(image_paths), batch_size)]
+    
+    results = []
+    confident_counts = defaultdict(int)
+    low_conf_counts = defaultdict(int)
+    skipped_count = 0
+    low_conf_details = [] # List to hold console print info
+    
+    for batch in tqdm(batches, desc="🚀 Sorting"):
+        batch_res = process_image_batch(batch)
+        results.extend(batch_res)
+        
+        for status, conf, path, guess in batch_res:
+            if status == "skip":
+                skipped_count += 1
+            elif status == "low_confidence":
+                low_conf_counts[guess] += 1
+                low_conf_details.append((conf, guess, path))
+            elif status in class_names:
+                confident_counts[status] += 1
+
+    # --- FINAL RESULTS SUMMARY ---
+    print("\n📊 ========== LABEL BREAKDOWN ==========")
+    print(f"{'Label':<12} | {'Confident':<10} | {'Low Conf':<10}")
+    print("-" * 38)
+    for label in class_names:
+        c_count = confident_counts[label]
+        l_count = low_conf_counts[label]
+        print(f"{label.capitalize():<12} | {c_count:>10} | {l_count:>10}")
+    
+    print("-" * 38)
+    print(f"✅ Successfully Renamed : {sum(confident_counts.values())}")
+    print(f"⚠️  Unsure (Not Renamed): {sum(low_conf_counts.values())}")
+    print(f"🔁 Already Done         : {skipped_count}")
+    print(f"🌐 Total Images Found   : {total_images}")
+    
+    # --- LOW CONFIDENCE CONSOLE PRINT ---
+    if low_conf_details:
+        print("\n🔍 ========== REVIEW NEEDED (LOW CONFIDENCE) ==========")
+        print(f"{'Confidence':<12} | {'Best Guess':<12} | {'File Path'}")
+        print("-" * 80)
+        for conf, guess, path in low_conf_details:
+            # Use short path or filename to keep console readable if needed
+            print(f"{conf:>10.2%} | {guess.capitalize():<12} | {path}")
+        print("-" * 80)
+
+if __name__ == "__main__":
+    target_dir = "/Users/sriram/Desktop/loft/idolsort"
+    if os.path.exists(target_dir):
+        run_classification(target_dir)
+    else:
+        print("❌ Directory not found!")

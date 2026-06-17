@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sd.nithyadharma.R
 import com.sd.nithyadharma.model.NDLanguage
+import com.sd.nithyadharma.util.Constants
 import com.sd.nithyadharma.util.PreferencesManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +53,7 @@ fun AboutScreen(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    Text(LocaleManager.getString("about_other", currentLang))
+                    Text(LocaleManager.getString("about_other", currentLang, Constants.APP_VERSION))
                 }
             }
         }

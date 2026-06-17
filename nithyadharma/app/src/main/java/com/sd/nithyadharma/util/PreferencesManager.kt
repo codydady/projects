@@ -8,11 +8,11 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.sd.nithyadharma.model.BreathingTimings
 import com.sd.nithyadharma.model.CustomerInfo
 import com.sd.nithyadharma.model.NDLanguage
-import com.sd.nithyadharma.model.Rasi
+import com.sd.nithyadharma.model.PanchangaAttributes.Rasi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 
 // Define a preferences key for Early, Near reminder, alertInterval, finalCount, and colorCodeVisited
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
@@ -50,16 +50,19 @@ class PreferencesManager(context: Context) {
     private val CUSTOMER_CITY = stringPreferencesKey("customer_city")
     private val CUSTOMER_STATE = stringPreferencesKey("customer_state")
     private val CUSTOMER_PINCODE = stringPreferencesKey("customer_pincode")
+    // for horoscope
+    private val CUSTOMER_DTOB_KEY = stringPreferencesKey("customer_dttm_birth")
+    private val CUSTOMER_LAT_KEY = stringPreferencesKey("customer_birth_lat")
+    private val CUSTOMER_LON_KEY = stringPreferencesKey("customer_birth_lon")
 
-    // In PreferencesManager class:
-// --- Breathing Timing Keys ---
+    // --- Breathing Timing Keys ---
     private val INHALE_KEY = floatPreferencesKey("inhale_time")
     private val HOLD_KEY = floatPreferencesKey("hold_time")
     private val EXHALE_KEY = floatPreferencesKey("exhale_time")
     private val PAUSE_KEY = floatPreferencesKey("pause_time")
 
-// --- Save/Retrieve Functions ---
 
+    // --- Save/Retrieve Functions ---
     suspend fun saveBreathingTimings(inhale: Float, hold: Float, exhale: Float, pause: Float) {
         dataStore.edit { preferences ->
             preferences[INHALE_KEY] = inhale
@@ -100,6 +103,10 @@ class PreferencesManager(context: Context) {
             preferences[CUSTOMER_CITY] = info.city
             preferences[CUSTOMER_STATE] = info.state
             preferences[CUSTOMER_PINCODE] = info.pincode
+            preferences[CUSTOMER_DTOB_KEY] = info.dttmOfBirth
+            preferences[CUSTOMER_LAT_KEY] = info.lat
+            preferences[CUSTOMER_LON_KEY] = info.lon
+
         }
         Log.d("PreferencesManager", "Saved CustomerInfo: $info")
     }
@@ -113,17 +120,12 @@ class PreferencesManager(context: Context) {
             address2 = preferences[CUSTOMER_ADDRESS2] ?: "",
             city = preferences[CUSTOMER_CITY] ?: "",
             state = preferences[CUSTOMER_STATE] ?: "",
-            pincode = preferences[CUSTOMER_PINCODE] ?: ""
+            pincode = preferences[CUSTOMER_PINCODE] ?: "",
+            dttmOfBirth = preferences[CUSTOMER_DTOB_KEY] ?: "",
+            lat = preferences[CUSTOMER_LAT_KEY] ?: "",
+            lon = preferences[CUSTOMER_LON_KEY] ?: ""
         )
     }
-
-    // Save counter value
-//    suspend fun saveAndroidLoginEmail(email: String) {
-//        dataStore.edit { preferences ->
-//            preferences[FIREBASE_EMAIL_ID] = email
-//        }
-//        Log.d("PreferencesManager", "Saved FIREBASE_EMAIL_ID value: $email")
-//    }
 
     // Retrieve counter value
     fun getAndroidLoginEmail(): Flow<String> = dataStore.data
@@ -187,6 +189,17 @@ class PreferencesManager(context: Context) {
             }
         }
 
+    fun getSavedLanguageDirectly(): NDLanguage {
+        return runBlocking { // 🔑 Temporarily blocks to get the snapshot
+            val preferences = dataStore.data.first() // Grab only the first emission
+            val langName = preferences[SELECTED_LANGUAGE] ?: NDLanguage.EN.name
+            try {
+                NDLanguage.valueOf(langName)
+            } catch (e: Exception) {
+                NDLanguage.EN
+            }
+        }
+    }
     /**
      * Accepts the Rasi Enum directly.
      * This prevents you from accidentally saving "Mesha" or "Aries".

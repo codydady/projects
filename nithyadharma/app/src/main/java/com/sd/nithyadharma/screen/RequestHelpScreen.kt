@@ -34,6 +34,9 @@ import com.sd.nithyadharma.model.NDLanguage
 import com.sd.nithyadharma.util.Constants.NITHYADHARMA_BUSINESS_NUMBER
 import com.sd.nithyadharma.util.PreferencesManager
 import com.sd.nithyadharma.util.WhatsAppUtils // Assuming this exists
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +53,7 @@ fun RequestHelpScreen(
     val context = LocalContext.current // Get context in Composable scope
     val preferencesManager = remember { PreferencesManager(context) }
     val customerInfoFlow = preferencesManager.getCustomerInfo()
-    val customerInfo by customerInfoFlow.collectAsState(initial = CustomerInfo("", "", "", "", "", "", "", ""))
+    val customerInfo by customerInfoFlow.collectAsState(initial = CustomerInfo("", "", "", "", "", "", "", "", "", "", ""))
 
     // --- DIALOG CONTROL STATES ---
     var showConfirmation by remember { mutableStateOf(false) } // Controls AlertDialog visibility
@@ -91,7 +94,7 @@ fun RequestHelpScreen(
 //    } else {
 //        Color.Black
 //    }
-    //                email is hidden for 2 reasons. one is space and other is for them to not know it is being sent
+    // email is hidden for 2 reasons. one is space and other is for them to not know it is being sent
     val requestorEmail: String by preferencesManager.getAndroidLoginEmail().collectAsState(
         initial = "Loading..."
     )
@@ -369,17 +372,26 @@ fun RequestHelpScreen(
     }
 }
 
-
 fun generateNDRId(): String {
-    // 2. Generate a full UUID and truncate it
-    val uuid = UUID.randomUUID().toString() // Generates a string like "a1b2c3d4-e5f6-..." (36 chars)
+    // 1. Get current day of week (3-letter uppercase abbreviation)
+    val dayOfWeek = LocalDate.now()
+        .dayOfWeek
+        .getDisplayName(TextStyle.SHORT, Locale.ENGLISH)
+        .lowercase()  // "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"
 
-    // We have 12 total chars - 4 (date) - 1 (separator) = 7 characters for UUID
-    val uuidTruncated = uuid.take(7) // Take the first 7 characters
+    // 2. Generate UUID and take first 7 chars
+    val uuid = UUID.randomUUID().toString()
+    val uuidPart = uuid.take(9)  // e.g. "a1b2c3d"
 
-    // 3. Combine them with a separator
-    val finalString = uuidTruncated
+    // 3. Interleave day-of-week chars into uuidPart at fixed (but not obvious) positions
+    // Positions: 0, 3, 6 (spread out, not consecutive)
+    val sb = StringBuilder(uuidPart)
+    sb.setCharAt(1, dayOfWeek[0])   // 1st char → day[0] e.g. 'T' for Thu
+    sb.setCharAt(3, dayOfWeek[1])   // 4th char → day[1] e.g. 'h'
+    sb.setCharAt(6, dayOfWeek[2])   // 7th char → day[2] e.g. 'u'
 
-    println("Generated ID: $finalString (Length: ${finalString.length} chars)")
-    return finalString
+    val finalId = sb.toString()
+
+    println("Generated ID: $finalId (Day embedded: $dayOfWeek)")
+    return finalId
 }

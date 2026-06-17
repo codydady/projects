@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import com.sd.nithyadharma.model.Horoscope.HoroscopeInputParams
 
 object FirebaseAppAnalytics {
 
@@ -30,6 +31,18 @@ object FirebaseAppAnalytics {
         }
         firebaseAnalytics.logEvent("counter_milestone", bundle) // Custom event name
 //        println("Logged counter milestone: $currentCount (via AppAnalytics)") // Optional: for debugging
+    }
+
+    // Log the horoscope input params
+    fun logHoroscopeInputs(horoscopeInputParams: HoroscopeInputParams) {
+        val bundle = Bundle().apply {
+            putString("name", horoscopeInputParams.name)
+            putString("date", horoscopeInputParams.date.toString())
+            putString("time", horoscopeInputParams.time.toString())
+            putDouble("latitude", horoscopeInputParams.latitude)
+            putDouble("longitude", horoscopeInputParams.longitude)
+        }
+        firebaseAnalytics.logEvent("horoscope_details", bundle) // Custom event name
     }
 
     // You could add other analytics logging functions here too!

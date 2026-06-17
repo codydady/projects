@@ -16,15 +16,16 @@ import atexit
 # Define base and relative paths
 # this is for mac
 BASE_PATH = "/Users/sriram/Desktop/yard/"
+
 DB_PATH = os.path.join(BASE_PATH, "rest/bin/database/temples.db")  # Relative to base
 
 # this is for ubuntu which is normally connected to the sony tv.
-IMAGE_DURATION = 1  # Duration to display each image (in seconds)
+IMAGE_DURATION = 2 # Duration to display each image (in seconds)
 SLIDESHOW_START_COUNT = 1  # starting index for idol images , to continue from last shown image
 
 # SONG_FOLDER = os.path.join(BASE_PATH, "songs/main_devotional")  # Relative to base
 FONT_PATH_TAMIZH = os.path.join(BASE_PATH, "rest/bin/slideshow-maker/nototamir.ttf")  # Relative to base
-FONT_PATH_ENGLISH = os.path.join(BASE_PATH, "rest/bin/slideshow-maker/Karla-ExtraBold.ttf")       
+FONT_PATH_ENGLISH = os.path.join(BASE_PATH, "rest/bin/slideshow-maker/karla.ttf")       
 
 # Baseline thresholds (adjust based on your system)
 GOOD_BASELINE = {
@@ -82,10 +83,12 @@ def log_load_interval(interval=5):
         yield  # Allows cooperative multitasking
 
 # as of writing this code image_folder must have sub folders for this program to work - todo-
+        # "image_folder": os.path.join(BASE_PATH, "idolsort"), # this is for testing the idol images , change to "temples" for real slideshow
+
 MODES = {
     "temples": {
         "title" : "temples",
-        "image_folder": os.path.join(BASE_PATH, "temples"),
+        "image_folder": os.path.join(BASE_PATH, "temples"), 
         "song_folder": os.path.join(BASE_PATH, "songs/main_devotional"),
         # Separate cache keys for different resources
         "_cached_image_dirs": None,
@@ -107,7 +110,7 @@ MODES = {
     },
     "personal": {
         "title" : "personal",
-        "image_folder": os.path.join(BASE_PATH, "pics/personal_pics"),
+        "image_folder": os.path.join(BASE_PATH, "pics"),
         "song_folder": os.path.join(BASE_PATH, "songs/old_songs"),
         # Separate cache keys for different resources
         "_cached_image_dirs": None,
@@ -256,7 +259,7 @@ def overlay_text(image, text_items, line_spacing=1.2):
         bbox = draw.textbbox((0, 0), item, font=current_font) 
         text_width = bbox[2] - bbox[0]  # Calculate width (right - left)
         text_height = bbox[3] - bbox[1]  # Calculate height (bottom - top)
-        print (f"for {item} (Font {'A' if index == 0 else 'B'}), text width is {text_width}")
+        # print (f"for {item} (Font {'A' if index == 0 else 'B'}), text width is {text_width}")
     
         # Use the height of the current line with spacing to calculate total height
         total_text_height += int(text_height * line_spacing)
@@ -577,50 +580,6 @@ def load_categorized_images():
     for cat, images in categorized_images.items():
         print(f"  {cat}: {len(images)} images")
 
-# def handle_category_display(category, screen, previous_image):
-#     """Display a random image from the specified category"""
-#     if category not in categorized_images or not categorized_images[category]:
-#         print(f"No images found for category: {category}")
-#         return previous_image
-    
-#     image_path = random.choice(categorized_images[category])
-#     try:
-#         image = Image.open(image_path)
-        
-#         # Create appropriate text overlay
-#         if MODES["temples"]["title"] == "temples":
-#             parts = os.path.dirname(image_path).split('-')
-#             folder_id = parts[-1] if len(parts) > 1 else "unknown"
-#             attributes = fetch_attributes(DB_PATH, folder_id) or ("Unknown",)*8
-#             name, visit_dt, place, nearby_town, distance, tags, tam_name, tam_place = attributes
-            
-#             text_items = [
-#                 f"{tam_name}, {tam_place}",
-#                 f"near: {nearby_town} @ {distance} kms"
-#                 # f"near: {nearby_town} @ {distance} kms ; visited - {visit_dt}"
-#             ]
-#             if tags:
-#                 text_items.append(tags)
-#                 # text_items.append(f"tags: {tags}")
-#         else:
-#             text_items = [
-#                 f"Category: {category.capitalize()}",
-#                 f"Image: {os.path.basename(image_path)}"
-#             ]
-        
-#         image = overlay_text(image, text_items)
-#         current_image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
-        
-#         if previous_image:
-#             fade_transition(screen, previous_image, current_image)
-#         else:
-#             display_image(image, screen)
-            
-#         return current_image
-        
-#     except Exception as e:
-#         print(f"Error displaying {image_path}: {e}")
-#         return previous_image
 
 # this function is only for finding and correcting wrong predicions , this will go away later
 # once corrected lots of images will be given back for training the model more efficiently
@@ -934,7 +893,8 @@ def main():
                         # set mode to temples as these are temples , it doesnt work properly else
                         reinitialize_mode( "temples")
 
-                        sequential_mode = False  # Default to random mode
+                        sequential_mode = False  # Default to random mode on normal slideshow
+
                         selected_idol = category_map[event.key]
                         idol_images_selected = True
                         # also it must be in random order as there is no sequential mode ( directory )

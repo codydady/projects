@@ -2,13 +2,21 @@ package com.sd.nithyadharma.util
 
 import com.sd.nithyadharma.R
 import com.sd.nithyadharma.model.Product
-import java.util.Calendar
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 object Constants {
 //    const val SUPER_USER = "sriram" // more beta features
 //    const val OTHER_USER = "others" // or it is others
 //    const val CURRENT_USER = SUPER_USER // more beta features
     const val PAYING_CUSTOMER = true // stable version
+
+    const val APP_VERSION = 10
+
+    val INDIA_ZONE = ZoneId.of("Asia/Kolkata")
+    val UTC_ZONE = ZoneOffset.UTC
 
     const val RADIUS_MILES = 3.0
     const val LOCATION_UPDATE_INTERVAL_MS = 300000L  // once every 5 minutes
@@ -26,8 +34,9 @@ object Constants {
 
     const val DEFAULT_MAP_ZOOM_LEVEL = 16.0
 
-    // setting the recalc interval to 31 mins which is used only when in exception.
-//    const val PANCHANGAM_RECALCULATION_INTERVAL = 31
+    const val FUTURE_PANCHANGAM_CALCULATION_DAYS = 7
+
+    val dttmFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy  HH:mm")
 
     const val DEFAULT_ALERT_INTERVAL = 36
     const val DEFAULT_FINAL_COUNT = 1008

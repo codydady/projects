@@ -41,8 +41,8 @@ android {
         applicationId = "com.sd.nithyadharma"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "1.11"
+        versionCode = 13 // this is required to push the app, keep increasing the number every push to store
+        versionName = "1.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

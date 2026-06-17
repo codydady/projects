@@ -54,7 +54,7 @@ fun PujaStoreScreen(
         initial = "Loading..."
     )
     val customerInfoFlow = preferencesManager.getCustomerInfo()
-    val customerInfo by customerInfoFlow.collectAsState(initial = CustomerInfo("", "", "", "", "", "", "", ""))
+    val customerInfo by customerInfoFlow.collectAsState(initial = CustomerInfo("", "", "", "", "", "", "", "", "", "", ""))
 
     // Dialog control
     var showConfirmation by remember { mutableStateOf(false) }
