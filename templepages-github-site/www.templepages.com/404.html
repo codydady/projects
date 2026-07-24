@@ -75,179 +75,18 @@
 
     // Consistent getSlugUrl for the hamburger menu inside 404
     function getSlugUrl(slug) {
-        return CONFIG.SITE_ROOT + slug + '/';
+        // 1. Remove leading and trailing slashes from slug
+        const cleanSlug = (slug || '').replace(/^\/+|\/+$/g, '');
+
+        // 2. Ensure SITE_ROOT has a trailing slash
+        const root = CONFIG.SITE_ROOT.endsWith('/') ? CONFIG.SITE_ROOT : CONFIG.SITE_ROOT + '/';
+
+        // 3. Combine cleanly
+        return cleanSlug ? `${root}${cleanSlug}/` : root;
     }
+
 </script> 
   
-  <!-- <script>
-        // 1. Dynamic root detection
-        const isCustomDomain = window.location.hostname === 'templepages.com';
-        const SITE_ROOT = isCustomDomain ? '/' : '/projects/';
-
-        // 2. Set the <base> tag
-        const baseTag = document.createElement('base');
-        baseTag.href = SITE_ROOT;
-        document.head.prepend(baseTag);
-
-        // 3. Updated Slug function to ignore 'projects' only if it's there
-        function getPostSlugFromUrl() {
-            const path = window.location.pathname;
-            const parts = path.split('/').filter(p => p && p !== 'projects' && p !== 'posts');
-            return parts.length > 0 ? parts[parts.length - 1] : null;
-        }
-
-        const currentSlug = getPostSlugFromUrl();
-
-        // 4. Config matches index.html logic
-        const CONFIG = {
-            MAX_IMGS_TO_FETCH: 12,
-            POSTS_JSON_URL: 'posts.json',
-            POSTS_DATA: [],
-            SITE_ROOT: SITE_ROOT,
-            POST_SLUG: currentSlug,
-            SLUG_ROOT: `posts/${currentSlug}`, 
-            NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
-        };
-
-        // 5. UI and Menu Logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const navbarBrand = document.querySelector('.navbar-brand');
-            if (navbarBrand) navbarBrand.href = CONFIG.SITE_ROOT;
-            
-            const logoImg = document.querySelector('.navbar-logo');
-            if (logoImg) logoImg.src = 'static/logo.png'; 
-
-            document.addEventListener('click', function(event) {
-                const nav = document.getElementById('floatingNav');
-                const toggle = document.querySelector('.menu-toggle');
-                if (nav && toggle && !nav.contains(event.target) && !toggle.contains(event.target)) {
-                    nav.classList.remove('show');
-                }
-            });
-        });
-    </script> -->
-
-    <!-- <script>
-        // 1. The root is always /projects/ because of your repo name
-        const SITE_ROOT = '/projects/';
-
-        // 2. Set the <base> tag so all relative links work automatically
-        const baseTag = document.createElement('base');
-        baseTag.href = SITE_ROOT;
-        document.head.prepend(baseTag);
-
-        // 3. Simple function to get the post name from the URL
-        function getPostSlugFromUrl() {
-            const path = window.location.pathname;
-            const parts = path.split('/').filter(p => p && p !== 'projects' && p !== 'posts');
-            return parts.length > 0 ? parts[parts.length - 1] : null;
-        }
-
-        const currentSlug = getPostSlugFromUrl();
-
-        // 4. Clean CONFIG matching your main index.html
-        const CONFIG = {
-            MAX_IMGS_TO_FETCH: 12,
-            POSTS_JSON_URL: 'posts.json', // base tag handles the /projects/ prefix
-            POSTS_DATA: [],
-            SITE_ROOT: SITE_ROOT,
-            POST_SLUG: currentSlug,
-            SLUG_ROOT: `posts/${currentSlug}`, // Path to the post's folder
-            NEW_HIGHLIGHT_FOR_POST_DURATION_MS: 14 * 24 * 60 * 60 * 1000
-        };
-
-        // 5. Fix UI elements (Home link and Logo)
-        document.addEventListener('DOMContentLoaded', () => {
-            // Fix UI branding
-            const navbarBrand = document.querySelector('.navbar-brand');
-            if (navbarBrand) navbarBrand.href = CONFIG.SITE_ROOT;
-            
-            const logoImg = document.querySelector('.navbar-logo');
-            if (logoImg) logoImg.src = 'static/logo.png'; 
-
-            // Menu "Click Outside to Close" Logic
-            document.addEventListener('click', function(event) {
-                const nav = document.getElementById('floatingNav');
-                const toggle = document.querySelector('.menu-toggle');
-                
-                // Check if elements exist before calling .contains
-                if (nav && toggle) {
-                    if (!nav.contains(event.target) && !toggle.contains(event.target)) {
-                        nav.classList.remove('show');
-                    }
-                }
-            });
-        });
-    </script> -->
-
-  <!-- <script>
-        const repoName = 'templepages'; // IMPORTANT: Change this to your repository name
-        const path = window.location.pathname;
-        const baseTag = document.createElement('base');
-
-        let basePath; // <-- Correctly declared here
-
-        if (path.includes(`/${repoName}/`)) {
-          // We are on GitHub Pages, the base path is the repo name
-          basePath = `/${repoName}/`;
-          baseTag.href = basePath;
-        } else {
-          // We are running locally, the base path is the root
-          basePath = '/';
-          baseTag.href = basePath;
-        }
-        // Add the base tag to the head of the document
-        document.head.prepend(baseTag);
-            // REPOSITORY_NAME:'templepages',
-
-        // Function to extract the slug from the URL
-        function getPostSlugFromUrl() {
-            // Get the pathname, e.g., "/posts/sikkal/"
-            const path = window.location.pathname;
-            // Split by '/', filter out empty strings, and get the last part
-            const parts = path.split('/').filter(p => p);
-            return parts.length > 0 ? parts[parts.length - 1] : null;
-        }
-
-         // Global variables and moved all problematic site root related items here as git and local testing have different roots.
-        // dont know what will be the root when the www.templepages.com is mapped to the github page
-
-        const CONFIG = {
-            MAX_IMGS_TO_FETCH: 12,
-            POSTS_JSON_URL: './posts.json',
-            POSTS_DATA: [],
-            SITE_ROOT:basePath,
-            POST_SLUG:getPostSlugFromUrl(),
-            SLUG_ROOT: `${basePath}posts/${getPostSlugFromUrl()}`,
-            SLUG_URL:`${basePath}${getPostSlugFromUrl()}/`     // last '/'' is important
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-          // Find the navbar brand link and fix its href.
-          const navbarBrand = document.querySelector('.navbar-brand');
-          if (navbarBrand) {
-            navbarBrand.href = CONFIG.SITE_ROOT;
-          }
-          
-          // Find the logo image inside the navbar brand and fix its src.
-          const logoImg = document.querySelector('.navbar-logo');
-          if (logoImg) {
-            // We assume the original path was '/static/logo.png'
-            logoImg.src = './static/logo.png';
-          }
-      })
-
-        document.addEventListener('click', function(event) {
-            const nav = document.getElementById('floatingNav');
-            const toggle = document.querySelector('.menu-toggle');
-            if (!nav.contains(event.target) && !toggle.contains(event.target)) {
-                nav.classList.remove('show');
-            }
-        });
-
-  </script> -->
-
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
