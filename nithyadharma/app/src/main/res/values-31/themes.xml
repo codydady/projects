@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.NithyaDharma" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Ensures window starts pitch black on API 26-30 -->
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
+</resources>

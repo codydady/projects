@@ -45,8 +45,7 @@
         "type": "posts",
         "title": "Girisundhari sametha Panchavarneswarar / KalyanaSundhareswarar, Nallur",
         "author": "Sriram Seetharaman",
-        "date": "2026-01-01",
-        "actualdate": "2004-02-24",
+        "date": "2004-02-24",
         "tags": ["temples", "hinduism","sambandhar","appar","sundharar","thevaram", "nallur-sapthasthanam"]
     }, 
     {
@@ -70,8 +69,7 @@
         "type": "posts",
         "title": "Girigujambigai samtha Shenbagaranyeswarar/Naganathar, Thirunageswaram",
         "author": "Sriram Seetharaman",
-        "date": "2025-11-10",
-        "actualdate": "2007-04-18",
+        "date": "2007-04-18",
         "tags": ["temples", "hinduism","appar","sundharar","sambandhar","thevaram","navagraham","shivarathri-adhiseshan-legend","thiruneelakkudi-sapthasthanam"]
     },  
    {
@@ -210,6 +208,14 @@
         "date": "2024-03-24",
         "tags": ["temple" , "sambandhar" , "thevaram" ]
     },   
+      {
+        "slug": "oeneswarar-kantheswarar-temple-kanchipuram",
+        "type": "posts",
+        "title": "Oeneswarar, Kantheswarar temple, Ona kaanthan thali, Kanchipuram",
+        "author": "Sriram S.",
+        "date": "2026-09-5",
+        "tags": ["temple" , "sundharar" , "thevaram" ]
+    },   
     {
         "slug": "soundharanaayagi-sametha-pushpavaneswarar-temple-thiruppoonthuruththi",
         "type": "posts",
@@ -231,8 +237,7 @@
         "type": "posts",
         "title": "Aanandhavalli sametha Raja Rajeswarar temple, Kadakadappai",
         "author": "Sriram S.",
-        "actualdate": "2020-01-31",
-        "date": "2025-09-5",
+        "date": "2020-01-31",
         "tags": ["temple", "sapthasthanam" ]
     },   
    {
