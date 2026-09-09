@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.sd.nithyadharma"
-    compileSdk = 35
+    compileSdk = 36 // Update compileSdk to match targetSdk
 
     signingConfigs {
         create("release") {
@@ -40,10 +40,9 @@ android {
     defaultConfig {
         applicationId = "com.sd.nithyadharma"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 13 // this is required to push the app, keep increasing the number every push to store
-        versionName = "1.10"
-
+        targetSdk = 36
+        versionCode = 15 // this is required to push the app, keep increasing the number every push to store
+        versionName = "2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

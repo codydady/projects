@@ -1,53 +1,53 @@
 package com.sd.nithyadharma.util
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
-import com.sd.nithyadharma.model.PanchangaAttributes
-import com.sd.nithyadharma.model.PanchangaAttributes.DynamicPanchangam
-import com.sd.nithyadharma.model.PanchangaAttributes.Karana
-import com.sd.nithyadharma.model.PanchangaAttributes.computeVaaraFromSunrise
-import com.sd.nithyadharma.model.PanchangaAttributes.getGulikaiSegment
-import com.sd.nithyadharma.model.PanchangaAttributes.getRahukalamSegment
-import com.sd.nithyadharma.model.PanchangaAttributes.getYamakandamSegment
-import com.sd.nithyadharma.model.PanchangaAttributes.Nakshatra
-import com.sd.nithyadharma.model.PanchangaAttributes.Paksha
-import com.sd.nithyadharma.model.PanchangaAttributes.Rasi
-import com.sd.nithyadharma.model.PanchangaAttributes.StaticGulikaiKalamMap
-import com.sd.nithyadharma.model.PanchangaAttributes.StaticPanchangam
-import com.sd.nithyadharma.model.PanchangaAttributes.StaticRahuKalamMap
-import com.sd.nithyadharma.model.PanchangaAttributes.StaticYamaGandamMap
-import com.sd.nithyadharma.model.PanchangaAttributes.TamilMonth
-import com.sd.nithyadharma.model.PanchangaAttributes.Thithi
-import com.sd.nithyadharma.model.PanchangaAttributes.Vaara
-import com.sd.nithyadharma.model.PanchangaAttributes.Yoga
+import com.sd.nithyadharma.model.PanchangaAttr
+import com.sd.nithyadharma.model.PanchangaAttr.DynamicPanchangam
+import com.sd.nithyadharma.model.PanchangaAttr.Karana
+import com.sd.nithyadharma.model.PanchangaAttr.Nakshatra
+import com.sd.nithyadharma.model.PanchangaAttr.Paksha
+import com.sd.nithyadharma.model.PanchangaAttr.Rasi
+import com.sd.nithyadharma.model.PanchangaAttr.StaticGulikaiKalamMap
+import com.sd.nithyadharma.model.PanchangaAttr.StaticPanchangam
+import com.sd.nithyadharma.model.PanchangaAttr.StaticRahuKalamMap
+import com.sd.nithyadharma.model.PanchangaAttr.StaticYamaGandamMap
+import com.sd.nithyadharma.model.PanchangaAttr.TamilMonth
+import com.sd.nithyadharma.model.PanchangaAttr.Thithi
+import com.sd.nithyadharma.model.PanchangaAttr.Vaara
+import com.sd.nithyadharma.model.PanchangaAttr.Yoga
+import com.sd.nithyadharma.model.PanchangaAttr.computeVaaraFromSunrise
+import com.sd.nithyadharma.model.PanchangaAttr.getGulikaiSegment
+import com.sd.nithyadharma.model.PanchangaAttr.getRahukalamSegment
+import com.sd.nithyadharma.model.PanchangaAttr.getYamakandamSegment
 import com.sd.nithyadharma.model.TimeRange
 import com.sd.nithyadharma.model.TimeWindow
 import com.sd.nithyadharma.util.Constants.RASI_DEGREES_PER_SEGMENT
 import com.sd.nithyadharma.util.Constants.YOGA_DEGREES
 import com.sd.nithyadharma.util.PanchangamCalculator.lunarPhaseDeg
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import swisseph.DblObj
 import swisseph.SweConst
 import swisseph.SweDate
 import swisseph.SwissEph
-import swisseph.DblObj
 import java.io.File
 import java.time.DayOfWeek
-import java.time.Instant
-import kotlin.math.floor
-import kotlin.math.roundToLong
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.roundToLong
 
 //    1. Nakshatra ⭐⭐⭐⭐⭐ 33.33 max marks
 //    2. Tithi ⭐⭐⭐⭐  26.67 max
 //    3. Yoga ⭐⭐⭐  20 max
 //    4. Karana ⭐⭐  13.33 max
 //    5. Vaara ⭐  6.67 max
-
+// used indirectly
 enum class NakshatraType(val score: Double) {
     MRIDU(16.67),      // mildly good
     KSHIPRA(22.22),    // good
@@ -273,9 +273,7 @@ private fun futureVaaraScore(
 private fun calculateFutureDayScore(
     thithi: Thithi,
     nakshatra: Nakshatra,
-    vaara: Vaara,
-    userRasi: Rasi,
-    chandrashtamaRasi: Rasi
+    vaara: Vaara
 ): Int {
 
     var score = 0
@@ -284,9 +282,10 @@ private fun calculateFutureDayScore(
     score += futureThithiScore(thithi)
     score += futureVaaraScore(vaara)
 
-    if (userRasi == chandrashtamaRasi) {
-        score -= 15
-    }
+    // imp , removed this for generic user calculations, may be in v2
+//    if (userRasi == chandrashtamaRasi) {
+//        score -= 15
+//    }
 
     return score.coerceIn(1, 100)
 }
@@ -327,10 +326,8 @@ object PanchangamCalculator {
     private lateinit var swissEph: SwissEph
     private lateinit var applicationContext: Context
 
-    // Chennai Coordinates (approximate, you might want more precise ones)
-    private const val LATITUDE_CHENNAI = 13.0827 // North
-    private const val LONGITUDE_CHENNAI = 80.2707 // East
-    private const val ALTITUDE_CHENNAI = 7.0 // meters above sea level (approx)
+    // 🔑 Lock mechanism to serialize thread access to swissEph
+    private val swissEphMutex = Mutex()
 
     // --- Public Initialization ---
     fun initializeEphimeris(context: Context) {
@@ -362,10 +359,10 @@ object PanchangamCalculator {
 
     // todo, for future scaleup, geopos must come from a enum where i get user location
 
-    public fun calculateStaticPanchangamDetails(currDttm: LocalDateTime): StaticPanchangam {
+     suspend fun calculateStaticPanchangamDetails(currDttm: LocalDateTime): StaticPanchangam = swissEphMutex.withLock {
         if (!::swissEph.isInitialized) {
             Log.e(TAG, "Swiss Ephemeris not initialized in calculatePanchangamInternal.")
-            return StaticPanchangam(
+            return@withLock StaticPanchangam(
                 calcDttm = currDttm,
                 rahuKalam = null,
                 yamaGandam = null,
@@ -377,7 +374,7 @@ object PanchangamCalculator {
             )
         }
 
-        val geopos = doubleArrayOf(LONGITUDE_CHENNAI, LATITUDE_CHENNAI, ALTITUDE_CHENNAI)
+        val geopos = Constants.GEO_POS_CHENNAI
 
         // --- STEP 1: Set Topocentric Coordinates ---
         // This is necessary to inform the library where the observer is.
@@ -388,8 +385,8 @@ object PanchangamCalculator {
             currDttm.year,
             currDttm.monthValue,
             currDttm.dayOfMonth,
-            LATITUDE_CHENNAI,
-            LONGITUDE_CHENNAI
+            Constants.LATITUDE_CHENNAI,
+            Constants.LONGITUDE_CHENNAI
         )
 
         val sunriseLocal = julianDayUtToLocalDttm(sunriseJd)
@@ -408,14 +405,8 @@ object PanchangamCalculator {
 
 //        Log.d(TAG, "******calced r y g are : $rahu,  $yama,  $gulikai")
 
-        // this sends actual sunrise and sunset but users are used to static so we
-        // will comment this and use next fn
-//        val nallaNeramWindows = getHighPrecisionNallaNeramWindows(currDttm ,
-//            sunriseLocal.toLocalTime(),
-//            sunsetLocal.toLocalTime()
-//        )
-        // todo , on jun 18,2026, i think this is not mature or correct enough to be included
-        // but this must be conquered
+        // todo , on jun 18,2026, i think this is not mature or correct
+         //  enough to be included but this must be conquered
 
 //        val nallaNeramWindows = getHighPrecisionNallaNeramWindows(
 //            currDttm = currDttm,
@@ -437,21 +428,21 @@ object PanchangamCalculator {
         return staticPanchangamForTheDay
     }
 
-    // --- Original calculation logic, now private and suspendable ---
-    // todo , we need a light and full version of the function as most karana , yoga , end times etc
-    // are not required for light version which is used for next N days future panchanga.
-    // todo, for future scaleup, geopos must come from a enum where i get user location
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    public fun calculateDynamicPanchangamDetails(currDttm: LocalDateTime,
-                                                 userRasi: Rasi,
-                                                 currentMode: Boolean): DynamicPanchangam {
+    /* todo , we need a light and full version of the function as most
+        karana , yoga , end times etc  are not required for light version
+        which is used for next N days future panchangam
+        for future scaleup, geopos must come from a enum where i get user location
+    */
+    suspend fun calculateDynamicPanchangamDetails(currDttm: LocalDateTime,
+                                                  currentMode: Boolean): DynamicPanchangam = swissEphMutex.withLock {
         // Ensure Swiss Ephemeris is initialized. (Should be called by initialize() first)
         if (!::swissEph.isInitialized) {
-            Log.e(TAG, "Swiss Ephemeris not initialized in calculatePanchangamInternal.")
-            return DynamicPanchangam(calcDttm = currDttm)
+            Log.e(TAG, "Swiss Ephemeris not initialized in calculateDynamicPanchangamDetails.")
+            return@withLock DynamicPanchangam(calcDttm = currDttm)
         }
-        val geopos = doubleArrayOf(LONGITUDE_CHENNAI, LATITUDE_CHENNAI, ALTITUDE_CHENNAI)
+
+        val geopos = Constants.GEO_POS_CHENNAI
+
         val error = StringBuffer()
         val result = DoubleArray(6)
 
@@ -487,6 +478,7 @@ object PanchangamCalculator {
         val yogaAngle = (sunLon + moonLon) % 360.0
         val yogaIndex = floor(yogaAngle / YOGA_DEGREES).toInt()
         val safeYogaIndex = yogaIndex.coerceIn(0, 26)
+
         val yogaEndTimeJulian = findYogaEndTime(julianDayUt(currDttm), swissEph)
         val yoga = Yoga.entries[safeYogaIndex]
 
@@ -541,8 +533,8 @@ object PanchangamCalculator {
             currDttm.year,
             currDttm.monthValue,
             currDttm.dayOfMonth,
-            LATITUDE_CHENNAI,
-            LONGITUDE_CHENNAI
+            Constants.LATITUDE_CHENNAI,
+            Constants.LONGITUDE_CHENNAI
         )
 
         val sunriseLocal = julianDayUtToLocalDttm(sunriseJd)
@@ -554,13 +546,17 @@ object PanchangamCalculator {
         // val vaara: String = currDttm.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
         // but for precise panchange calcs , vaara is from sunrise to sunset.
 
+        /*
+            imp why is 8 hours added makes next day what logic is it because
+            this calc happens from midnight or something and plus 8 is safe hours ?
+         */
         val vaaraCalcTimeForMuhurtha =
             if (currentMode) { // true means for now when the user is seeing
                 Log.i(TAG, "current day so callin vaara with $currDttm ")
                 currDttm
             } else { // flase means future day
                 Log.i(TAG, "future day so callin vaara with $currDttm.plusHours(8) ")
-                currDttm.plusHours(8)
+                currDttm.plusHours(8) // imp this would be midnight + 8 hours so proper vaara afer sunrise would be there
             }
 
         val vaara = computeVaaraFromSunrise(
@@ -569,7 +565,8 @@ object PanchangamCalculator {
         )
 
         // compute nalla neram windows
-        // todo , on jun 18,2026, i think this is not mature or correct enough to be included
+        // todo , on jun 18,2026, i think this is not mature or correct
+        //  enough to be included
 
 //        val nallaNeramWindows = getHighPrecisionNallaNeramWindows(currDttm ,
 //            sunriseLocal.toLocalTime(),
@@ -586,8 +583,7 @@ object PanchangamCalculator {
         val (rahuKalam, yamaGandam, gulikai) = getRahuKaalamYamaGandamGulikaiPeriods(sunriseLocal, sunsetLocal, useDynamic = false)
 
         // calculate score based on panchangam parameters
-        Log.i(TAG, "going to call calculateAuspiciousnessScore")
-        // if currentMode is true , means do full calc as i have everything and come with accurate number
+//        Log.i(TAG, "going to call calculateAuspiciousnessScore")
         //  if false , it is for futureday score calc so use only less args and new function
         val currentScore =
             if (currentMode) {
@@ -598,8 +594,6 @@ object PanchangamCalculator {
                     yoga = yoga,
                     karana = karana,
                     vaara = vaara,
-                    userRasi = userRasi,
-                    affectedJanmaRasi = affectedJanmaRasi,
                     rahuKalam = rahuKalam,
                     yamaGandam = yamaGandam,
                     nallaNeram = null, //nallaNeramWindows,
@@ -614,9 +608,7 @@ object PanchangamCalculator {
                 calculateFutureDayScore(
                     thithi = thithi,
                     nakshatra = nakshatra,
-                    vaara = vaara,
-                    userRasi = userRasi,
-                    chandrashtamaRasi = affectedJanmaRasi
+                    vaara = vaara
                 )
             }
 
@@ -625,6 +617,7 @@ object PanchangamCalculator {
 
         val yogaEndTime = julianDayUtToLocalDttm(yogaEndTimeJulian)
         val karanaEndTime = julianDayUtToLocalDttm(karanaEndJd)
+
         // on 28 jan,2026 12 noon, priyam found a bug, i dont include rahu kalam and yama gandam
         // end times in this tho they fall within this timeframe
         val rahuKalamStartTime = rahuKalam.start
@@ -645,7 +638,7 @@ object PanchangamCalculator {
         val sunriseThithi: Thithi
         val sunriseNakshatra: Nakshatra
 
-        with(PanchangaAttributes) {
+        with(PanchangaAttr) {
 
             sunriseThithi =
                 if (thithiEndTime.isBefore(sunriseLocal))
@@ -659,7 +652,7 @@ object PanchangamCalculator {
                 else
                     nakshatra
         }
-        Log.d(TAG, "====calling isMuhurthaDay wth = $sunriseThithi , $sunriseNakshatra , $tamizhMonth, $vaara")
+//        Log.d(TAG, "====calling isMuhurthaDay wth = $sunriseThithi , $sunriseNakshatra , $tamizhMonth, $vaara")
 
         val isMuhurthaDay = isMuhurthaDay(
             tamizhMonth,
@@ -672,7 +665,6 @@ object PanchangamCalculator {
             calcDttm = currDttm,
             sunrise = sunriseLocal,
             sunset = sunsetLocal,
-            janmaRasi = userRasi,
             paksha = paksha,
             maasam = tamizhMonth,
             vaara = vaara,
@@ -753,8 +745,6 @@ object PanchangamCalculator {
         yoga: Yoga,
         karana: Karana,
         vaara: Vaara,
-        userRasi: Rasi,
-        affectedJanmaRasi: Rasi,
         rahuKalam: TimeRange,
         yamaGandam: TimeRange,
         nallaNeram: List<TimeWindow>?,
@@ -765,10 +755,9 @@ object PanchangamCalculator {
     ): Int {
         val dayOfWeek = currentDttm.dayOfWeek
 
-        Log.i(TAG, "-----Inputs → Thithi: $thithi (${thithiScore(thithi)}), " +
+        Log.i(TAG, "calculateAuspiciousnessScore Inputs → Thithi: $thithi (${thithiScore(thithi)}), " +
                 "Nakshatra: $nakshatra (${nakshatraScore(nakshatra)}), Yoga: $yoga, " +
                 "Karana: $karana," + " Vaara: $vaara (${vaaraScore(vaara)}), " +
-                "chandrshtama rasi: $affectedJanmaRasi, JanmaRashi: $userRasi, " +
                 "CurrentTime: $currentDttm, DayOfWeek: $dayOfWeek")
 
         var score = 0.0
@@ -792,12 +781,7 @@ object PanchangamCalculator {
 //            score += 15.0
 //        }
 
-        if (userRasi.ordinal == affectedJanmaRasi.ordinal) {
-            score -= 15.0
-            Log.d(TAG, "---Chandrashtama condition met as user rasi ${userRasi} = ${affectedJanmaRasi}. Penalty applied.")
-        }
-
-        // ---- RAHU KALAM AND YAMA GANDAM PENALTIES (−20 pts each) ----
+        // ---- RAAHU KALAM AND YAMA GANDAM PENALTIES (−20 pts each) ----
         Log.i(TAG, "Rahu Kalam range new "+rahuKalam.start+" -- " + rahuKalam.end)
         if (currentDttm >= rahuKalam.start && currentDttm <= rahuKalam.end) {
             score -= 20.0
@@ -824,13 +808,11 @@ object PanchangamCalculator {
     // adding a new functions wrapper for next n days worth of panchangam
     // added date , 11 jun, 2026
 
-    fun calculateFuturePanchangam(
+    suspend fun calculateFuturePanchangam(
         days: Int,
-        userRasi: Rasi
     ): List<Pair<StaticPanchangam, DynamicPanchangam>> {
 
-        val result =
-            mutableListOf<Pair<StaticPanchangam, DynamicPanchangam>>()
+        val result = mutableListOf<Pair<StaticPanchangam, DynamicPanchangam>>()
 
         // for this since the calculation is always from today, lets use this
         //val today = LocalDate.now()
@@ -852,7 +834,7 @@ object PanchangamCalculator {
             val sunrise = dayStart
 
             val dynamicPanchangam =
-                calculateDynamicPanchangamDetails(sunrise, userRasi, false) // false means use future score calc and such
+                calculateDynamicPanchangamDetails(sunrise, false) // false means use future score calc and such
 
             result.add(
                 staticPanchangam to dynamicPanchangam
@@ -928,13 +910,11 @@ object PanchangamCalculator {
         if (tamilMonth !in allowedMonths) {
             return false
         }
-        Log.i(TAG, "--pass 1 ---")
 
         // 2. Tuesday (Mangal) and Saturday (Shani) are strictly avoided for Subha Muhurthams
         if (vaara == Vaara.MANGAL || vaara == Vaara.SHANI) {
             return false
         }
-        Log.i(TAG, "--pass 2 ---")
 
         // 3. Rikta Tithi and Chaturthi Exclusion Filter
         // Standard Chaturthi (4th), Navami (9th), Chaturdashi (14th) along with Amavasya/Purnima cycles
@@ -954,7 +934,6 @@ object PanchangamCalculator {
         if (!hasGoodThithi) {
             return false
         }
-        Log.i(TAG, "--pass 3 ---")
 
         // 4. Dagdha Yoga (Burnt Day-Tithi Collisions) Check
         val isDagdhaDay = when (vaara) {
@@ -970,22 +949,19 @@ object PanchangamCalculator {
         if (isDagdhaDay) {
             return false
         }
-        Log.i(TAG, "--pass 3.5 Dagdha Checked ---")
 
         // 5. Sunday (Ravi) Constraint Filter (Check this BEFORE the generic weekday list)
         if (vaara == Vaara.RAVI) {
             val isGoodSundayNakshatra = nakshatra in premiumSundayNakshatras
-            Log.i(TAG, "--pass 4 (Sunday Branch: $isGoodSundayNakshatra) ---")
+//            Log.i(TAG, "--pass 4 (Sunday Branch: $isGoodSundayNakshatra) ---")
             return isGoodSundayNakshatra
         }
-        Log.i(TAG, "--pass 4 ---")
 
         // 6. Nakshatra Baseline Verification
         val hasGoodNakshatra = nakshatra in allowedNakshatras
         if (!hasGoodNakshatra) {
             return false
         }
-        Log.i(TAG, "--pass 5 ---")
 
         // 7. Monday, Wednesday, Thursday, Friday Output Finalization
         return vaara in allowedVaaras && nakshatra in allowedNakshatras
@@ -1069,6 +1045,18 @@ fun findNakshatraEndTime(
     }
 
     return (jdLow + jdHigh) / 2.0
+}
+
+/**
+ * Test mock for findYogaEndTime.
+ * Returns a Julian Day (JD) timestamp set to exactly 1 minute,12 secs  after jdStart.
+ */
+fun findYogaEndTimeForTest(
+    jdStart: Double,
+    swe: SwissEph? = null // Made optional since ephemeris isn't needed for mock
+): Double {
+    val ONE_MINUTE_IN_DAYS = 5 / 1440.0 // 24 * 60 = 1440 minutes in a day
+    return jdStart + ONE_MINUTE_IN_DAYS
 }
 
 fun findYogaEndTime(
@@ -1304,24 +1292,6 @@ fun getRahuKaalamYamaGandamGulikaiPeriods(
     }
 }
 
-// Flexible rounding extension to easily toggle between 15 or 30 minute snapping
-fun LocalTime.roundToNearestMinutes(intervalMinutes: Int): LocalTime {
-    val totalMinutes = this.hour * 60 + this.minute
-    val roundedMinutes = ((totalMinutes + (intervalMinutes / 2)) / intervalMinutes) * intervalMinutes
-    val roundedHour = (roundedMinutes / 60) % 24
-    val roundedMinute = roundedMinutes % 60
-    return LocalTime.of(roundedHour, roundedMinute)
-}
-fun LocalTime.floorToMinutes(intervalMinutes: Int): LocalTime {
-    val totalMinutes = this.hour * 60 + this.minute
-    // Integer division drops the remainder, forcing it to snap backward
-    val flooredMinutes = (totalMinutes / intervalMinutes) * intervalMinutes
-
-    val flooredHour = (flooredMinutes / 60) % 24
-    val flooredMinute = flooredMinutes % 60
-    return LocalTime.of(flooredHour, flooredMinute)
-}
-
 enum class HoraPlanet { SATURN, JUPITER, MARS, SUN, VENUS, MERCURY, MOON }
 
 data class HoraWindow(val start: LocalTime, val end: LocalTime, val planet: HoraPlanet)
@@ -1422,25 +1392,26 @@ private fun getNextPanchangamRefreshTime(
     val now = LocalDateTime.now()
     val today = LocalDate.now()
 
-    // todo - was before ignoring nalla neram - bring back if we find it
-    // todo important dont delete the commented section
-//    val nextChange = (listOfNotNull(
-//        thithiEndTime,
-//        nakshatraEndTime,
-//        yogaEndTime,
-//        karanaEndTime,
-//        rahuKalamStartTime,
-//        rahuKalamEndTime,
-//        yamaGandamStartTime,
-//        yamaGandamEndTime
-//    ) + nallaNeramWindows.flatMap { window ->
-//        listOf(
-//            LocalDateTime.of(today, window.start),
-//            LocalDateTime.of(today, window.end)
-//        )
-//    })
-//        .filter { it.isAfter(now) }
-//        .minOrNull()
+    /* todo - was before ignoring nalla neram - bring back if we find it
+        important dont delete the commented section
+            val nextChange = (listOfNotNull(
+                thithiEndTime,
+                nakshatraEndTime,
+                yogaEndTime,
+                karanaEndTime,
+                rahuKalamStartTime,
+                rahuKalamEndTime,
+                yamaGandamStartTime,
+                yamaGandamEndTime
+            ) + nallaNeramWindows.flatMap { window ->
+                listOf(
+                    LocalDateTime.of(today, window.start),
+                    LocalDateTime.of(today, window.end)
+                )
+            })
+                .filter { it.isAfter(now) }
+                .minOrNull()
+     */
 
     // todo , since nalla neram logic aint good , discarding it for now , jun 18,26
     val nextChange = ( listOfNotNull(
@@ -1458,7 +1429,6 @@ private fun getNextPanchangamRefreshTime(
 
     // If nothing is upcoming, force refresh before next sunrise
     val nextChangeDttm = nextChange ?: now.plusHours(23)
-    Log.i("PanchangamCalculator", "----next panchangam refresh time = $nextChangeDttm")
 
     return nextChangeDttm
 }

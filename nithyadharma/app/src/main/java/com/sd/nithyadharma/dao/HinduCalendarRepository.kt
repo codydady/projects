@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.sd.nithyadharma.R
 import com.sd.nithyadharma.model.ScheduleItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,7 +11,7 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.InputStreamReader
 
-object DataRepository {
+object HinduCalendarRepository {
 
     private var applicationContext: Context? = null
 
@@ -35,7 +34,7 @@ object DataRepository {
     fun initialize(context: Context) {
         if (applicationContext == null) {
             applicationContext = context.applicationContext
-            Log.d("DataRepository", "Initialized with application context.")
+            Log.d("HinduCalendarRepository", "Initialized with application context.")
         }
     }
 
@@ -51,7 +50,7 @@ object DataRepository {
     /** Entry point for UI / AlarmReceiver */
     suspend fun ensureScheduleLoaded() {
         if (isScheduleLoaded()) {
-            Log.d("DataRepository", "Schedule already loaded, skipping reload.")
+            Log.d("HinduCalendarRepository", "Schedule already loaded, skipping reload.")
             return
         }
         loadScheduleDataInternal()
@@ -62,12 +61,12 @@ object DataRepository {
     /* ------------------------- */
 
     private suspend fun loadScheduleDataInternal() {
-        Log.i("DataRepository", "Loading schedule data")
+        Log.i("HinduCalendarRepository", "Loading schedule data")
 
         val context = applicationContext ?: run {
             Log.e(
-                "DataRepository",
-                "Not initialized! Call DataRepository.initialize(context) first."
+                "HinduCalendarRepository",
+                "Not initialized! Call HinduCalendarRepository.initialize(context) first."
             )
             return
         }
@@ -89,11 +88,11 @@ object DataRepository {
                 }
 
                 Log.d(
-                    "DataRepository",
+                    "HinduCalendarRepository",
                     "Loaded ${result.size} schedule items successfully."
                 )
             } catch (e: Exception) {
-                Log.e("DataRepository", "Failed to load schedule JSON", e)
+                Log.e("HinduCalendarRepository", "Failed to load schedule JSON", e)
 
                 withContext(Dispatchers.Main) {
                     _scheduleData.value = emptyList()

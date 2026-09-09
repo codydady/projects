@@ -1,11 +1,12 @@
 package com.sd.nithyadharma.model
 
+import com.sd.nithyadharma.util.CommonFunctions
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.LocalTime
 
 // data classes
-object PanchangaAttributes {
+object PanchangaAttr {
 
     // enums
 
@@ -89,23 +90,21 @@ object PanchangaAttributes {
 
     // this is the object holding the static panchangam for the day
     data class StaticPanchangam(
-        val calcDttm: LocalDateTime = LocalDateTime.now(),
+        val calcDttm: LocalDateTime = CommonFunctions.getCurrentTime(),
         val sunrise: LocalDateTime? = null,
         val sunset: LocalDateTime? = null,
-        val vaara: Vaara ,
+        val vaara: Vaara,
         val rahuKalam: TimeRange? = null,
         val yamaGandam: TimeRange? = null,
         val gulikan: TimeRange? = null,
         val nallaNeram: List<TimeWindow>? = null
     )
 
-
-    // this is the object holding the dynamic panchangam  which changes every once a while
+    // this is the object holding the dynamic panchangam which changes every once a while
     data class DynamicPanchangam(
-        val calcDttm: LocalDateTime = LocalDateTime.now(),
+        val calcDttm: LocalDateTime = CommonFunctions.getCurrentTime(),
         val sunrise: LocalDateTime? = null,
         val sunset: LocalDateTime? = null,
-        val janmaRasi: Rasi? = null,
         val paksha: Paksha? = null,
         val maasam: TamilMonth? = null,
         val vaara: Vaara? = null,
@@ -119,9 +118,9 @@ object PanchangaAttributes {
         val yogaEndTime: LocalDateTime? = null,
         val karana: Karana? = null,
         val karanaEndTime: LocalDateTime? = null,
-        val expiryDttm: LocalDateTime = LocalDateTime.now().plusMinutes(30),
+        val expiryDttm: LocalDateTime = CommonFunctions.getCurrentTime().plusMinutes(30),
         val muhurthaDay: Boolean? = false,
-        val score: Int = 0   // for score based on vara , thithi, nakshathra , yoga , karana & chandrashtama
+        val score: Int = 0
     )
 
     // functions
@@ -129,25 +128,28 @@ object PanchangaAttributes {
     fun computeVaaraFromSunrise(now: LocalDateTime, sunrise: LocalDateTime): Vaara =
         when (if (now.isBefore(sunrise)) now.minusDays(1).dayOfWeek else now.dayOfWeek) {
             DayOfWeek.SUNDAY    -> Vaara.RAVI
-            DayOfWeek.MONDAY    -> Vaara.SOMA   // In Tamil tradition: Monday = Moon → Mangal? Wait — see note below
-            DayOfWeek.TUESDAY   -> Vaara.MANGAL     // Actually Tuesday = Mars (Sevvai), but you named it GUJA?
+            DayOfWeek.MONDAY    -> Vaara.SOMA
+            DayOfWeek.TUESDAY   -> Vaara.MANGAL
             DayOfWeek.WEDNESDAY -> Vaara.BUDHA
             DayOfWeek.THURSDAY  -> Vaara.GURU
             DayOfWeek.FRIDAY    -> Vaara.SHUKRA
             DayOfWeek.SATURDAY  -> Vaara.SHANI
         }
 
-    // Helper function (assuming you have the same NDLanguage enum)
     fun rasiName(r: Rasi, lang: NDLanguage): String =
         when (lang) {
             NDLanguage.EN -> rasiEn[r]!!
             NDLanguage.TA -> rasiTa[r]!!
+            NDLanguage.KA -> rasiKa[r]!!
+            NDLanguage.HI -> rasiHi[r]!!
         }
 
     fun vaaraName(v: Vaara, lang: NDLanguage): String =
         when (lang) {
             NDLanguage.EN -> vaaraEn[v]!!
             NDLanguage.TA -> vaaraTa[v]!!
+            NDLanguage.KA -> vaaraKa[v]!!
+            NDLanguage.HI -> vaaraHi[v]!!
         }
 
     fun Vaara.next(): Vaara {
@@ -162,12 +164,24 @@ object PanchangaAttributes {
         when (lang) {
             NDLanguage.EN -> tamilMonthEn[month]!!
             NDLanguage.TA -> tamilMonthTa[month]!!
+            NDLanguage.KA -> tamilMonthKa[month]!!
+            NDLanguage.HI -> tamilMonthHi[month]!!
+        }
+
+    fun pakshaName(p: Paksha, lang: NDLanguage): String =
+        when (lang) {
+            NDLanguage.EN -> pakshaEn[p]!!
+            NDLanguage.TA -> pakshaTa[p]!!
+            NDLanguage.KA -> pakshaKa[p]!!
+            NDLanguage.HI -> pakshaHi[p]!!
         }
 
     fun nakshatraName(n: Nakshatra, lang: NDLanguage): String =
         when (lang) {
             NDLanguage.EN -> nakshatraEn[n]!!
             NDLanguage.TA -> nakshatraTa[n]!!
+            NDLanguage.KA -> nakshatraKa[n]!!
+            NDLanguage.HI -> nakshatraHi[n]!!
         }
 
     fun Nakshatra.next(): Nakshatra {
@@ -179,6 +193,8 @@ object PanchangaAttributes {
         when (lang) {
             NDLanguage.EN -> thithiEn[t]!!
             NDLanguage.TA -> thithiTa[t]!!
+            NDLanguage.KA -> thithiKa[t]!!
+            NDLanguage.HI -> thithiHi[t]!!
         }
 
     fun Thithi.next(): Thithi {
@@ -190,12 +206,16 @@ object PanchangaAttributes {
         when (lang) {
             NDLanguage.EN -> yogaEn[y]!!
             NDLanguage.TA -> yogaTa[y]!!
+            NDLanguage.KA -> yogaKa[y]!!
+            NDLanguage.HI -> yogaHi[y]!!
         }
 
     fun karanaName(k: Karana, lang: NDLanguage): String =
         when (lang) {
             NDLanguage.EN -> karanaEn[k]!!
             NDLanguage.TA -> karanaTa[k]!!
+            NDLanguage.KA -> karanaKa[k]!!
+            NDLanguage.HI -> karanaHi[k]!!
         }
 
     /* ---------------- DATA ---------------- */
@@ -230,6 +250,56 @@ object PanchangaAttributes {
         TamilMonth.PANGUNI to "பங்குனி"
     )
 
+    private val tamilMonthKa = mapOf(
+        TamilMonth.CHITHIRAI to "ಚೈತ್ರ",        // Chaitra
+        TamilMonth.VAIKASI to "ವೈಶಾಖ",         // Vaishakha
+        TamilMonth.AANI to "ಜ್ಯೇಷ್ಠ",           // Jyeshtha
+        TamilMonth.AADI to "ಆಷಾಢ",             // Ashadha
+        TamilMonth.AVANI to "ಶ್ರಾವಣ",           // Shravana
+        TamilMonth.PURATTASI to "ಭಾದ್ರಪದ",      // Bhadrapada
+        TamilMonth.IYPPASI to "ಆಶ್ವಿನ",         // Ashvina
+        TamilMonth.KARTHIGAI to "ಕಾರ್ತಿಕ",      // Kartika
+        TamilMonth.MARGAZHI to "ಮಾರ್ಗಶಿರ",      // Margashirsha
+        TamilMonth.THAI to "ಪೌಷ",              // Pausha
+        TamilMonth.MAASI to "ಮಾಘ",             // Magha
+        TamilMonth.PANGUNI to "ಫಾಲ್ಗುಣ"        // Phalguna
+    )
+
+    private val tamilMonthHi = mapOf(
+        TamilMonth.CHITHIRAI to "चैत्र",        // Chaitra
+        TamilMonth.VAIKASI to "वैशाख",         // Vaishakha
+        TamilMonth.AANI to "ज्येष्ठ",           // Jyeshtha
+        TamilMonth.AADI to "आषाढ",             // Ashadha
+        TamilMonth.AVANI to "श्रावण",           // Shravana
+        TamilMonth.PURATTASI to "भाद्रपद",      // Bhadrapada
+        TamilMonth.IYPPASI to "आश्विन",         // Ashvina
+        TamilMonth.KARTHIGAI to "कार्तिक",      // Kartika
+        TamilMonth.MARGAZHI to "मार्गशीर्ष",    // Margashirsha ✅ (corrected)
+        TamilMonth.THAI to "पौष",              // Pausha
+        TamilMonth.MAASI to "माघ",             // Magha
+        TamilMonth.PANGUNI to "फाल्गुन"        // Phalguna
+    )
+
+    private val pakshaEn = mapOf(
+        Paksha.SHUKLA to "Shukla",
+        Paksha.KRISHNA to "Krishna"
+    )
+
+    private val pakshaTa = mapOf(
+        Paksha.SHUKLA to "வளர்பிறை",
+        Paksha.KRISHNA to "தேய்பிறை"
+    )
+
+    private val pakshaKa = mapOf(
+        Paksha.SHUKLA to "ಶುಕ್ಲ ಪಕ್ಷ",
+        Paksha.KRISHNA to "ಕೃಷ್ಣ ಪಕ್ಷ"
+    )
+
+    private val pakshaHi = mapOf(
+        Paksha.SHUKLA to "शुक्ल पक्ष",
+        Paksha.KRISHNA to "कृष्ण पक्ष"
+    )
+
     private val vaaraEn = mapOf(
         Vaara.RAVI to "Sunday",
         Vaara.SOMA to "Monday",
@@ -250,7 +320,26 @@ object PanchangaAttributes {
         Vaara.SHANI to "சனி"
     )
 
-    // English names (transliterated)
+    private val vaaraKa = mapOf(
+        Vaara.RAVI to "ಭಾನುವಾರ",
+        Vaara.SOMA to "ಸೋಮವಾರ",
+        Vaara.MANGAL to "ಮಂಗಳವಾರ",
+        Vaara.BUDHA to "ಬುಧವಾರ",
+        Vaara.GURU to "ಗುರುವಾರ",
+        Vaara.SHUKRA to "ಶುಕ್ರವಾರ",
+        Vaara.SHANI to "ಶನಿವಾರ"
+    )
+
+    private val vaaraHi = mapOf(
+        Vaara.RAVI to "रविवार",
+        Vaara.SOMA to "सोमवार",
+        Vaara.MANGAL to "मंगलवार",
+        Vaara.BUDHA to "बुधवार",
+        Vaara.GURU to "गुरुवार",
+        Vaara.SHUKRA to "शुक्रवार",
+        Vaara.SHANI to "शनिवार"
+    )
+
     private val rasiEn = mapOf(
         Rasi.MESHA to "Mesha",
         Rasi.VRISHABHA to "Vrishabha",
@@ -266,7 +355,6 @@ object PanchangaAttributes {
         Rasi.MEENA to "Meena"
     )
 
-    // Tamil names
     private val rasiTa = mapOf(
         Rasi.MESHA to "மேஷம்",
         Rasi.VRISHABHA to "ரிஷபம்",
@@ -280,6 +368,36 @@ object PanchangaAttributes {
         Rasi.MAKARA to "மகரம்",
         Rasi.KUMBHA to "கும்பம்",
         Rasi.MEENA to "மீனம்"
+    )
+
+    private val rasiKa = mapOf(
+        Rasi.MESHA to "ಮೇಷ",
+        Rasi.VRISHABHA to "ವೃಷಭ",
+        Rasi.MITHUNA to "ಮಿಥುನ",
+        Rasi.KARKATAKA to "ಕರ್ಕಾಟಕ",
+        Rasi.SIMHA to "ಸಿಂಹ",
+        Rasi.KANYA to "ಕನ್ಯಾ",
+        Rasi.THULAA to "ತುಲಾ",
+        Rasi.VRISHCHIKA to "ವೃಶ್ಚಿಕ",
+        Rasi.DHANUS to "ಧನುಸ್ಸು",
+        Rasi.MAKARA to "ಮಕರ",
+        Rasi.KUMBHA to "ಕುಂಭ",
+        Rasi.MEENA to "ಮೀನ"
+    )
+
+    private val rasiHi = mapOf(
+        Rasi.MESHA to "मेष",
+        Rasi.VRISHABHA to "वृषभ",
+        Rasi.MITHUNA to "मिथुन",
+        Rasi.KARKATAKA to "कर्क",
+        Rasi.SIMHA to "सिंह",
+        Rasi.KANYA to "कन्या",
+        Rasi.THULAA to "तुला",
+        Rasi.VRISHCHIKA to "वृश्चिक",
+        Rasi.DHANUS to "धनु",
+        Rasi.MAKARA to "मकर",
+        Rasi.KUMBHA to "कुंभ",
+        Rasi.MEENA to "मीन"
     )
 
     private val nakshatraEn = mapOf(
@@ -342,6 +460,66 @@ object PanchangaAttributes {
         Nakshatra.REVATHI to "ரேவதி"
     )
 
+    private val nakshatraKa = mapOf(
+        Nakshatra.ASHWINI to "ಅಶ್ವಿನಿ",
+        Nakshatra.BHARANI to "ಭರಣಿ",
+        Nakshatra.KRITHTHIKA to "ಕೃತ್ತಿಕಾ",
+        Nakshatra.ROHINI to "ರೋಹಿಣಿ",
+        Nakshatra.MRIGASHIRSHA to "ಮೃಗಶಿರಾ",
+        Nakshatra.AARDHRAA to "ಆರಿದ್ರಾ",
+        Nakshatra.PUNARVASU to "ಪುನರ್ವಸು",
+        Nakshatra.PUSHYA to "ಪುಷ್ಯ",
+        Nakshatra.ASHLESHA to "ಆಶ್ಲೇಷಾ",
+        Nakshatra.MAGHA to "ಮಖಾ",
+        Nakshatra.PURVA_PHALGUNI to "ಪೂರ್ವಾ ಫಾಲ್ಗುಣಿ",
+        Nakshatra.UTTARA_PHALGUNI to "ಉತ್ತರಾ ಫಾಲ್ಗುಣಿ",
+        Nakshatra.HASTHA to "ಹಸ್ತಾ",
+        Nakshatra.CHITRA to "ಚಿತ್ತಾ",
+        Nakshatra.SWAATHI to "ಸ್ವಾತಿ",
+        Nakshatra.VISHAKHA to "ವಿಶಾಖಾ",
+        Nakshatra.ANURADHA to "ಅನುರಾಧಾ",
+        Nakshatra.JYESHTHA to "ಜೇಷ್ಠಾ",
+        Nakshatra.MULA to "ಮೂಲಾ",
+        Nakshatra.PURVA_ASHADA to "ಪೂರ್ವಾಷಾಢ",
+        Nakshatra.UTTARA_ASHADA to "ಉತ್ತರಾಷಾಢ",
+        Nakshatra.SHRAVANA to "ಶ್ರವಣ",
+        Nakshatra.DHANISHTA to "ಧನಿಷ್ಠಾ",
+        Nakshatra.SHATABHISHA to "ಶತಭಿಷಾ",
+        Nakshatra.PURVA_BHADRAPADA to "ಪೂರ್ವಾಭಾದ್ರ",
+        Nakshatra.UTTARA_BHADRAPADA to "ಉತ್ತರಾಭಾದ್ರ",
+        Nakshatra.REVATHI to "ರೇವತಿ"
+    )
+
+    private val nakshatraHi = mapOf(
+        Nakshatra.ASHWINI to "अश्विनी",
+        Nakshatra.BHARANI to "भरणी",
+        Nakshatra.KRITHTHIKA to "कृत्तिका",
+        Nakshatra.ROHINI to "रोहिणी",
+        Nakshatra.MRIGASHIRSHA to "मृगशिरा",
+        Nakshatra.AARDHRAA to "आर्द्रा",
+        Nakshatra.PUNARVASU to "पुनर्वसु",
+        Nakshatra.PUSHYA to "पुष्य",
+        Nakshatra.ASHLESHA to "आश्लेषा",
+        Nakshatra.MAGHA to "मघा",
+        Nakshatra.PURVA_PHALGUNI to "पूर्वा फाल्गुनी",
+        Nakshatra.UTTARA_PHALGUNI to "उत्तरा फाल्गुनी",
+        Nakshatra.HASTHA to "हस्त",
+        Nakshatra.CHITRA to "चित्रा",
+        Nakshatra.SWAATHI to "स्वाति",
+        Nakshatra.VISHAKHA to "विशाखा",
+        Nakshatra.ANURADHA to "अनुराधा",
+        Nakshatra.JYESHTHA to "ज्येष्ठा",
+        Nakshatra.MULA to "मूल",
+        Nakshatra.PURVA_ASHADA to "पूर्वाषाढा",
+        Nakshatra.UTTARA_ASHADA to "उत्तराषाढा",
+        Nakshatra.SHRAVANA to "श्रवण",
+        Nakshatra.DHANISHTA to "धनिष्ठा",
+        Nakshatra.SHATABHISHA to "शतभिषा",
+        Nakshatra.PURVA_BHADRAPADA to "पूर्वा भाद्रपद",
+        Nakshatra.UTTARA_BHADRAPADA to "उत्तरा भाद्रपद",
+        Nakshatra.REVATHI to "रेवती"
+    )
+
     private val thithiEn = mapOf(
         Thithi.PRATHAMA to "Prathama",
         Thithi.DWITIYA to "Dwitiya",
@@ -380,7 +558,43 @@ object PanchangaAttributes {
         Thithi.AMAVASYA to "அமாவாசை"
     )
 
-    // For Yoga (27 Nithya Yogas)
+    private val thithiKa = mapOf(
+        Thithi.PRATHAMA to "ಪ್ರಥಮಾ",
+        Thithi.DWITIYA to "ದ್ವಿತೀಯಾ",
+        Thithi.TRITIYA to "ತೃತೀಯಾ",
+        Thithi.CHATURTHI to "ಚತುರ್ಥಿ",
+        Thithi.PANCHAMI to "ಪಂಚಮಿ",
+        Thithi.SHASHTI to "ಷಷ್ಠಿ",
+        Thithi.SAPTAMI to "ಸಪ್ತಮಿ",
+        Thithi.ASHTAMI to "ಅಷ್ಟಮಿ",
+        Thithi.NAVAMI to "ನವಮಿ",
+        Thithi.DASHAMI to "ದಶಮಿ",
+        Thithi.EKADASHI to "ಏಕಾದಶಿ",
+        Thithi.DWADASHI to "ದ್ವಾದಶಿ",
+        Thithi.TRAYODASHI to "ತ್ರಯೋದಶಿ",
+        Thithi.CHATURDASHI to "ಚತುರ್ದಶಿ",
+        Thithi.PURNIMA to "ಪೂರ್ಣಿಮಾ",
+        Thithi.AMAVASYA to "ಅಮಾವಾಸ್ಯೆ"
+    )
+
+    private val thithiHi = mapOf(
+        Thithi.PRATHAMA to "प्रथमा",
+        Thithi.DWITIYA to "द्वितीया",
+        Thithi.TRITIYA to "तृतीया",
+        Thithi.CHATURTHI to "चतुर्थी",
+        Thithi.PANCHAMI to "पंचमी",
+        Thithi.SHASHTI to "षष्ठी",
+        Thithi.SAPTAMI to "सप्तमी",
+        Thithi.ASHTAMI to "अष्टमी",
+        Thithi.NAVAMI to "नवमी",
+        Thithi.DASHAMI to "दशमी",
+        Thithi.EKADASHI to "एकादशी",
+        Thithi.DWADASHI to "द्वादशी",
+        Thithi.TRAYODASHI to "त्रयोदशी",
+        Thithi.CHATURDASHI to "चतुर्दशी",
+        Thithi.PURNIMA to "पूर्णिमा",
+        Thithi.AMAVASYA to "अमावस्या"
+    )
 
     private val yogaEn = mapOf(
         Yoga.VISHKAMBHA to "Vishkambha",
@@ -420,10 +634,10 @@ object PanchangaAttributes {
         Yoga.SHOBHANA to "சோபன",
         Yoga.ATIGANDA to "அதிகண்ட",
         Yoga.SUKARMA to "சுகர்மா",
-        Yoga.DHRITI to "திரிதி",
+        Yoga.DHRITI to "த்ரிதி",
         Yoga.SHULA to "சூல",
         Yoga.GANDA to "கண்ட",
-        Yoga.VRIDDHI to "விருத்தி",
+        Yoga.VRIDDHI to "வ்ருத்தி",
         Yoga.DHRUVA to "துருவ",
         Yoga.VYAGHATA to "வ்யாகத",
         Yoga.HARSHANA to "ஹர்ஷண",
@@ -442,7 +656,65 @@ object PanchangaAttributes {
         Yoga.VAIDHRITI to "வைத்ரிதி"
     )
 
-    // For Karana (11 Karanas)
+    private val yogaKa = mapOf(
+        Yoga.VISHKAMBHA to "ವಿಷ್ಕಂಭ",
+        Yoga.PREETI to "ಪ್ರೀತಿ",
+        Yoga.AYUSHMAN to "ಆಯುಷ್ಮಾನ್",
+        Yoga.SAUBHAGYA to "ಸೌಭಾಗ್ಯ",
+        Yoga.SHOBHANA to "ಶೋಭನ",
+        Yoga.ATIGANDA to "ಅತಿಗಂಡ",
+        Yoga.SUKARMA to "ಸುಕರ್ಮಾ",
+        Yoga.DHRITI to "ಧೃತಿ",
+        Yoga.SHULA to "ಶೂಲ",
+        Yoga.GANDA to "ಗಂಡ",
+        Yoga.VRIDDHI to "ವೃದ್ಧಿ",
+        Yoga.DHRUVA to "ಧ್ರುವ",
+        Yoga.VYAGHATA to "ವ್ಯಾಘಾತ",
+        Yoga.HARSHANA to "ಹರ್ಷಣ",
+        Yoga.VAJRA to "ವಜ್ರ",
+        Yoga.SIDDHI to "ಸಿದ್ದಿ",
+        Yoga.VYATIPATA to "ವ್ಯತೀಪಾತ",
+        Yoga.VARIYAN to "ವರಿಯಾನ್",
+        Yoga.PARIGHA to "ಪರಿಘ",
+        Yoga.SHIVA to "ಶಿವ",
+        Yoga.SIDDHA to "ಸಿದ್ಧ",
+        Yoga.SADHYA to "ಸಾಧ್ಯ",
+        Yoga.SHUBHA to "ಶುಭ",
+        Yoga.SHUKLA to "ಶುಕ್ಲ",
+        Yoga.BRAHMA to "ಬ್ರಹ್ಮ",
+        Yoga.INDRA to "ಇಂದ್ರ",
+        Yoga.VAIDHRITI to "ವೈಧೃತಿ"
+    )
+
+    private val yogaHi = mapOf(
+        Yoga.VISHKAMBHA to "विष्कंभ",
+        Yoga.PREETI to "प्रीति",
+        Yoga.AYUSHMAN to "आयुष्मान",
+        Yoga.SAUBHAGYA to "सौभाग्य",
+        Yoga.SHOBHANA to "शोभन",
+        Yoga.ATIGANDA to "अतिगंड",
+        Yoga.SUKARMA to "सुकर्मा",
+        Yoga.DHRITI to "धृति",
+        Yoga.SHULA to "शूल",
+        Yoga.GANDA to "गंड",
+        Yoga.VRIDDHI to "वृद्धि",
+        Yoga.DHRUVA to "ध्रुव",
+        Yoga.VYAGHATA to "व्याघात",
+        Yoga.HARSHANA to "हर्षण",
+        Yoga.VAJRA to "वज्र",
+        Yoga.SIDDHI to "सिद्धि",
+        Yoga.VYATIPATA to "व्यतीपात",
+        Yoga.VARIYAN to "वरियान",
+        Yoga.PARIGHA to "परिघ",
+        Yoga.SHIVA to "शिव",
+        Yoga.SIDDHA to "सिद्ध",
+        Yoga.SADHYA to "साध्य",
+        Yoga.SHUBHA to "शुभ",
+        Yoga.SHUKLA to "शुक्ल",
+        Yoga.BRAHMA to "ब्रह्म",
+        Yoga.INDRA to "इंद्र",
+        Yoga.VAIDHRITI to "वैधृति"
+    )
 
     private val karanaEn = mapOf(
         Karana.BAVA to "Bava",
@@ -470,6 +742,34 @@ object PanchangaAttributes {
         Karana.CHATUSHPADA to "சதுஷ்பாத",
         Karana.NAGA to "நாக",
         Karana.KIMSTHUGNA to "கிம்ஸ்துக்ன"
+    )
+
+    private val karanaKa = mapOf(
+        Karana.BAVA to "ಬವ",
+        Karana.BALAVA to "ಬಾಲವ",
+        Karana.KAULAVA to "ಕೌಲವ",
+        Karana.TAITILA to "ತೈತಿಲ",
+        Karana.GARAJA to "ಗರಜ",
+        Karana.VANIJA to "ವಣಿಜ",
+        Karana.VISHTI to "ವಿಷ್ಟಿ",
+        Karana.SHAKUNI to "ಶಕುನಿ",
+        Karana.CHATUSHPADA to "ಚತುಷ್ಪಾದ",
+        Karana.NAGA to "ನಾಗ",
+        Karana.KIMSTHUGNA to "ಕಿಂಸ್ತುಘ್ನ"
+    )
+
+    private val karanaHi = mapOf(
+        Karana.BAVA to "बव",
+        Karana.BALAVA to "बालव",
+        Karana.KAULAVA to "कौलव",
+        Karana.TAITILA to "तैतिल",
+        Karana.GARAJA to "गरज",
+        Karana.VANIJA to "वणिज",
+        Karana.VISHTI to "विष्टि",
+        Karana.SHAKUNI to "शकुनि",
+        Karana.CHATUSHPADA to "चतुष्पाद",
+        Karana.NAGA to "नाग",
+        Karana.KIMSTHUGNA to "किम्स्तुघ्न"
     )
 
     // Standard 90-minute intervals starting from 06:00
@@ -514,7 +814,7 @@ object PanchangaAttributes {
     )
 
     fun getRahukalamSegment(dayOfWeek: DayOfWeek): Int {
-        return rahuSegmentMap[dayOfWeek] ?: 1 // Returns 1 as a safe fallback
+        return rahuSegmentMap[dayOfWeek] ?: 1
     }
 
     private val yamaSegmentMap = mapOf(
@@ -528,7 +828,7 @@ object PanchangaAttributes {
     )
 
     fun getYamakandamSegment(dayOfWeek: DayOfWeek): Int {
-        return yamaSegmentMap[dayOfWeek] ?: 1 // Returns 1 as a safe fallback
+        return yamaSegmentMap[dayOfWeek] ?: 1
     }
 
     private val gulikaiSegmentMap = mapOf(
@@ -542,7 +842,7 @@ object PanchangaAttributes {
     )
 
     fun getGulikaiSegment(dayOfWeek: DayOfWeek): Int {
-        return gulikaiSegmentMap[dayOfWeek] ?: 1 // Returns 1 as a safe fallback
+        return gulikaiSegmentMap[dayOfWeek] ?: 1
     }
 
 }

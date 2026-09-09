@@ -49,7 +49,7 @@
 }
 
 .discrepancy { 
-    color: #ef4444; /* Tailwind red-500 */
+    color: hsl(166, 84%, 60%); /* Tailwind red-500 */
     font-weight: bold; 
 }
 

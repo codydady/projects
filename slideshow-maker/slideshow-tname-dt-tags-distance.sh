@@ -27,13 +27,13 @@ start_time=$(date +%s)
 photo_folder='/Users/sriram/Desktop/yard/temples/'
 
 # Set your database file path
-DB_FILE="/Users/sriram/Desktop/yard/rest/database/temples.db"	#------- change this when this changes --------
+DB_FILE="/Users/sriram/Desktop/yard/rest/bin/database/temples.db"	#------- change this when this changes --------
 
 #if on external drive
 # photo_folder='/Volumes/yuvas-ext-hdd/temples/chaya_tem'
 
 junk_folder=~/junk/slideshow-junk
-slideshow_folder=~/junk/slideshow-2
+slideshow_folder=~/junk/slideshow-1
 
 rm -rf $junk_folder
 mkdir -p $junk_folder
@@ -52,10 +52,26 @@ alpha_nmary=( $(seq -w 1 4000) )
 
 let i=i+1
 
-# List of strings
-color_list=("snow2" "thistle" "LightSteelBlue1" "yellow" "aquamarine1" "PaleGoldenrod" "plum1" \
-	"LavenderBlush1" "khaki1"  "BlanchedAlmond" "PaleTurquoise1" "DarkSeaGreen1" 
-	"CadetBlue1" "burlywood1" "pink" "yellow1" "LightCyan" "PaleGreen" "OliveDrab1")
+# List of color strings
+color_list=(
+    "snow"
+    "GhostWhite"
+    "AliceBlue"
+    "Azure"
+    "MintCream"
+    "Honeydew"
+    "FloralWhite"
+    "Ivory"
+    "Seashell"
+    "LightCyan1"
+    "LightYellow1"
+    "PaleTurquoise1"
+    "PaleGreen1"
+    "LightSteelBlue1"
+    "khaki1"
+    "yellow1"
+    "aquamarine1"
+)
 
 image_file_list=`find $photo_folder -type d | sort -R`
 
@@ -83,7 +99,8 @@ do
 	#echo "value of currentdir is $currentdir , dm_value_from_folder is $dm_value_from_folder"  
 
 	# Execute the SQL query
-	RESULT=$(sqlite3 "$DB_FILE" "SELECT name, visit_dt, latlong, tags, nearby_town, distance FROM temples WHERE dm = '$dm_value_from_folder';")
+	# RESULT=$(sqlite3 "$DB_FILE" "SELECT name, visit_dt, latlong, tags, nearby_town, distance FROM temples WHERE dm = '$dm_value_from_folder';")
+	RESULT=$(sqlite3 "$DB_FILE" -cmd ".mode list" -cmd ".separator |" "SELECT name, visit_dt, latlong, tags, nearby_town, distance FROM temples WHERE dm = '$dm_value_from_folder';")
 
 	# Check if any rows were returned
 	if [ -z "$RESULT" ]; then
@@ -102,7 +119,9 @@ do
   		# echo "latlong is $latlong"
 
   		tagcount=$(echo "$item" | cut -d '|' -f 4 | tr -cd ',' | wc -c)
-  		temple_tags=$(echo "$item" | cut -d '|' -f 4 | sed 's/,/ #/g' ) 
+  		# temple_tags=$(echo "$item" | cut -d '|' -f 4 | sed 's/,/ #/g' ) 
+		temple_tags=$(echo "$item" | cut -d '|' -f 4 | sed -E 's/(.+)/#\1/; s/,/ #/g')
+		# echo "temple tags = $temple_tags , item - $item, tagcount = $tagcount"
 
 		nearbytown=$(echo "$item" | cut -d '|' -f 5)
 
@@ -115,87 +134,62 @@ do
 	# remove trailing spaces
 	temple_name=`echo $temple_name | sed 's/ *$//g'`
 
-	# templecaption="$temple_name, $place_value_from_folder - $vdate"
-	templecaption="$temple_name, $place_value_from_folder"
-
 	# do the following for printing purposes
 	cf=$(echo "$currentfile" | awk -F "temples" '{print $2}')
 	
 	# Calculate the index of a random value
 	index=$(( RANDOM % ${#color_list[@]} ))
 	chosen_color="${color_list[index]}"
-	
-	tclen=${#templecaption}
 
-	tagslen=${#temple_tags}
+	# for english text ,  change -font below for tamizh font - todo
 
-	nbtwnlen=${#nearbytown}
+	echo "cf = $cf , chosen_temble = $temple_name"
 
-	count=$(echo "$string" | grep -o 'i' | wc -l)
-
-	# lets get temple caption length , nearbytown string length , tags length and find which is bigger and frame png as such - nov 2, 24
-	startx=$((tclen * 8 ))
-
-	tagstartx=$((tagslen * 9 ))
-
-	nearbytownstartx=$((nbtwnlen * 8 + 80))
-
-	# Find the largest value among startx, tagstartx, and nearbytownstartx
-	largestx=$startx
-
-	if [ $tagstartx -gt $largestx ]; then
-	    largestx=$tagstartx
+	# 1. Build a single multi-line string (Bash handles newline formatting)
+	text_content="${distfromnearbytown} kms from ${nearbytown}"
+	if [ -n "$temple_tags" ]; then
+		text_content="${text_content}"$'\n'"${temple_tags}"
 	fi
 
-	if [ $nearbytownstartx -gt $largestx ]; then
-	    largestx=$nearbytownstartx
-	fi
+			# -font Trebuchet-MS -pointsize 18 \
+			# -font Palatino -pointsize 18 \
+			# -font Georgia -pointsize 18 \
+			# -font Baskerville -pointsize 18 \
 
-	echo "cf = $cf , lengths = $tclen, $tagslen, $nbtwnlen  width = $largestx , chosen_color = $chosen_color"
-
-	# since we are adding a sthalam / near , lets add another 9 to the largestx
-	let largestx=largestx+10
-
-	# Check if the variable is empty
-	if [ "$tagslen" -eq 0 ]; then
-    	# echo "this temple aint got tags"
-
-		magick $junk_folder/${tnprefx}_${alpha_nmary[$i]}.jpg \
-		\( \
-			-size ${largestx}x44 xc:${chosen_color} \
-			-font Comic-Sans-MS -pointsize 16 -fill black -gravity northwest \
-			-fill OrangeRed4 -annotate +5-2 "${templecaption}" \
-			-fill darkblue -annotate +5+20 "${distfromnearbytown} kms from ${nearbytown}" \
-		\) \
-		-geometry +100+540 \
-		-composite \
-		$slideshow_folder/${tnprefx}_${alpha_nmary[$i]}.jpg
+	# 2. Single magick command for both 2-line and 3-line cases
+	# magick $junk_folder/${tnprefx}_${alpha_nmary[$i]}.jpg \
+	# 	\( \
+	# 		-font Trebuchet-MS -pointsize 18 \
+	# 		-background "${chosen_color}" -fill black \
+	# 		label:"$text_content" \
+	# 		-bordercolor "${chosen_color}" -border 8x5 \
+	# 	\) \
+	# 	-geometry +100+540 -composite \
+	# 	$slideshow_folder/${tnprefx}_${alpha_nmary[$i]}.jpg
 		
-	else
-	    # echo "temple got tags."
-  		temple_tags=#$temple_tags
-
-		magick $junk_folder/${tnprefx}_${alpha_nmary[$i]}.jpg \
-		\( \
-			-size ${largestx}x66 xc:${chosen_color} \
-			-font Comic-Sans-MS -pointsize 16 -fill black -gravity northwest \
-			-fill OrangeRed4 -annotate +5-2 "${templecaption}" \
-			-fill darkblue -annotate +5+20 "${distfromnearbytown} kms from ${nearbytown}" \
-		    -fill darkgreen -annotate +5+40 "${temple_tags}" \
-		\) \
-		-geometry +100+540 \
-		-composite \
-		$slideshow_folder/${tnprefx}_${alpha_nmary[$i]}.jpg
-
-	fi
-
+	magick "$junk_folder/${tnprefx}_${alpha_nmary[$i]}.jpg" \
+    \( \
+        -font Trebuchet-MS -pointsize 18 \
+        -background "${chosen_color}" -fill black \
+        label:"${temple_name}, ${place_value_from_folder}" \
+        -bordercolor "${chosen_color}" -border 8x5 \
+    \) \
+    -geometry +100+540 -composite \
+    \( \
+        -font Trebuchet-MS -pointsize 16 \
+        -background "${chosen_color}" -fill "#445544" \
+        label:"${text_content}" \
+        -bordercolor "${chosen_color}" -border 8x5 \
+    \) \
+    -geometry +100+568 -composite \
+    "$slideshow_folder/${tnprefx}_${alpha_nmary[$i]}.jpg"
 	let i=i+1
 
-	# stopper for test purposes
-	# let var=var+1
-	# if [ "$var" -ge 10 ]; then
-	# 	break
-	# fi
+	# stopper for test purposes , normally 10, but since i want for 40 mins, i gave 630 x 4 secs / pic
+	let var=var+1
+	if [ "$var" -ge 630 ]; then
+		break
+	fi
 
 done
 

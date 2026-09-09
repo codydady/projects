@@ -3,16 +3,34 @@ package com.sd.nithyadharma.util
 import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonSerializer
+import com.google.gson.JsonPrimitive
+
 import com.sd.nithyadharma.model.BreathingTimings
 import com.sd.nithyadharma.model.CustomerInfo
 import com.sd.nithyadharma.model.NDLanguage
-import com.sd.nithyadharma.model.PanchangaAttributes.Rasi
+import com.sd.nithyadharma.model.PanchangaAttr
+import com.sd.nithyadharma.model.PanchangaAttr.Rasi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.time.LocalDateTime
+
 
 // Define a preferences key for Early, Near reminder, alertInterval, finalCount, and colorCodeVisited
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
@@ -20,6 +38,93 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "us
 class PreferencesManager(context: Context) {
 
     private val dataStore = context.dataStore
+
+    // new stuff pertaining to storing the cards etc
+    // --- Saved Cards Keys ---
+    private val SAVED_CARDS_MAP_KEY = stringPreferencesKey("saved_cards_map")
+
+    // 🔑 Place it here as a class property
+    private val gson: Gson = GsonBuilder()
+        .registerTypeAdapter(LocalDateTime::class.java, JsonSerializer<LocalDateTime> { src, _, _ ->
+            if (src == null) null else JsonPrimitive(src.toString())
+        })
+        .registerTypeAdapter(LocalDateTime::class.java, JsonDeserializer { json, _, _ ->
+            if (json == null || json.asString.isEmpty()) null
+            else runCatching { LocalDateTime.parse(json.asString) }.getOrNull()
+        })
+        .create()
+
+    /**
+     * Saves or updates a card in the map stored in DataStore.
+     * Stored as a JSON Map of String (cardId) -> String (jsonPayload).
+     */
+    suspend fun saveCardMetadata(cardId: String, jsonPayload: String) {
+        dataStore.edit { preferences ->
+            val currentMapJson = preferences[SAVED_CARDS_MAP_KEY] ?: "{}"
+            val currentMap = parseCardsMap(currentMapJson).toMutableMap()
+
+            // Put or overwrite by cardId
+            currentMap[cardId] = jsonPayload
+
+            // 👈 Explicitly specify <Map<String, String>> here
+            preferences[SAVED_CARDS_MAP_KEY] =
+                Json.encodeToString<Map<String, String>>(currentMap)
+        }
+    }
+
+    // this is not card removal but removal of card from the stored preferences
+    suspend fun removeCardMetadata(cardId: String) {
+        Log.i("PreferencesManager", "entered removeCardMetadata cardid - ${cardId}")
+
+        dataStore.edit { preferences ->
+            val currentMapJson = preferences[SAVED_CARDS_MAP_KEY] ?: "{}"
+            val currentMap = parseCardsMap(currentMapJson).toMutableMap()
+
+            // Removes key if present; returns null if absent
+            if (currentMap.remove(cardId) != null) {
+                preferences[SAVED_CARDS_MAP_KEY] =
+                    Json.encodeToString<Map<String, String>>(currentMap)
+            }
+        }
+    }
+
+    /**
+     * Retrieves all saved card JSON strings from the SAVED_CARDS_MAP_KEY entry.
+     */
+    fun getAllCardsMetadata(): Flow<List<String>> {
+        return dataStore.data.map { preferences ->
+            val currentMapJson = preferences[SAVED_CARDS_MAP_KEY] ?: "{}"
+            val currentMap = parseCardsMap(currentMapJson)
+            currentMap.values.toList()
+        }
+    }
+
+    /**
+     * Synchronous / Direct snapshot retrieval of saved card JSONs.
+     */
+//    fun getSavedCardsJsonDirectly(): List<String> = runBlocking {
+//        val preferences = dataStore.data.first()
+//        val rawJson = preferences[SAVED_CARDS_MAP_KEY] ?: "{}"
+//        parseCardsMap(rawJson).values.toList()
+//    }
+
+    /**
+     * Clears all saved cards from DataStore.
+     */
+    suspend fun clearAllCards() {
+        dataStore.edit { preferences ->
+            preferences[SAVED_CARDS_MAP_KEY] = "{}"
+        }
+    }
+
+    // Private Helper to Safely Deserialize Map
+    private fun parseCardsMap(rawJson: String): Map<String, String> {
+        return runCatching {
+            Json.decodeFromString<Map<String, String>>(rawJson)
+        }.getOrDefault(emptyMap())
+    }
+
+    /// -- existing stuff starts
 
     // from firebase authentication
     private val FIREBASE_EMAIL_ID = stringPreferencesKey("firebase_auth_email")
@@ -30,8 +135,6 @@ class PreferencesManager(context: Context) {
     private val FINAL_COUNT_KEY = intPreferencesKey("final_count")
     private val HIDE_VISITED_TEMPLE = booleanPreferencesKey("hide_visited_temples")
     private val SHOW_ONLY_MARKED_TEMPLE = booleanPreferencesKey("show_only_marked_temples")
-
-    private val SELECTED_RASI_KEY = stringPreferencesKey("selected_rasi")
 
     private val SELECTED_LANGUAGE = stringPreferencesKey("selected_language")
 
@@ -54,6 +157,7 @@ class PreferencesManager(context: Context) {
     private val CUSTOMER_DTOB_KEY = stringPreferencesKey("customer_dttm_birth")
     private val CUSTOMER_LAT_KEY = stringPreferencesKey("customer_birth_lat")
     private val CUSTOMER_LON_KEY = stringPreferencesKey("customer_birth_lon")
+    private val CUSTOMER_RASI_KEY = stringPreferencesKey("customer_rasi")
 
     // --- Breathing Timing Keys ---
     private val INHALE_KEY = floatPreferencesKey("inhale_time")
@@ -61,8 +165,77 @@ class PreferencesManager(context: Context) {
     private val EXHALE_KEY = floatPreferencesKey("exhale_time")
     private val PAUSE_KEY = floatPreferencesKey("pause_time")
 
+    // for panchangam storage
+    private val PREVIOUS_PANCHANGAM = stringPreferencesKey("previous_panchangam")
+
 
     // --- Save/Retrieve Functions ---
+
+//    fun getPreviousPanchangam(): Flow<PanchangaAttr.DynamicPanchangam?> = dataStore.data
+//        .map { preferences ->
+//            val jsonString = preferences[PREVIOUS_PANCHANGAM]
+//            if (jsonString != null) {
+//                // Using Gson (or your preferred JSON parser)
+//                Gson().fromJson(jsonString, PanchangaAttr.DynamicPanchangam::class.java)
+//            } else {
+//                null
+//            }
+//        }
+    // Example for Gson / Moshi deserialization inside PreferencesManager
+    fun getPreviousPanchangam(): Flow<PanchangaAttr.DynamicPanchangam?> {
+        return dataStore.data.map { preferences ->
+            val json = preferences[PREVIOUS_PANCHANGAM] ?: return@map null
+            try {
+                val parsed = gson.fromJson(json, PanchangaAttr.DynamicPanchangam::class.java)
+
+                // 🔑 Sanity check: Ensure nested LocalDateTime fields are NOT null
+                if (parsed?.calcDttm == null || parsed.expiryDttm == null) {
+                    null
+                } else {
+                    parsed
+                }
+            } catch (e: Exception) {
+                Log.e("PreferencesManager", "Failed to parse saved DynamicPanchangam", e)
+                null
+            }
+        }
+    }
+
+    private val dataStoreMutex = Mutex()
+
+    suspend fun setPreviousPanchangam(panchangam: PanchangaAttr.DynamicPanchangam) {
+
+        // 🔑 2. MUTEX: Lock out concurrent DataStore reads while editing
+        dataStoreMutex.withLock {
+            try {
+                val jsonString = gson.toJson(panchangam)
+                Log.d("PreferencesManager", "Successfully parsed DynamicPanchangam ${jsonString}")
+
+                dataStore.edit { preferences ->
+                    preferences[PREVIOUS_PANCHANGAM] = jsonString
+                }
+                Log.d("PreferencesManager", "Successfully saved DynamicPanchangam to DataStore")
+            } catch (e: Exception) {
+                Log.e("PreferencesManager", "Failed to write DynamicPanchangam to DataStore", e)
+            }
+        }
+    }
+
+    // --- Set/Save Function ---
+//    suspend fun setPreviousPanchangam(panchangam: PanchangaAttr.DynamicPanchangam) {
+//        val jsonString = Gson().toJson(panchangam)
+//        dataStore.edit { preferences ->
+//            preferences[PREVIOUS_PANCHANGAM] = jsonString
+//        }
+//    }
+
+    // --- Clear Function (Optional) ---
+    suspend fun clearPreviousPanchangam() {
+        dataStore.edit { preferences ->
+            preferences.remove(PREVIOUS_PANCHANGAM)
+        }
+    }
+
     suspend fun saveBreathingTimings(inhale: Float, hold: Float, exhale: Float, pause: Float) {
         dataStore.edit { preferences ->
             preferences[INHALE_KEY] = inhale
@@ -93,6 +266,7 @@ class PreferencesManager(context: Context) {
             pause = preferences[PAUSE_KEY] ?: 0.01f
         )
     }
+
     suspend fun saveCustomerInfo(info: CustomerInfo) {
         dataStore.edit { preferences ->
             preferences[CUSTOMER_NAME] = info.name
@@ -106,12 +280,15 @@ class PreferencesManager(context: Context) {
             preferences[CUSTOMER_DTOB_KEY] = info.dttmOfBirth
             preferences[CUSTOMER_LAT_KEY] = info.lat
             preferences[CUSTOMER_LON_KEY] = info.lon
-
+            preferences[CUSTOMER_RASI_KEY] = info.rasi.name // 🔑 Save enum .name string
         }
         Log.d("PreferencesManager", "Saved CustomerInfo: $info")
     }
 
     fun getCustomerInfo(): Flow<CustomerInfo> = dataStore.data.map { preferences ->
+        val rasiString = preferences[CUSTOMER_RASI_KEY] ?: Rasi.MESHA.name
+        val parsedRasi = runCatching { Rasi.valueOf(rasiString) }.getOrDefault(Rasi.MESHA)
+
         CustomerInfo(
             name = preferences[CUSTOMER_NAME] ?: "",
             email = preferences[CUSTOMER_EMAIL] ?: "",
@@ -123,7 +300,8 @@ class PreferencesManager(context: Context) {
             pincode = preferences[CUSTOMER_PINCODE] ?: "",
             dttmOfBirth = preferences[CUSTOMER_DTOB_KEY] ?: "",
             lat = preferences[CUSTOMER_LAT_KEY] ?: "",
-            lon = preferences[CUSTOMER_LON_KEY] ?: ""
+            lon = preferences[CUSTOMER_LON_KEY] ?: "",
+            rasi = parsedRasi // 🔑 Cleanly parsed enum
         )
     }
 
@@ -200,29 +378,6 @@ class PreferencesManager(context: Context) {
             }
         }
     }
-    /**
-     * Accepts the Rasi Enum directly.
-     * This prevents you from accidentally saving "Mesha" or "Aries".
-     */
-    suspend fun saveSelectedRasi(rasi: Rasi) {
-        dataStore.edit { preferences ->
-            preferences[SELECTED_RASI_KEY] = rasi.name // Saves "MESHA", "VRISHABHA", etc.
-        }
-    }
-
-    /**
-     * Returns a Flow of the Rasi Enum.
-     * The conversion logic happens once here, so your ViewModel doesn't have to deal with Strings.
-     */
-    fun getSelectedRasi(): Flow<Rasi> = dataStore.data
-        .map { preferences ->
-            val rasiName = preferences[SELECTED_RASI_KEY] ?: "MESHA"
-            try {
-                Rasi.valueOf(rasiName)
-            } catch (e: Exception) {
-                Rasi.MESHA // Fallback if data is corrupted
-            }
-        }
 
     // Function to store early reminder
     suspend fun saveEarlyReminder(days: Int) {

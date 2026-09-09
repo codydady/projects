@@ -273,8 +273,8 @@ def generate_whatsapp_message(allocations, conn):
         # Use the combined display name here
         message_block += f"    has been provided to \n\n"
         message_block += f"    *{temple_display_name}*.\n\n"
-        message_block += "Thanks for your contribution and support of Dharma.\n\n"
-        message_block += "Regards,\n\n"
+        message_block += "Thanks for supporting Dharma.\n\n"
+        message_block += "Regards,\n"
         message_block += "NithyaDharma, Lokamotiv & TemplePages\n\n"
         # message_block += "--------------------------------------\n\n"
         

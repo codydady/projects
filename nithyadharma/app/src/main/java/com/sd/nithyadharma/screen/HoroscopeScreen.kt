@@ -22,25 +22,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sd.nithyadharma.model.*
 import com.sd.nithyadharma.util.PreferencesManager
-import com.sd.nithyadharma.model.Horoscope.HoroscopeChart
-import com.sd.nithyadharma.model.Horoscope.HoroscopeInputParams
-import com.sd.nithyadharma.model.Horoscope.HoroscopePeriod
-import com.sd.nithyadharma.model.Horoscope.Panchanga
-import com.sd.nithyadharma.model.Horoscope.PlanetPosition
-import com.sd.nithyadharma.model.Horoscope.dbaName
-import com.sd.nithyadharma.model.Horoscope.planetName
-import com.sd.nithyadharma.model.Horoscope.planetShortName
-import com.sd.nithyadharma.model.PanchangaAttributes.Rasi
-import com.sd.nithyadharma.model.PanchangaAttributes.karanaName
-import com.sd.nithyadharma.model.PanchangaAttributes.nakshatraName
-import com.sd.nithyadharma.model.PanchangaAttributes.tithiName
-import com.sd.nithyadharma.model.PanchangaAttributes.vaaraName
-import com.sd.nithyadharma.model.PanchangaAttributes.yogaName
+import com.sd.nithyadharma.model.HoroscopeAttr.HoroscopeChart
+import com.sd.nithyadharma.model.HoroscopeAttr.HoroscopeInputParams
+import com.sd.nithyadharma.model.HoroscopeAttr.HoroscopePeriod
+import com.sd.nithyadharma.model.HoroscopeAttr.Panchanga
+import com.sd.nithyadharma.model.HoroscopeAttr.PlanetPosition
+import com.sd.nithyadharma.model.HoroscopeAttr.dbaName
+import com.sd.nithyadharma.model.HoroscopeAttr.planetName
+import com.sd.nithyadharma.model.HoroscopeAttr.planetShortName
+import com.sd.nithyadharma.model.PanchangaAttr.Rasi
+import com.sd.nithyadharma.model.PanchangaAttr.karanaName
+import com.sd.nithyadharma.model.PanchangaAttr.nakshatraName
+import com.sd.nithyadharma.model.PanchangaAttr.tithiName
+import com.sd.nithyadharma.model.PanchangaAttr.vaaraName
+import com.sd.nithyadharma.model.PanchangaAttr.yogaName
 import com.sd.nithyadharma.util.HoroscopeCalculator
 import com.sd.nithyadharma.util.Constants.dttmFormatter
 import com.sd.nithyadharma.util.FirebaseAppAnalytics
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -513,8 +514,10 @@ fun ChartHouse(
             verticalArrangement = Arrangement.Center
         ) {
             planetsInThisRasi.forEach { planetPos ->
+//                val deg = "%.2f".format(planetPos.degree)
+                val deg = planetPos.degree.roundToInt()
                 Text(
-                    text = planetShortName(planetPos.planet, currentLang),
+                    text = planetShortName(planetPos.planet, currentLang) + "(" + deg + ")",
                     fontSize = fontSize,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1

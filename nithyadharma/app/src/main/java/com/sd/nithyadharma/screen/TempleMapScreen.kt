@@ -124,8 +124,11 @@ fun TempleMapScreen(
     val showOnlyMarkedTemplesRaw by preferencesManager.getShowOnlyMarkedTemples().collectAsState(initial = false)
 
     // Derived / overridden values (read-only)
-    val hideVisitedTemples = if (Constants.PAYING_CUSTOMER) hideVisitedTemplesRaw else false
-    val showOnlyMarkedTemples = if (Constants.PAYING_CUSTOMER) showOnlyMarkedTemplesRaw else false
+//    val hideVisitedTemples = if (Constants.PAYING_CUSTOMER) hideVisitedTemplesRaw else false
+//    val showOnlyMarkedTemples = if (Constants.PAYING_CUSTOMER) showOnlyMarkedTemplesRaw else false
+
+    val hideVisitedTemples = false
+    val showOnlyMarkedTemples = false
 
     // NEW: State for showing the debug dialog for deleted IDs
     var showDeletedIdsDialog by remember { mutableStateOf(false) }

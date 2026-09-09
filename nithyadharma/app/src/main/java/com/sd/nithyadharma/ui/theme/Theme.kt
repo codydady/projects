@@ -1,130 +1,66 @@
 package com.sd.nithyadharma.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.isSpecified
 import com.sd.nithyadharma.model.NDLanguage
+import com.sd.nithyadharma.util.LocalAppLanguage
 
-/* ------------------ */
-/* Core App Colors    */
-/* ------------------ */
+/* Core App Colors & Schemes ... (Keep your color definitions) */
 
-// Your ivory background
-val IvoryBackground = Color(0xFFF1E1B4)
-val IvoryLightBackground = Color(0xFFF5F5DC)
-// Text colors chosen for ivory
-val IvoryTextLight = Color(0xFF412121)   // Dark brown-black
-val IvoryTextDark  = Color(0xFF3D1E1E)   // Even stronger contrast
+// 🔑 Helper to safely scale TextStyle font size and line height
+private fun TextStyle.scale(factor: Float): TextStyle {
+    return this.copy(
+        fontSize = if (fontSize.isSpecified) fontSize * factor else TextUnit.Unspecified,
+        lineHeight = if (lineHeight.isSpecified) lineHeight * factor else TextUnit.Unspecified
+    )
+}
 
-// Accent (used for buttons, highlights, icons)
-val Saffron = Color(0xFF41260F)
-
-// Card surface colors
-val IvoryCardLight = Color(0xFFF7ECD1)
-val IvoryCardDark  = Color(0xFFE8D8A8)
-
-val LightGreenBackground = Color(0xFFBDE1DE)
-
-/* ------------------ */
-/* Light Color Scheme */
-/* ------------------ */
-
-private val LightColors = lightColorScheme(
-    background = IvoryLightBackground,
-    onBackground = IvoryTextLight,
-
-    surface = IvoryBackground,
-    onSurface = IvoryTextLight,
-
-    primary = Saffron,
-    onPrimary = Color.White,
-
-    primaryContainer = IvoryBackground,     // ⭐ YOUR IVORY
-    onPrimaryContainer = IvoryTextLight,
-
-    secondary = Saffron,
-    onSecondary = Color.White,
-
-    secondaryContainer = LightGreenBackground,
-    onSecondaryContainer = IvoryTextLight,
-
-    surfaceVariant = IvoryCardLight,
-    onSurfaceVariant = IvoryTextLight
-)
-
-/* Dark Color Scheme  */
-/*
-Important: We STILL keep ivory.
-Dark theme here means:
-- darker text
-- slightly deeper card color
-NOT black background
-*/
-
-private val DarkColors = darkColorScheme(
-    background = IvoryLightBackground,
-    onBackground = IvoryTextDark,
-
-    surface = IvoryBackground,
-    onSurface = IvoryTextLight,
-
-    primary = Saffron,
-    onPrimary = Color.Black,
-
-    primaryContainer = IvoryBackground,     // ⭐ YOUR IVORY
-    onPrimaryContainer = IvoryTextLight,
-
-    secondary = Saffron,
-    onSecondary = Color.Black,
-
-    secondaryContainer = LightGreenBackground,     // ⭐ YOUR IVORY
-    onSecondaryContainer = IvoryTextLight,
-
-    surfaceVariant = IvoryCardDark,
-    onSurfaceVariant = IvoryTextDark
-)
-
-/* ------------------ */
-/* App Theme Wrapper  */
-/* ------------------ */
+// 🔑 Helper to scale an entire Typography system
+private fun Typography.scaleAll(factor: Float): Typography {
+    return Typography(
+        displayLarge = displayLarge.scale(factor),
+        displayMedium = displayMedium.scale(factor),
+        displaySmall = displaySmall.scale(factor),
+        headlineLarge = headlineLarge.scale(factor),
+        headlineMedium = headlineMedium.scale(factor),
+        headlineSmall = headlineSmall.scale(factor),
+        titleLarge = titleLarge.scale(factor),
+        titleMedium = titleMedium.scale(factor),
+        titleSmall = titleSmall.scale(factor),
+        bodyLarge = bodyLarge.scale(factor),
+        bodyMedium = bodyMedium.scale(factor),
+        bodySmall = bodySmall.scale(factor),
+        labelLarge = labelLarge.scale(factor),
+        labelMedium = labelMedium.scale(factor),
+        labelSmall = labelSmall.scale(factor)
+    )
+}
 
 @Composable
 fun NithyaDharmaTheme(
-    currentLang: NDLanguage,
-    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    // Base typography (default Material3)
+    val currentLang = LocalAppLanguage.current // 🔑 Read inside the theme!
     val baseTypography = Typography()
 
-    // Create Tamil-adjusted typography (reduce sizes by 10-20%)
-    val tamilTypography = baseTypography.copy(
-        displayLarge = baseTypography.displayLarge.copy(fontSize = baseTypography.displayLarge.fontSize * 0.80f),
-        displayMedium = baseTypography.displayMedium.copy(fontSize = baseTypography.displayMedium.fontSize * 0.80f),
-        displaySmall = baseTypography.displaySmall.copy(fontSize = baseTypography.displaySmall.fontSize * 0.80f),
-        headlineLarge = baseTypography.headlineLarge.copy(fontSize = baseTypography.headlineLarge.fontSize * 0.80f),
-        headlineMedium = baseTypography.headlineMedium.copy(fontSize = baseTypography.headlineMedium.fontSize * 0.80f),
-        headlineSmall = baseTypography.headlineSmall.copy(fontSize = baseTypography.headlineSmall.fontSize * 0.80f),
-        titleLarge = baseTypography.titleLarge.copy(fontSize = baseTypography.titleLarge.fontSize * 0.80f),
-        titleMedium = baseTypography.titleMedium.copy(fontSize = baseTypography.titleMedium.fontSize * 0.80f),
-        titleSmall = baseTypography.titleSmall.copy(fontSize = baseTypography.titleSmall.fontSize * 0.80f),
-        bodyLarge = baseTypography.bodyLarge.copy(fontSize = baseTypography.bodyLarge.fontSize * 0.80f),
-        bodyMedium = baseTypography.bodyMedium.copy(fontSize = baseTypography.bodyMedium.fontSize * 0.80f),
-        bodySmall = baseTypography.bodySmall.copy(fontSize = baseTypography.bodySmall.fontSize * 0.80f),
-        labelLarge = baseTypography.labelLarge.copy(fontSize = baseTypography.labelLarge.fontSize * 0.80f),
-        labelMedium = baseTypography.labelMedium.copy(fontSize = baseTypography.labelMedium.fontSize * 0.80f),
-        labelSmall = baseTypography.labelSmall.copy(fontSize = baseTypography.labelSmall.fontSize * 0.80f)
-    )
-
-    // Choose typography based on language
-    val typography = if (currentLang == NDLanguage.TA) tamilTypography else baseTypography
-    val colorScheme = if (darkTheme) DarkColors else LightColors
+    // 🔑 Tamil fonts often render ~15-20% visually larger than Latin fonts.
+    // Scaling by 0.85f gives a clean, comfortable match.
+//    val typography = if (currentLang == NDLanguage.TA) {
+//        baseTypography.scaleAll(0.8f)
+//    } else {
+//        baseTypography.scaleAll(1.0f)
+//    }
+    // scale everything to 80% of fontsize. sep 7, 2026
+    val typography = baseTypography.scaleAll(0.9f)
+//    val colorScheme = if (darkTheme) DarkColors else LightColors
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = typography,  // ← Use adjusted typography
+//        colorScheme = colorScheme,
+        typography = typography,
         content = content
     )
-
 }

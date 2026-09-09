@@ -1,27 +1,28 @@
 package com.sd.nithyadharma.util
 
 import android.util.Log
-import com.sd.nithyadharma.model.Horoscope.AstrologyAccess
-import com.sd.nithyadharma.model.Horoscope.HoroscopeChart
-import com.sd.nithyadharma.model.Horoscope.HoroscopeInputParams
-import com.sd.nithyadharma.model.Horoscope.HoroscopePeriod
-import com.sd.nithyadharma.model.Horoscope.HoroscopePeriodType
-import com.sd.nithyadharma.model.Horoscope.NAKSHATRA_SIZE
-import com.sd.nithyadharma.model.Horoscope.NakshatraBalance
-import com.sd.nithyadharma.model.Horoscope.Panchanga
-import com.sd.nithyadharma.model.Horoscope.Planet
-import com.sd.nithyadharma.model.Horoscope.PlanetPosition
-import com.sd.nithyadharma.model.Horoscope.VIMSHOTTARI_TOTAL_YEARS
-import com.sd.nithyadharma.model.Horoscope.VIMSHOTTARI_YEAR_DAYS
-import com.sd.nithyadharma.model.Horoscope.getNakshatraLord
-import com.sd.nithyadharma.model.Horoscope.vimshottariDashaOrder
-import com.sd.nithyadharma.model.Horoscope.vimshottariDashaYears
-import com.sd.nithyadharma.model.PanchangaAttributes.Karana
-import com.sd.nithyadharma.model.PanchangaAttributes.Nakshatra
-import com.sd.nithyadharma.model.PanchangaAttributes.Rasi
-import com.sd.nithyadharma.model.PanchangaAttributes.Thithi
-import com.sd.nithyadharma.model.PanchangaAttributes.Vaara
-import com.sd.nithyadharma.model.PanchangaAttributes.Yoga
+import com.sd.nithyadharma.model.HoroscopeAttr.AstrologyAccess
+import com.sd.nithyadharma.model.HoroscopeAttr.HoroscopeChart
+import com.sd.nithyadharma.model.HoroscopeAttr.HoroscopeInputParams
+import com.sd.nithyadharma.model.HoroscopeAttr.HoroscopePeriod
+import com.sd.nithyadharma.model.HoroscopeAttr.HoroscopePeriodType
+import com.sd.nithyadharma.model.HoroscopeAttr.NAKSHATRA_SIZE
+import com.sd.nithyadharma.model.HoroscopeAttr.NakshatraBalance
+import com.sd.nithyadharma.model.HoroscopeAttr.Panchanga
+import com.sd.nithyadharma.model.HoroscopeAttr.Planet
+import com.sd.nithyadharma.model.HoroscopeAttr.PlanetPosition
+import com.sd.nithyadharma.model.HoroscopeAttr.VIMSHOTTARI_TOTAL_YEARS
+import com.sd.nithyadharma.model.HoroscopeAttr.VIMSHOTTARI_YEAR_DAYS
+import com.sd.nithyadharma.model.HoroscopeAttr.getNakshatraLord
+import com.sd.nithyadharma.model.HoroscopeAttr.vimshottariDashaOrder
+import com.sd.nithyadharma.model.HoroscopeAttr.vimshottariDashaYears
+import com.sd.nithyadharma.model.PanchangaAttr.Karana
+import com.sd.nithyadharma.model.PanchangaAttr.Nakshatra
+import com.sd.nithyadharma.model.PanchangaAttr.Rasi
+import com.sd.nithyadharma.model.PanchangaAttr.Thithi
+import com.sd.nithyadharma.model.PanchangaAttr.Vaara
+import com.sd.nithyadharma.model.PanchangaAttr.Yoga
+
 import swisseph.*
 import java.time.*
 
@@ -100,7 +101,7 @@ class HoroscopeCalculator {
 
         // todo , make all a these relative to user , TIMEZONE MUST BE FROM ANYWHERE
         val zoned = birthDttm
-            .atZone(ZoneId.of("Asia/Kolkata"))
+            .atZone(Constants.INDIA_ZONE)
             .withZoneSameInstant(ZoneOffset.UTC)
 
         val jd = toJulianDayUTC(zoned)
@@ -126,8 +127,8 @@ class HoroscopeCalculator {
                 Planet.JUPITER to jupX[0],
                 Planet.VENUS to venX[0],
                 Planet.SATURN to satX[0],
-                Planet.RAHU to rahuX[0],
-                Planet.KETU to ((rahuX[0] + 180.0) % 360.0)
+                Planet.RAAHU to rahuX[0],
+                Planet.KETHU to ((rahuX[0] + 180.0) % 360.0)
             )
         }
 
@@ -173,7 +174,7 @@ class HoroscopeCalculator {
 
         // lets proceed to calculate dasa bukthi
 
-        Log.i("--horoscopeastrology--", "moon long = $moonLongitude")
+        Log.i("HoroscopeCalculator", "moon long = $moonLongitude")
 
         // to control depth
         val accessLevel =
@@ -341,4 +342,45 @@ class HoroscopeCalculator {
         return result
     }
 
-}
+    // these 2 new methods are introduced for daily rasi palan
+    /**
+     * Calculates transit planetary positions for any specific ZonedDateTime
+     * for use in RasiPalanEngine.
+     */
+    /**
+     * Calculates transit planetary positions for RasiPalanEngine.
+     * Accepts LocalDateTime (defaults to getCurrentTime()).
+     */
+    fun calcPlanetaryPositions(
+        dateTime: LocalDateTime = CommonFunctions.getCurrentTime()
+    ): DailyPlanetaryPositions {
+
+        // Convert LocalDateTime (IST) directly to UTC Julian Day internally
+        val utcZdt = dateTime.atZone(Constants.INDIA_ZONE).withZoneSameInstant(ZoneOffset.UTC)
+        val jd = toJulianDayUTC(utcZdt)
+
+        val sunX = planetState(jd, SweConst.SE_SUN)
+        val moonX = planetState(jd, SweConst.SE_MOON)
+        val marsX = planetState(jd, SweConst.SE_MARS)
+        val mercX = planetState(jd, SweConst.SE_MERCURY)
+        val venX = planetState(jd, SweConst.SE_VENUS)
+        val jupX = planetState(jd, SweConst.SE_JUPITER)
+        val satX = planetState(jd, SweConst.SE_SATURN)
+        val rahuX = planetState(jd, SweConst.SE_TRUE_NODE)
+
+        val positionsMap = mapOf(
+            Planet.SUN to getRasiFromLongitude(sunX[0]),
+            Planet.MOON to getRasiFromLongitude(moonX[0]),
+            Planet.MARS to getRasiFromLongitude(marsX[0]),
+            Planet.MERCURY to getRasiFromLongitude(mercX[0]),
+            Planet.JUPITER to getRasiFromLongitude(jupX[0]),
+            Planet.VENUS to getRasiFromLongitude(venX[0]),
+            Planet.SATURN to getRasiFromLongitude(satX[0]),
+            Planet.RAAHU to getRasiFromLongitude(rahuX[0]),
+            Planet.KETHU to getRasiFromLongitude((rahuX[0] + 180.0) % 360.0)
+        )
+
+        return DailyPlanetaryPositions(positions = positionsMap)
+    }
+} // class horoscope calculator ends
+

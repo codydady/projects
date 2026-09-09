@@ -1,27 +1,52 @@
 package com.sd.nithyadharma.util
 
 import android.os.Bundle
+import android.util.Log
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
-import com.sd.nithyadharma.model.Horoscope.HoroscopeInputParams
+import com.sd.nithyadharma.model.HoroscopeAttr.HoroscopeInputParams
 
 object FirebaseAppAnalytics {
 
     // Get the Firebase Analytics instance
-    // Using lazy delegate or getting it directly inside functions is fine
-    // Let's get it when needed for simplicity in this example
-    private val firebaseAnalytics: FirebaseAnalytics
-        get() = Firebase.analytics
+    // 💡 Lazy delegate: Initialized on first call, cached thereafter
+    private val firebaseAnalytics: FirebaseAnalytics by lazy {
+        Firebase.analytics
+    }
+
+    fun setUserId(userId: String) {
+        firebaseAnalytics.setUserId(userId)
+    }
 
     // Log a screen view event
-    fun logScreenView(screenName: String, screenClass: String) {
+    fun logScreenView(screenName: String) {
         val bundle = Bundle().apply {
             putString(FirebaseAnalytics.Param.SCREEN_NAME, screenName)
-            putString(FirebaseAnalytics.Param.SCREEN_CLASS, screenClass)
         }
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, bundle)
-//        println("Logged screen view: $screenName (via AppAnalytics)") // Optional: for debugging
+    }
+
+    fun logCardLiked(analyticsKey: String, loggingKey: String) {
+        val bundle = Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_NAME, analyticsKey) // "card_type"
+            putString(FirebaseAnalytics.Param.ITEM_ID, loggingKey)     // "content_id"
+            //  putString("card_type", analyticsKey) // Unique, non-localized card identifier
+            //  putString("content_id", loggingKey) // Optional detail parameter
+        }
+        firebaseAnalytics.logEvent("nd_card_liked", bundle)
+//        Log.i("FirebaseAppAnalytics","Logged card_liked (via AppAnalytics)") // Optional: for debugging
+    }
+
+    fun logRating(analyticsKey: String, rating: Int) {
+        val bundle = Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_NAME, analyticsKey) // "card_type"
+            putString(FirebaseAnalytics.Param.ITEM_ID, ""+rating)     // ""+ int makes string
+            //  putString("card_type", analyticsKey) // Unique, non-localized card identifier
+            //  putString("content_id", loggingKey) // Optional detail parameter
+        }
+        firebaseAnalytics.logEvent("nd_rating", bundle)
+        Log.i("FirebaseAppAnalytics","Logged nd_rating") // Optional: for debugging
     }
 
     // Log the counter milestone event
@@ -29,8 +54,7 @@ object FirebaseAppAnalytics {
         val bundle = Bundle().apply {
             putInt("final_count", currentCount) // Custom parameter
         }
-        firebaseAnalytics.logEvent("counter_milestone", bundle) // Custom event name
-//        println("Logged counter milestone: $currentCount (via AppAnalytics)") // Optional: for debugging
+        firebaseAnalytics.logEvent("nd_counter_milestone", bundle) // Custom event name
     }
 
     // Log the horoscope input params
@@ -42,7 +66,7 @@ object FirebaseAppAnalytics {
             putDouble("latitude", horoscopeInputParams.latitude)
             putDouble("longitude", horoscopeInputParams.longitude)
         }
-        firebaseAnalytics.logEvent("horoscope_details", bundle) // Custom event name
+        firebaseAnalytics.logEvent("nd_horoscope_details", bundle) // Custom event name
     }
 
     // You could add other analytics logging functions here too!
