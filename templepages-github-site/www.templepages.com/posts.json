@@ -1,373 +1,630 @@
 [
-        {
-        "slug": "about",
-        "type": "static",
-        "title": "About",
-        "author": "Sriram Seetharaman",
-        "date": "2000-07-23",
-        "tags": ["sriram", "temples", "trains" , "nithyadharma"]
-    },
-    {
-        "slug": "privacy-policy",
-        "type": "posts",
-        "title": "Nithya Dharma Mobile App Privacy Policy",
-        "author": "sriram",
-        "date": "2025-08-08",
-        "tags": ["nithyadharma", "templetracker"],
-        "hide":true
-    },
-    {
-        "slug": "what-is-sanathana-dharma",
-        "type": "posts",
-        "title": "What is Sanathana Dharma ?",
-        "author": "Sriram Seetharaman",
-        "date": "2023-11-10",
-        "tags": ["temples", "rituals","nithyadharma", "spirituality" , "hinduism"]
-    },
-    {
-        "slug": "parvathi-sametha-kailasanathar-temple-koonancheri",
-        "type": "posts",
-        "title": "Parvathi sametha Kailasanathar, Koonancheri",
-        "author": "Sriram Seetharaman",
-        "date": "2023-06-13",
-        "tags": ["temples", "hinduism"]
-    },  
-    {
-        "slug": "madhurabaashini-sametha-dhevapureeswarar-temple-thevur",
-        "type": "posts",
-        "title": "Madhurabaashini sametha Dhevapureeswarar, Thevur",
-        "author": "Sriram Subramanian",
-        "date": "2026-09-10",
-        "tags": ["temples", "hinduism","sambandhar","thevaram"]
-    }, 
-    {
-        "slug": "karpagambal-sametha-kapaleeswarar-mylapore",
-        "type": "posts",
-        "title": "Karpagambal sametha Kapaleeswarar, Mylapore",
-        "author": "Sriram Subramanian",
-        "date": "2026-07-23",
-        "tags": ["temples", "hinduism","sambandhar","appar","thevaram"]
-    }, 
-    {
-        "slug": "girisundhari-sametha-panchavarneswarar-temple-nallur",
-        "type": "posts",
-        "title": "Girisundhari sametha Panchavarneswarar / KalyanaSundhareswarar, Nallur",
-        "author": "Sriram Seetharaman",
-        "date": "2004-02-24",
-        "tags": ["temples", "hinduism","sambandhar","appar","sundharar","thevaram", "nallur-sapthasthanam"]
-    }, 
-    {
-        "slug": "gnanambika-sametha-gnanaparameswarar-temple-naaloor-mayaanam",
-        "type": "posts",
-        "title": "Gnanambika sametha Gnana Parameswara Swamy, Naaloor Mayaanam",
-        "author": "Sriram Seetharaman",
-        "date": "2008-01-08",
-        "tags": ["temples", "hinduism","sambandhar","thevaram", "mayanam"]
-    },  
-    {
-        "slug": "ubhayapushpavilochani-sametha-hayavantheeswarar-temple-seeyathamangai",
-        "type": "posts",
-        "title": "Ubhayapushpavilochani sametha Ayavantheeswarar, Seeyathamangai",
-        "author": "Sriram Seetharaman",
-        "date": "2025-05-2",
-        "tags": ["temples", "hinduism","sambandhar","thevaram"]
-    },  
-    {
-        "slug": "girigujambigai-samtha-naganathar-temple-ragu-sthalam-thirunageswaram",
-        "type": "posts",
-        "title": "Girigujambigai samtha Shenbagaranyeswarar/Naganathar, Thirunageswaram",
-        "author": "Sriram Seetharaman",
-        "date": "2007-04-18",
-        "tags": ["temples", "hinduism","appar","sundharar","sambandhar","thevaram","navagraham","shivarathri-adhiseshan-legend","thiruneelakkudi-sapthasthanam"]
-    },  
-   {
-        "slug": "mangalanayagi-sametha-prananatheswarar-temple-thirumangalakkudi",
-        "type": "posts",
-        "title": "MangaLanayagi sametha Prananatheswarar, Thirumangalakkudi",
-        "author": "Sriram Seetharaman",
-        "date": "2014-06-13",
-        "tags": ["temples", "hinduism","appar","sambandhar","thevaram","mangala-kshethram","panchabhaskara-kshethram","kanjanur-sapthasthanam"]
-    },  
-    {
-        "slug": "parimalanayagi-sametha-abathsahayeswarar-temple-rudhragangai",
-        "type": "posts",
-        "title": "Parimalanayagi Sametha Abathsahayeswarar Kovil, Rudhragangai",
-        "author": "Sriram Seetharaman",
-        "date": "2026-09-18",
-        "tags": ["temples", "hinduism", "vaipu"]
-    },  
-    {
-        "slug": "navukkarasi-udanurai-naganathar-temple-periyakumarapalayam",
-        "type": "posts",
-        "title": "Navukkarasi udanurai Naganathar temple, Periyakumarapalayam",
-        "author": "Sriram Seetharaman",
-        "date": "2019-03-23",
-        "tags": ["temples", "hinduism"]
-    },  
-    {
-        "slug": "nithyadharma-mobile-app",
-        "type": "static",
-        "title": "Nithya Dharma Mobile App",
-        "author": "Sriram Seetharaman",
-        "date": "2025-6-14",
-        "tags": ["temples", "nithyadharma", "rituals", "spirituality" , "hinduism"]
-    },  
-    {
-        "slug": "nithyadharma-charitable-trust",
-        "type": "static",
-        "title": "Nithya Dharma Charitable Trust",
-        "author": "Sriram Seetharaman",
-        "date": "2025-5-7",
-        "tags": ["temples",  "nithyadharma",  "spirituality" , "hinduism"]
-    },  
-    {
-        "slug": "lokamotiv",
-        "type": "static",
-        "title": "Lokamotiv Technology Solutions",
-        "author": "Sriram Seetharaman",
-        "date": "2023-06-19",
-        "tags": ["lokamotiv"]
-    },   
-    {
-        "slug": "jeya-mangala-anjaneyar-temple-idugampalayam",
-        "type": "posts",
-        "title": "Jeyamangala Anjaneyar temple, Idugampalayam",
-        "author": "Sriram Seetharaman",
-        "date": "2018-03-18",
-        "tags": [  "temple" , "hinduism" ]
-    },   
-    {
-        "slug": "nithyadharma-puja-products",
-        "type": "static",
-        "title": "Nithyadharma Authentic Puja Products",
-        "author": "R.Srinivasan",
-        "date": "2019-02-13",
-        "tags": ["nithyadharma", "spirituality", "wisdom" , "hinduism" ]
-    },   
-    {
-        "slug": "ganapathy-agraharam",
-        "type": "posts",
-        "title": "Maha Ganapathy temple, Ganapathy Agraharam",
-        "author": "Sriram S.",
-        "date": "2002-02-23",
-        "tags": ["temple", "spirituality", "wisdom" , "hinduism" ]
-    },   
-     {
-        "slug": "kailasanathar-temple-irumbarai",
-        "type": "posts",
-        "title": "Kailasanathar temple, Irumbarai. ( foothills of Othimalai Andavar temple )",
-        "author": "Sriram S.",
-        "date": "2016-08-15",
-        "tags": ["temple" , "hinduism" ]
-    },   
-     {
-        "slug": "subramanya-swami-chenniyandavar-temple-chennimalai",
-        "type": "posts",
-        "title": "Subramanya swami temple, Chennimalai",
-        "author": "Sriram S.",
-        "date": "2016-01-8",
-        "tags": ["temple" , "hinduism" ]
-    },   
-         {
-        "slug": "sivaambikaa-sametha-swarnapureeswarar-temple-aandan-kovil",
-        "type": "posts",
-        "title": "Sivaambikaa sametha Swarnapureeswarar temple, Aandaan Kovil",
-        "author": "Sriram S.",
-        "date": "2014-06-14",
-        "tags": ["temple" , "hinduism" ]
-    },   
-    {
-        "slug": "thevara-vaipu-thalangal",
-        "type": "posts",
-        "title": "Thevara Vaippu thalangal",
-        "author": "Sriram S.",
-        "date": "2002-10-6",
-        "tags": ["temple"  , "thevaram" ]
-    },   
-    {
-        "slug": "nishkalank-mahadev-mandhir-bhavnagar",
-        "type": "posts",
-        "title": "Nishkalank Mahadheva temple, Koliyak/ Bhavnagar, Gujarath",
-        "author": "Sriram S.",
-        "date": "2018-09-4",
-        "tags": ["temple" ]
-    },   
-    {
-        "slug": "abhayahastha-anjaneyar-temple-krishnapuram",
-        "type": "posts",
-        "title": "Abhayahastha Anjaneyar temple, Krishnapuram",
-        "author": "Sriram S.",
-        "date": "2016-11-5",
-        "tags": ["temple"  ]
-    },   
-    {
-        "slug": "kalamegapperumal-temple-thirumogur",
-        "type": "posts",
-        "title": "Kalamegapperumal temple, Thirumogur",
-        "author": "Sriram S.",
-        "date": "2016-09-15",
-        "tags": ["temple" , "divyadesam" ]
-    },   
-    {
-        "slug": "siddheswaran-temple-palamalai-rf-mettur",
-        "type": "posts",
-        "title": "Madheswarar, Siddheswaran Malai Kovil, Palamalai Reserve Forest, Near Mettur Dam",
-        "author": "Sriram S.",
-        "date": "2016-06-19",
-        "tags": ["temple" , "hill-temple" ]
-    },   
-    {
-        "slug": "lalitha-sametha-meghanathar-temple-thirumeeyachur",
-        "type": "posts",
-        "title": "Lalithambika sametha Meghanathar temple, Thirumeeyachur",
-        "author": "Sriram S.",
-        "date": "2024-03-24",
-        "tags": ["temple" , "sambandhar" , "thevaram" ]
-    },   
-      {
-        "slug": "oeneswarar-kantheswarar-temple-kanchipuram",
-        "type": "posts",
-        "title": "Oeneswarar, Kantheswarar temple, Ona kaanthan thali, Kanchipuram",
-        "author": "Sriram S.",
-        "date": "2026-09-5",
-        "tags": ["temple" , "sundharar" , "thevaram" ]
-    },   
-    {
-        "slug": "soundharanaayagi-sametha-pushpavaneswarar-temple-thiruppoonthuruththi",
-        "type": "posts",
-        "title": "Soundharanaayagi sametha Pushpavaneswarar temple, Thiruppoonthuruththi",
-        "author": "Sriram S.",
-        "date": "2012-03-24",
-        "tags": ["temple" , "appar" , "thevaram" , "sapthasthanam"]
-    },   
-    {
-        "slug": "karunyavalli-sametha-kachabeswarar-temple-eachankudi",
-        "type": "posts",
-        "title": "Karunyavalli  sametha Kachabeswarar temple, Eachankudi",
-        "author": "Sriram S.",
-        "date": "2023-11-04",
-        "tags": ["temple" ]
-    },   
-    {
-        "slug": "anandhavalli-sametha-rajarajeswarar-temple-kadakadappai",
-        "type": "posts",
-        "title": "Aanandhavalli sametha Raja Rajeswarar temple, Kadakadappai",
-        "author": "Sriram S.",
-        "date": "2020-01-31",
-        "tags": ["temple", "sapthasthanam" ]
-    },   
-   {
-        "slug": "kaivalyambikai-sametha-karkkodaganadhar-temple-kodangudi",
-        "type": "posts",
-        "title": "Kaivalyambikai sametha Karkkodaganadhar temple, Kodangudi",
-        "author": "Sriram S.",
-        "date": "2024-04-11",
-        "tags": ["temple", "sarpa-dosha-parikaram" ]
-    },   
-    {
-        "slug": "lathaamadhyaambaa-sametha-maasilamaneeswarar-temple-thirumullaivayil",
-        "type": "posts",
-        "title": "Kodiyidaiyamman Sametha Maasilamaneeswarar Temple, Thirumullaivayil",
-        "author": "Sriram S.",
-        "date": "2026-07-30",
-        "tags": ["temple", "thevaram", "sundharar", "chennai-vicinity" ]
-    },   
-    {
-        "slug": "amruthanayaki-sametha-naganathaswamy-temple-paamani",
-        "type": "posts",
-        "title": "Amruthanayaki Sametha Naganathaswamy Temple, Paamani",
-        "author": "Sriram S.",
-        "actualdate": "2020-01-26",
-        "date": "2025-09-26",
-        "tags": ["temple", "thevaram", "sambandhar", "sarpa-dosha-parikaram" ]
-    },   
-    {
-        "slug": "akilandeswari-sametha-agastheeswarar-temple-karuvalarcheri",
-        "type": "posts",
-        "title": "Akilandeswari sametha Agastheeswarar temple, Karuvalarcheri",
-        "author": "Sriram S.",
-        "date": "2020-03-18",
-        "tags": ["temple", "puthra-dosha-parikaram" ]
-    },   
-    {
-        "slug": "amrithamugizhambikai-sametha-ukthavedeeswarar-temple-kuththalam",
-        "type": "posts",
-        "title": "Amritha Mugizhambikai sametha Ukthavedeeswarar temple, Kuththalam",
-        "author": "Sriram S.",
-        "date": "2022-03-22",
-        "tags": ["temple", "thevaram" , "appar"  , "sundharar" , "sambandhar"]
-    },   
-    {
-        "slug": "bhoomi-balaka-perumal-temple-thiruppuliyangudi",
-        "type": "posts",
-        "title": "Bhoomi balaka perumal temple, Thiruppuliyangudi",
-        "author": "Sriram S.",
-        "date": "2016-12-30",
-        "tags": ["temple" , "divyadesam" , "navathiruppathi" ]
-    },   
-    {
-        "slug": "vandamar-poonguzhali-sametha-brahmapureeswarar-temple-thirukkuvalai",
-        "type": "posts",
-        "title": "Vandamar Poonguzhali sametha Brahmapureeswarar temple, Thirukkuvalai",
-        "author": "Sriram S.",
-        "date": "2024-04-05",
-        "tags": ["temple" , "appar" , "thevaram" , "sapthavidangam" , "sundharar" , "sambandhar"]
-    },   
-    {
-        "slug": "nava-mukuntha-temple-thirunavaya",
-        "type": "posts",
-        "title": "Nava Mukuntha temple, ThiruNavaya, Kerala",
-        "author": "Sriram S.",
-        "date": "2015-11-29",
-        "tags": ["temple" , "divyadesam"]    
-    },
-    {
-        "slug": "meenakshi-sametha-sundhareswarar-kariyappatti",
-        "type": "posts",
-        "title": "Meenakshi sametha Sundhareswarar temple, Kariyapatti",
-        "author": "Sriram S.",
-        "date": "2018-07-21",
-        "tags": ["temple" ]    
-    },
-     {
-        "slug": "mangalanaayagi-sametha-bramhasirakandeeswarar-temple-kandiyur",
-        "type": "posts",
-        "title": "Mangalanaayagi sametha BrammaSira Kandeeswarar temple, Kandiyur",
-        "author": "Sriram S.",
-        "date": "2013-08-25",
-        "tags": ["temple" , "thevaram" , "appar" , "sapthasthanam" , "sambandhar"]
-    },   
-     {
-        "slug": "sundharagujambika-sametha-nethrarppaneswarar-thiruveezhimizhalai",
-        "type": "posts",
-        "title": "Sundharagujambika sametha Nethrarppaneswarar temple, Thiruveezhimizhalai",
-        "author": "Sriram S.",
-        "date": "2012-08-18",
-        "tags": ["temple" , "thevaram" , "appar" , "sundharar" , "kalyana-parikara-sthalam" , "sambandhar"]
-    },   
-   {
-        "slug": "soundharanayagi-sametha-vilvaranyeswarar-thirukollamboodhoor",
-        "type": "posts",
-        "title": "Soundharanayagi sametha Vilvaranyeswarar temple, Thirukollamboodhoor",
-        "author": "Sriram S.",
-        "date": "2007-01-11",
-        "tags": ["temple" , "thevaram" , "sambandhar"]
-    },   
-    {
-        "slug": "othimalai-andavar-temple-irumbarai",
-        "type": "posts",
-        "title": "Othimalai andavar temple, Irumbarai",
-        "author": "Sriram S.",
-        "date": "2015-07-30",
-        "tags": ["temple" , "hill-temple"],
-        "pinned": true
-    },   
-    {
-        "slug": "which-temple-to-start-with",
-        "type": "posts",
-        "title": "Which temple to start my visit and how to see temples ?? ",
-        "author": "Bharanidharan",
-        "date": "2025-08-13",
-        "tags": [ "spirituality", "wisdom" , "hinduism"  , "blog"]
-    }
+  {
+    "author": "sriram",
+    "date": "2026-09-19",
+    "hide": false,
+    "slug": "hei-bb",
+    "tags": [
+      "nithyadharma",
+      "templetracker"
+    ],
+    "title": "hei bb",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2000-07-23",
+    "hide": false,
+    "slug": "about",
+    "tags": [
+      "sriram",
+      "temples",
+      "trains",
+      "nithyadharma"
+    ],
+    "title": "About",
+    "type": "static"
+  },
+  {
+    "author": "sriram",
+    "date": "2025-08-08",
+    "hide": true,
+    "slug": "privacy-policy",
+    "tags": [
+      "nithyadharma",
+      "templetracker"
+    ],
+    "title": "Nithya Dharma Mobile App Privacy Policy",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2023-11-10",
+    "hide": false,
+    "slug": "what-is-sanathana-dharma",
+    "tags": [
+      "temples",
+      "rituals",
+      "nithyadharma",
+      "spirituality",
+      "hinduism"
+    ],
+    "title": "What is Sanathana Dharma ?",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2023-06-13",
+    "hide": false,
+    "slug": "parvathi-sametha-kailasanathar-temple-koonancheri",
+    "tags": [
+      "temples",
+      "hinduism"
+    ],
+    "title": "Parvathi sametha Kailasanathar, Koonancheri",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Subramanian",
+    "date": "2026-09-10",
+    "hide": false,
+    "slug": "madhurabaashini-sametha-dhevapureeswarar-temple-thevur",
+    "tags": [
+      "temples",
+      "hinduism",
+      "sambandhar",
+      "thevaram"
+    ],
+    "title": "Madhurabaashini sametha Dhevapureeswarar, Thevur",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Subramanian",
+    "date": "2026-07-23",
+    "hide": false,
+    "slug": "karpagambal-sametha-kapaleeswarar-mylapore",
+    "tags": [
+      "temples",
+      "hinduism",
+      "sambandhar",
+      "appar",
+      "thevaram"
+    ],
+    "title": "Karpagambal sametha Kapaleeswarar, Mylapore",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2004-02-24",
+    "hide": false,
+    "slug": "girisundhari-sametha-panchavarneswarar-temple-nallur",
+    "tags": [
+      "temples",
+      "hinduism",
+      "sambandhar",
+      "appar",
+      "sundharar",
+      "thevaram",
+      "nallur-sapthasthanam"
+    ],
+    "title": "Girisundhari sametha Panchavarneswarar / KalyanaSundhareswarar, Nallur",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2008-01-08",
+    "hide": false,
+    "slug": "gnanambika-sametha-gnanaparameswarar-temple-naaloor-mayaanam",
+    "tags": [
+      "temples",
+      "hinduism",
+      "sambandhar",
+      "thevaram",
+      "mayanam"
+    ],
+    "title": "Gnanambika sametha Gnana Parameswara Swamy, Naaloor Mayaanam",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2025-05-2",
+    "hide": false,
+    "slug": "ubhayapushpavilochani-sametha-hayavantheeswarar-temple-seeyathamangai",
+    "tags": [
+      "temples",
+      "hinduism",
+      "sambandhar",
+      "thevaram"
+    ],
+    "title": "Ubhayapushpavilochani sametha Ayavantheeswarar, Seeyathamangai",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2007-04-18",
+    "hide": false,
+    "slug": "girigujambigai-samtha-naganathar-temple-ragu-sthalam-thirunageswaram",
+    "tags": [
+      "temples",
+      "hinduism",
+      "appar",
+      "sundharar",
+      "sambandhar",
+      "thevaram",
+      "navagraham",
+      "shivarathri-adhiseshan-legend",
+      "thiruneelakkudi-sapthasthanam"
+    ],
+    "title": "Girigujambigai samtha Shenbagaranyeswarar/Naganathar, Thirunageswaram",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2014-06-13",
+    "hide": false,
+    "slug": "mangalanayagi-sametha-prananatheswarar-temple-thirumangalakkudi",
+    "tags": [
+      "temples",
+      "hinduism",
+      "appar",
+      "sambandhar",
+      "thevaram",
+      "mangala-kshethram",
+      "panchabhaskara-kshethram",
+      "kanjanur-sapthasthanam"
+    ],
+    "title": "MangaLanayagi sametha Prananatheswarar, Thirumangalakkudi",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2026-09-18",
+    "hide": false,
+    "slug": "parimalanayagi-sametha-abathsahayeswarar-temple-rudhragangai",
+    "tags": [
+      "temples",
+      "hinduism",
+      "vaipu"
+    ],
+    "title": "Parimalanayagi Sametha Abathsahayeswarar Kovil, Rudhragangai",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2019-03-23",
+    "hide": false,
+    "slug": "navukkarasi-udanurai-naganathar-temple-periyakumarapalayam",
+    "tags": [
+      "temples",
+      "hinduism"
+    ],
+    "title": "Navukkarasi udanurai Naganathar temple, Periyakumarapalayam",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2025-6-14",
+    "hide": false,
+    "slug": "nithyadharma-mobile-app",
+    "tags": [
+      "temples",
+      "nithyadharma",
+      "rituals",
+      "spirituality",
+      "hinduism"
+    ],
+    "title": "Nithya Dharma Mobile App",
+    "type": "static"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2025-5-7",
+    "hide": false,
+    "slug": "nithyadharma-charitable-trust",
+    "tags": [
+      "temples",
+      "nithyadharma",
+      "spirituality",
+      "hinduism"
+    ],
+    "title": "Nithya Dharma Charitable Trust",
+    "type": "static"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2023-06-19",
+    "hide": false,
+    "slug": "lokamotiv",
+    "tags": [
+      "lokamotiv"
+    ],
+    "title": "Lokamotiv Technology Solutions",
+    "type": "static"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2018-03-18",
+    "hide": false,
+    "slug": "jeya-mangala-anjaneyar-temple-idugampalayam",
+    "tags": [
+      "temple",
+      "hinduism"
+    ],
+    "title": "Jeyamangala Anjaneyar temple, Idugampalayam",
+    "type": "posts"
+  },
+  {
+    "author": "R.Srinivasan",
+    "date": "2019-02-13",
+    "hide": false,
+    "slug": "nithyadharma-puja-products",
+    "tags": [
+      "nithyadharma",
+      "spirituality",
+      "wisdom",
+      "hinduism"
+    ],
+    "title": "Nithyadharma Authentic Puja Products",
+    "type": "static"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2002-02-23",
+    "hide": false,
+    "slug": "ganapathy-agraharam",
+    "tags": [
+      "temple",
+      "spirituality",
+      "wisdom",
+      "hinduism"
+    ],
+    "title": "Maha Ganapathy temple, Ganapathy Agraharam",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2016-08-15",
+    "hide": false,
+    "slug": "kailasanathar-temple-irumbarai",
+    "tags": [
+      "temple",
+      "hinduism"
+    ],
+    "title": "Kailasanathar temple, Irumbarai. ( foothills of Othimalai Andavar temple )",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2016-01-8",
+    "hide": false,
+    "slug": "subramanya-swami-chenniyandavar-temple-chennimalai",
+    "tags": [
+      "temple",
+      "hinduism"
+    ],
+    "title": "Subramanya swami temple, Chennimalai",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2014-06-14",
+    "hide": false,
+    "slug": "sivaambikaa-sametha-swarnapureeswarar-temple-aandan-kovil",
+    "tags": [
+      "temple",
+      "hinduism"
+    ],
+    "title": "Sivaambikaa sametha Swarnapureeswarar temple, Aandaan Kovil",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2002-10-6",
+    "hide": false,
+    "slug": "thevara-vaipu-thalangal",
+    "tags": [
+      "temple",
+      "thevaram"
+    ],
+    "title": "Thevara Vaippu thalangal",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2018-09-4",
+    "hide": false,
+    "slug": "nishkalank-mahadev-mandhir-bhavnagar",
+    "tags": [
+      "temple"
+    ],
+    "title": "Nishkalank Mahadheva temple, Koliyak/ Bhavnagar, Gujarath",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2016-11-5",
+    "hide": false,
+    "slug": "abhayahastha-anjaneyar-temple-krishnapuram",
+    "tags": [
+      "temple"
+    ],
+    "title": "Abhayahastha Anjaneyar temple, Krishnapuram",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2016-09-15",
+    "hide": false,
+    "slug": "kalamegapperumal-temple-thirumogur",
+    "tags": [
+      "temple",
+      "divyadesam"
+    ],
+    "title": "Kalamegapperumal temple, Thirumogur",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2016-06-19",
+    "hide": false,
+    "slug": "siddheswaran-temple-palamalai-rf-mettur",
+    "tags": [
+      "temple",
+      "hill-temple"
+    ],
+    "title": "Madheswarar, Siddheswaran Malai Kovil, Palamalai Reserve Forest, Near Mettur Dam",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2024-03-24",
+    "hide": false,
+    "slug": "lalitha-sametha-meghanathar-temple-thirumeeyachur",
+    "tags": [
+      "temple",
+      "sambandhar",
+      "thevaram"
+    ],
+    "title": "Lalithambika sametha Meghanathar temple, Thirumeeyachur",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2026-09-5",
+    "hide": false,
+    "slug": "oeneswarar-kantheswarar-temple-kanchipuram",
+    "tags": [
+      "temple",
+      "sundharar",
+      "thevaram"
+    ],
+    "title": "Oeneswarar, Kantheswarar temple, Ona kaanthan thali, Kanchipuram",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2012-03-24",
+    "hide": false,
+    "slug": "soundharanaayagi-sametha-pushpavaneswarar-temple-thiruppoonthuruththi",
+    "tags": [
+      "temple",
+      "appar",
+      "thevaram",
+      "sapthasthanam"
+    ],
+    "title": "Soundharanaayagi sametha Pushpavaneswarar temple, Thiruppoonthuruththi",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2023-11-04",
+    "hide": false,
+    "slug": "karunyavalli-sametha-kachabeswarar-temple-eachankudi",
+    "tags": [
+      "temple"
+    ],
+    "title": "Karunyavalli  sametha Kachabeswarar temple, Eachankudi",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2020-01-31",
+    "hide": false,
+    "slug": "anandhavalli-sametha-rajarajeswarar-temple-kadakadappai",
+    "tags": [
+      "temple",
+      "sapthasthanam"
+    ],
+    "title": "Aanandhavalli sametha Raja Rajeswarar temple, Kadakadappai",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2024-04-11",
+    "hide": false,
+    "slug": "kaivalyambikai-sametha-karkkodaganadhar-temple-kodangudi",
+    "tags": [
+      "temple",
+      "sarpa-dosha-parikaram"
+    ],
+    "title": "Kaivalyambikai sametha Karkkodaganadhar temple, Kodangudi",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2026-07-30",
+    "hide": false,
+    "slug": "lathaamadhyaambaa-sametha-maasilamaneeswarar-temple-thirumullaivayil",
+    "tags": [
+      "temple",
+      "thevaram",
+      "sundharar",
+      "chennai-vicinity"
+    ],
+    "title": "Kodiyidaiyamman Sametha Maasilamaneeswarar Temple, Thirumullaivayil",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2025-09-26",
+    "hide": false,
+    "slug": "amruthanayaki-sametha-naganathaswamy-temple-paamani",
+    "tags": [
+      "temple",
+      "thevaram",
+      "sambandhar",
+      "sarpa-dosha-parikaram"
+    ],
+    "title": "Amruthanayaki Sametha Naganathaswamy Temple, Paamani",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2020-03-18",
+    "hide": false,
+    "slug": "akilandeswari-sametha-agastheeswarar-temple-karuvalarcheri",
+    "tags": [
+      "temple",
+      "puthra-dosha-parikaram"
+    ],
+    "title": "Akilandeswari sametha Agastheeswarar temple, Karuvalarcheri",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2022-03-22",
+    "hide": false,
+    "slug": "amrithamugizhambikai-sametha-ukthavedeeswarar-temple-kuththalam",
+    "tags": [
+      "temple",
+      "thevaram",
+      "appar",
+      "sundharar",
+      "sambandhar"
+    ],
+    "title": "Amritha Mugizhambikai sametha Ukthavedeeswarar temple, Kuththalam",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2016-12-30",
+    "hide": false,
+    "slug": "bhoomi-balaka-perumal-temple-thiruppuliyangudi",
+    "tags": [
+      "temple",
+      "divyadesam",
+      "navathiruppathi"
+    ],
+    "title": "Bhoomi balaka perumal temple, Thiruppuliyangudi",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2024-04-05",
+    "hide": false,
+    "slug": "vandamar-poonguzhali-sametha-brahmapureeswarar-temple-thirukkuvalai",
+    "tags": [
+      "temple",
+      "appar",
+      "thevaram",
+      "sapthavidangam",
+      "sundharar",
+      "sambandhar"
+    ],
+    "title": "Vandamar Poonguzhali sametha Brahmapureeswarar temple, Thirukkuvalai",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2015-11-29",
+    "hide": false,
+    "slug": "nava-mukuntha-temple-thirunavaya",
+    "tags": [
+      "temple",
+      "divyadesam"
+    ],
+    "title": "Nava Mukuntha temple, ThiruNavaya, Kerala",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2018-07-21",
+    "hide": false,
+    "slug": "meenakshi-sametha-sundhareswarar-kariyappatti",
+    "tags": [
+      "temple"
+    ],
+    "title": "Meenakshi sametha Sundhareswarar temple, Kariyapatti",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2013-08-25",
+    "hide": false,
+    "slug": "mangalanaayagi-sametha-bramhasirakandeeswarar-temple-kandiyur",
+    "tags": [
+      "temple",
+      "thevaram",
+      "appar",
+      "sapthasthanam",
+      "sambandhar"
+    ],
+    "title": "Mangalanaayagi sametha BrammaSira Kandeeswarar temple, Kandiyur",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2012-08-18",
+    "hide": false,
+    "slug": "sundharagujambika-sametha-nethrarppaneswarar-thiruveezhimizhalai",
+    "tags": [
+      "temple",
+      "thevaram",
+      "appar",
+      "sundharar",
+      "kalyana-parikara-sthalam",
+      "sambandhar"
+    ],
+    "title": "Sundharagujambika sametha Nethrarppaneswarar temple, Thiruveezhimizhalai",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2007-01-11",
+    "hide": false,
+    "slug": "soundharanayagi-sametha-vilvaranyeswarar-thirukollamboodhoor",
+    "tags": [
+      "temple",
+      "thevaram",
+      "sambandhar"
+    ],
+    "title": "Soundharanayagi sametha Vilvaranyeswarar temple, Thirukollamboodhoor",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram S.",
+    "date": "2015-07-30",
+    "hide": false,
+    "slug": "othimalai-andavar-temple-irumbarai",
+    "tags": [
+      "temple",
+      "hill-temple"
+    ],
+    "title": "Othimalai andavar temple, Irumbarai",
+    "type": "posts"
+  },
+  {
+    "author": "Bharanidharan",
+    "date": "2025-08-13",
+    "hide": false,
+    "slug": "which-temple-to-start-with",
+    "tags": [
+      "spirituality",
+      "wisdom",
+      "hinduism",
+      "blog"
+    ],
+    "title": "Which temple to start my visit and how to see temples ?? ",
+    "type": "posts"
+  }
 ]
