@@ -1,4 +1,3 @@
-<h5 style="text-align: center;">Parimalanayagi Sametha Abathsahayeswarar Kovil, Rudhragangai</h5>
 
 Rudhragangai village is situated approximately a kilometer from Poonthottam, a prominent stop along the Mayavaram - Thiruvarur bus route. The Poonthottam railway station is less than a kilometer away.
 Rudhragangai is often associated with the panchayath koththavasal which also houses a temple and is a km away. 37 kms from kumbakonam and 20 kms from thiruvarur. Ambal and Koil Thirumagalam, both padal petra thalangal are just a couple of kms away.
