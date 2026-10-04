@@ -3,7 +3,10 @@ name: Notify Mobile Clients
 on:
   push:
     branches:
-      - main  # Change to 'master' or 'gh-pages' if that's your primary branch
+      - main  # Triggers when changes are pushed to main
+    paths:
+      # Action ONLY triggers when posts.json is modified
+      - 'templepages-github-site/www.templepages.com/posts.json'
 
 jobs:
   send-fcm-notification:
@@ -33,10 +36,11 @@ jobs:
           from google.oauth2 import service_account
           from google.auth.transport.requests import Request
 
-          # Load key from GitHub Secret
+          # 1. Parse Firebase Key from GitHub Secrets
           raw_json = os.environ.get("SERVICE_ACCOUNT", "")
           key_data = json.loads(raw_json)
 
+          # 2. Get Google OAuth2 Token
           creds = service_account.Credentials.from_service_account_info(
               key_data,
               scopes=["https://www.googleapis.com/auth/firebase.messaging"]
@@ -45,26 +49,28 @@ jobs:
 
           project_id = key_data["project_id"]
           commit_sha = os.environ.get("COMMIT_SHA", "")
-          commit_msg = os.environ.get("COMMIT_MSG", "New update published")
+          commit_msg = os.environ.get("COMMIT_MSG", "Temple updates published")
 
-          # Construct FCM HTTP v1 request
+          # 3. Construct FCM v1 Request
           url = f"https://fcm.googleapis.com/v1/projects/{project_id}/messages:send"
           headers = {
               "Authorization": f"Bearer {creds.token}",
               "Content-Type": "application/json"
           }
 
+          # 4. Clean Payload using only your domain (No GitHub username references)
           payload = {
               "message": {
                   "topic": "updates",
                   "data": {
                       "version": commit_sha,
-                      "url": f"https://codydady.github.io/projects/content-{commit_sha}.json",
+                      "url": "https://www.templepages.com/posts.json",
                       "message": commit_msg
                   }
               }
           }
 
+          # 5. Send Notification
           res = requests.post(url, json=payload, headers=headers)
           print("FCM Response Code:", res.status_code)
           print("FCM Response Body:", res.text)
