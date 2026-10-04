@@ -92,6 +92,9 @@ jobs:
                       "version": commit_sha,
                       "url": "https://www.templepages.com/posts.json",
                       "message": commit_msg
+                  },
+                  "android": {
+                      "priority": "HIGH"
                   }
               }
           }
