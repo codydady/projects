@@ -14,6 +14,24 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Required to compare current commit against parent commit
+
+      - name: Extract New Slug via Git Diff
+        id: extract_slug
+        run: |
+          JSON_PATH="templepages-github-site/www.templepages.com/posts.json"
+          
+          # Isolate added lines in posts.json containing the "slug" field
+          NEW_SLUG=$(git diff HEAD~1 HEAD -- "$JSON_PATH" | grep '^+[^+]' | grep '"slug":' | sed -E 's/.*"slug": *"([^"]+)".*/\1/' | head -n 1)
+
+          if [ -z "$NEW_SLUG" ]; then
+            echo "No new slug detected in git diff."
+          else
+            echo "Detected new slug: $NEW_SLUG"
+          fi
+
+          echo "slug=$NEW_SLUG" >> $GITHUB_OUTPUT
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -30,11 +48,18 @@ jobs:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           COMMIT_SHA: ${{ github.sha }}
           COMMIT_MSG: ${{ github.event.head_commit.message }}
+          NEW_SLUG: ${{ steps.extract_slug.outputs.slug }}
         run: |
           python - << 'EOF'
           import os, json, requests
           from google.oauth2 import service_account
           from google.auth.transport.requests import Request
+
+          new_slug = os.environ.get("NEW_SLUG", "").strip()
+
+          if not new_slug:
+              print("No new slug found in posts.json diff. Skipping FCM notification.")
+              exit(0)
 
           # 1. Parse Firebase Key from GitHub Secrets
           raw_json = os.environ.get("SERVICE_ACCOUNT", "")
@@ -58,11 +83,12 @@ jobs:
               "Content-Type": "application/json"
           }
 
-          # 4. Clean Payload using only your domain (No GitHub username references)
+          # 4. Clean Payload containing the newly added slug
           payload = {
               "message": {
                   "topic": "updates",
                   "data": {
+                      "newslug": new_slug,
                       "version": commit_sha,
                       "url": "https://www.templepages.com/posts.json",
                       "message": commit_msg
