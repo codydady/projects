@@ -1,6 +1,15 @@
 name: Notify Mobile Clients
 
 on:
+  # 1. Enables manual triggering from the GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      test_slug:
+        description: 'Slug to send via FCM (e.g. test-slug-123 or an existing slug from posts.json)'
+        required: true
+        default: 'test-slug-123'
+
+  # 2. Automated trigger when posts.json is modified on main
   push:
     branches:
       - main  # Triggers when changes are pushed to main
@@ -17,18 +26,23 @@ jobs:
         with:
           fetch-depth: 2 # Required to compare current commit against parent commit
 
-      - name: Extract New Slug via Git Diff
+      - name: Extract New Slug via Git Diff or Manual Input
         id: extract_slug
         run: |
-          JSON_PATH="templepages-github-site/www.templepages.com/posts.json"
-          
-          # Isolate added lines in posts.json containing the "slug" field
-          NEW_SLUG=$(git diff HEAD~1 HEAD -- "$JSON_PATH" | grep '^+[^+]' | grep '"slug":' | sed -E 's/.*"slug": *"([^"]+)".*/\1/' | head -n 1)
-
-          if [ -z "$NEW_SLUG" ]; then
-            echo "No new slug detected in git diff."
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            NEW_SLUG="${{ github.event.inputs.test_slug }}"
+            echo "Manual run triggered via UI. Using provided slug: $NEW_SLUG"
           else
-            echo "Detected new slug: $NEW_SLUG"
+            JSON_PATH="templepages-github-site/www.templepages.com/posts.json"
+            
+            # Isolate added lines in posts.json containing the "slug" field
+            NEW_SLUG=$(git diff HEAD~1 HEAD -- "$JSON_PATH" | grep '^+[^+]' | grep '"slug":' | sed -E 's/.*"slug": *"([^"]+)".*/\1/' | head -n 1)
+
+            if [ -z "$NEW_SLUG" ]; then
+              echo "No new slug detected in git diff."
+            else
+              echo "Detected new slug: $NEW_SLUG"
+            fi
           fi
 
           echo "slug=$NEW_SLUG" >> $GITHUB_OUTPUT
@@ -58,7 +72,7 @@ jobs:
           new_slug = os.environ.get("NEW_SLUG", "").strip()
 
           if not new_slug:
-              print("No new slug found in posts.json diff. Skipping FCM notification.")
+              print("No new slug found. Skipping FCM notification.")
               exit(0)
 
           # 1. Parse Firebase Key from GitHub Secrets
