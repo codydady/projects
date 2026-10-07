@@ -2,19 +2,26 @@ package com.sd.nithyadharma.screen
 
 import LocaleManager
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -75,12 +82,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -104,13 +115,13 @@ import com.sd.nithyadharma.cards.PujaStoreCardContent
 import com.sd.nithyadharma.cards.RasiPalanCardContent
 import com.sd.nithyadharma.cards.RatingShareCardContent
 import com.sd.nithyadharma.cards.RequestHelpCardContent
-import com.sd.nithyadharma.cards.formatCardTimestamp
 import com.sd.nithyadharma.cards.formatMillisToHoursMins
 import com.sd.nithyadharma.cards.toEnglish
 import com.sd.nithyadharma.model.MainViewModel
 import com.sd.nithyadharma.model.NDLanguage
 import com.sd.nithyadharma.model.PanchangaAttr
 import com.sd.nithyadharma.model.PanchangaAttr.Rasi
+import com.sd.nithyadharma.util.CommonFunctions
 import com.sd.nithyadharma.util.Constants
 import com.sd.nithyadharma.util.FirebaseAppAnalytics
 import com.sd.nithyadharma.util.LocalAppLanguage
@@ -118,6 +129,145 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.cos
+import kotlin.math.sin
+
+@Composable
+fun AnimatedLikeButton(
+    isLiked: Boolean,
+    modifier: Modifier = Modifier,
+    iconSize: Dp = 28.dp
+) {
+    // 1. Icon Bulge Scale
+    val scale = remember { Animatable(1f) }
+
+    // 2. Fireworks Progress (0f to 1f over 1.5 seconds)
+    val fireworksProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(isLiked) {
+        if (isLiked) {
+            // Reset states
+            scale.snapTo(1f)
+            fireworksProgress.snapTo(0f)
+
+            // A. Bulge up smoothly and spring back to normal size
+            launch {
+                scale.animateTo(
+                    targetValue = 1.6f,
+                    animationSpec = tween(durationMillis = 250, easing = LinearOutSlowInEasing)
+                )
+                scale.animateTo(
+                    targetValue = 1.0f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
+            }
+
+            // B. Run full 1.5 second (1500 ms) fireworks burst animation
+            launch {
+                fireworksProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = 1500,
+                        easing = LinearOutSlowInEasing
+                    )
+                )
+            }
+        } else {
+            scale.snapTo(1f)
+            fireworksProgress.snapTo(0f)
+        }
+    }
+
+    val goldColor = Color(0xFFFFD700)
+    val crimsonColor = Color(0xFFFF5252)
+    val sparkYellow = Color(0xFFFFF59D)
+    val cyanSpark = Color(0xFF80DEEA)
+
+    Box(
+        modifier = modifier.size(iconSize * 3.5f), // Generous boundary so sparks don't clip
+        contentAlignment = Alignment.Center
+    ) {
+        // Fireworks Particles & Shockwave Canvas (1.5s lifecycle)
+        if (fireworksProgress.value > 0f && fireworksProgress.value < 1f) {
+            val progress = fireworksProgress.value
+
+            // Gradually fade out toward the end of 1.5s
+            val globalAlpha = if (progress < 0.7f) 1f else (1f - progress) / 0.3f
+
+            Canvas(modifier = Modifier.matchParentSize()) {
+                val center = Offset(size.width / 2, size.height / 2)
+                val maxRadius = size.minDimension / 2.1f
+
+                // 1. Primary Expanding Shockwave Ring
+                drawCircle(
+                    color = sparkYellow.copy(alpha = (1f - progress) * globalAlpha * 0.7f),
+                    radius = maxRadius * progress,
+                    center = center,
+                    style = Stroke(width = (4.dp.toPx() * (1f - progress)).coerceAtLeast(1f))
+                )
+
+                // 2. Outer Wave - 12 Radiating Firecracker Sparks
+                val outerCount = 12
+                val outerDist = maxRadius * progress
+                val outerSparkSize = (4.5.dp.toPx() * (1f - progress)).coerceAtLeast(1f)
+
+                val outerColors = listOf(goldColor, crimsonColor, sparkYellow, cyanSpark)
+
+                for (i in 0 until outerCount) {
+                    val angle = Math.toRadians(i * (360.0 / outerCount))
+                    val sparkOffset = Offset(
+                        x = center.x + (outerDist * cos(angle)).toFloat(),
+                        y = center.y + (outerDist * sin(angle)).toFloat()
+                    )
+
+                    drawCircle(
+                        color = outerColors[i % outerColors.size].copy(alpha = globalAlpha),
+                        radius = outerSparkSize,
+                        center = sparkOffset
+                    )
+                }
+
+                // 3. Inner Wave - 8 Secondary Delayed Sparks (Slower Expansion)
+                if (progress > 0.15f) {
+                    val innerProgress = ((progress - 0.15f) / 0.85f).coerceIn(0f, 1f)
+                    val innerCount = 8
+                    val innerDist = maxRadius * 0.65f * innerProgress
+                    val innerSparkSize = (3.5.dp.toPx() * (1f - innerProgress)).coerceAtLeast(1f)
+
+                    for (j in 0 until innerCount) {
+                        val angle = Math.toRadians((j * (360.0 / innerCount)) + 22.5) // Offset angle
+                        val sparkOffset = Offset(
+                            x = center.x + (innerDist * cos(angle)).toFloat(),
+                            y = center.y + (innerDist * sin(angle)).toFloat()
+                        )
+
+                        drawCircle(
+                            color = outerColors[(j + 1) % outerColors.size].copy(alpha = globalAlpha),
+                            radius = innerSparkSize,
+                            center = sparkOffset
+                        )
+                    }
+                }
+            }
+        }
+
+        // Thumb Up Icon
+        Icon(
+            imageVector = if (isLiked) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
+            contentDescription = "Like Card",
+            tint = if (isLiked) goldColor else Color.White.copy(alpha = 0.85f),
+            modifier = Modifier
+                .size(iconSize)
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                }
+        )
+    }
+}
 
 // --- 2. MAIN SCREEN CONTAINER ---
 @Composable
@@ -148,9 +298,6 @@ fun MainScreen(
     val staticPanchangam by mainViewModel.staticPanchangam.collectAsState()
     val dynamicPanchangam by mainViewModel.dynamicPanchangam.collectAsState()
     val futureNDayPanchangam by mainViewModel.futurePanchangam.collectAsState()
-
-    // for post of the day if it exists
-    val postOfDay by mainViewModel.postOfDay.collectAsState()
 
     // Prompt user if customerInfo loaded and name is still blank
     //    if (customerInfo != null && customerInfo.name.isBlank()) {
@@ -363,18 +510,12 @@ fun MainScreen(
                                         )
                                     }
                                     CardType.TEMPLE_NEEDS -> {
-                                        // 1. Collect CustomerInfo safely from ViewModel StateFlow
-//                                        val customerInfo by mainViewModel.customerInfo.collectAsStateWithLifecycle()
-
                                         RequestHelpCardContent(
                                             textColor = textColor,
                                             customerInfo = customerInfo
                                         )
                                     }
                                     CardType.PUJA_STORE -> {
-                                        // 1. Collect CustomerInfo safely from ViewModel StateFlow
-//                                        val customerInfo by mainViewModel.customerInfo.collectAsStateWithLifecycle()
-                                        // 2. Render Card and delegate save callback up to ViewModel
                                         PujaStoreCardContent(
                                             textColor = textColor,
                                             customerInfo = customerInfo,
@@ -440,10 +581,9 @@ fun MainScreen(
                                         RatingShareCardContent(
                                             textColor = textColor,
                                             onRatingSelected = { rating ->
-                                                FirebaseAppAnalytics.logRating(
-                                                    card.type.toString(),
-                                                    rating
-                                                )
+                                                FirebaseAppAnalytics.logCardLiked(
+                                                    card.type.toEnglish().lowercase(),
+                                                    "" + rating /* so we get a string */)
                                             }
                                         )
                                     }
@@ -456,13 +596,12 @@ fun MainScreen(
                                     CardType.MAP -> TODO() // since it is big, leaving as a screen.
 
                                     CardType.TODAYS_DHARMA -> {
-                                        postOfDay?.let { post ->
-                                            DharmaTodayCardContent(
-                                                post = post,
-                                                textColor = textColor
-                                            )
-                                        }
-                                    } // todays dharma ends
+                                        DharmaTodayCardContent(
+                                            paramsMap = card.customParams ?: emptyMap(),
+                                            textColor = textColor
+                                        )
+                                    }
+
                                     CardType.RASI_PALAN -> {
                                         RasiPalanCardContent(
                                             paramsMap = card.customParams ?: emptyMap(),
@@ -483,6 +622,130 @@ fun MainScreen(
 }
 
 // --- 3. STATIC TITLE CARD COMPONENT ---
+
+@Composable
+fun NewTitleCard(
+    mainViewModel: MainViewModel,
+    onTempleItemClick: () -> Unit,
+    textColor: Color,
+    currentLang: NDLanguage,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "gemini_rich_gradient")
+
+    // 1. Top Color: Subtle, rich muted tones
+    val topColor by infiniteTransition.animateColor(
+        initialValue = Color(0xFF2D482F),
+        targetValue = Color(0xFF2D482F),
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 30000
+                Color(0xFF2D482F) at 0 with EaseInOut       // Deep Forest
+                Color(0xFF573C23) at 6000 with EaseInOut    // Muted Amber
+                Color(0xFF391A5E) at 12000 with EaseInOut   // Slate Purple
+                Color(0xFF21385B) at 18000 with EaseInOut   // Dark Steel Blue
+                Color(0xFF4D293C) at 24000 with EaseInOut   // Muted Plum
+                Color(0xFF2D482F) at 30000 with EaseInOut
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "topColor"
+    )
+
+// 2. Bottom Color: Dark bases carrying a slight hint of the top hue
+    val bottomColor by infiniteTransition.animateColor(
+        initialValue = Color(0xFF0F1A10),
+        targetValue = Color(0xFF0F1A10),
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 30000
+                Color(0xFF0F1A10) at 0 with EaseInOut       // Very Dark Forest Base
+                Color(0xFF1F150D) at 6000 with EaseInOut    // Very Dark Amber Base
+                Color(0xFF150924) at 12000 with EaseInOut   // Very Dark Purple Base
+                Color(0xFF0B1421) at 18000 with EaseInOut   // Very Dark Blue Base
+                Color(0xFF1C0E15) at 24000 with EaseInOut   // Very Dark Plum Base
+                Color(0xFF0F1A10) at 30000 with EaseInOut
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "bottomColor"
+    )
+
+    // Vertical top-to-bottom dual-tone gradient brush
+    val richGeminiBrush = Brush.linearGradient(
+        colors = listOf(
+            topColor,
+            topColor.copy(alpha = 0.9f),
+            bottomColor
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(0f, Float.POSITIVE_INFINITY)
+    )
+    // 1. Direct 2-color stop: Exact Top-to-Bottom mapping
+    val subtleGeminiBrush = Brush.verticalGradient(
+        colors = listOf(
+            topColor,    // Starts exactly at Top (Y = 0)
+            bottomColor  // Ends exactly at Bottom (Y = max)
+        )
+    )
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(subtleGeminiBrush)
+            .padding(horizontal = 20.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "App Logo",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable { onTempleItemClick() }
+                        .clip(RoundedCornerShape(10.dp))
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = LocaleManager.getString("app_title", currentLang),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp,
+                        color = textColor
+                    ),
+                    modifier = Modifier.clickable {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            mainViewModel.testingDummyMusicCardMaker()
+                        }
+                    }
+                )
+            }
+
+            Text(
+                text = LocaleManager.getString("app_motto", currentLang),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 1.sp,
+                    color = textColor.copy(alpha = 0.90f)
+                ),
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .clickable {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            mainViewModel.testingDummyRasiPalanCardMaker()
+                        }
+                    }
+            )
+        }
+    }
+}
 
 @Composable
 fun TitleCard(
@@ -553,7 +816,6 @@ fun TitleCard(
                             .clickable {
                             // todo temp quick place for new feature test
                             CoroutineScope(Dispatchers.IO).launch {
-                                //val preferencesManager = PreferencesManager(appContext)
                                 mainViewModel.testingDummyRasiPalanCardMaker()
                             }
                 }
@@ -580,15 +842,15 @@ fun DismissibleCardContainer(
 
     // Format timestamp once per recomposition
     val formattedCreDttm = remember(card.createdTime) {
-        formatCardTimestamp(card.createdTime)
+        CommonFunctions.formatCardTimestamp(card.createdTime)
     }
 
     val formattedExpDttm = remember(card.expiryTime) {
-        formatCardTimestamp(card.expiryTime)
+        CommonFunctions.formatCardTimestamp(card.expiryTime)
     }
 
-    val animDuration = 1200
-    val dismissDelay = (animDuration + 100).toLong()
+    val animDuration = 2200
+    val dismissDelay = (animDuration + 1300).toLong()
 
     AnimatedVisibility(
         visible = isVisible,
@@ -643,30 +905,18 @@ fun DismissibleCardContainer(
                     IconButton(
                         onClick = {
                             isLiked = !isLiked
-
                             if (isLiked) {
                                 FirebaseAppAnalytics.logCardLiked(
-                                    card.type.toString(),
-                                    card.loggingKey // which contains the current dt
+                                    card.type.toString().lowercase(),
+                                    card.loggingKey // contains current dt
                                 )
                             }
                         },
-                        modifier = Modifier.size(40.dp).padding(end = 20.dp)
-
+                        modifier = Modifier.padding(end = 12.dp) // Apply padding first
                     ) {
-                        Icon(
-                            imageVector = if (isLiked) {
-                                Icons.Filled.ThumbUp
-                            } else {
-                                Icons.Outlined.ThumbUp
-                            },
-                            contentDescription = "Like Card",
-                            tint = if (isLiked) {
-                                Color(0xFFFFD700)
-                            } else {
-                                Color.White.copy(alpha = 0.8f)
-                            },
-                            modifier = Modifier.size(28.dp)
+                        AnimatedLikeButton(
+                            isLiked = isLiked,
+                            iconSize = 24.dp // Standard icon size inside 48.dp touch target
                         )
                     }
                 } // Title + Like ends
@@ -841,32 +1091,6 @@ fun UserSetupDialog(
                         color = Color.White
                     )
 
-                    // 🔑 Language Toggle Switch (e.g. English <-> Tamil)
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-//                    ) {
-//                        Text(
-//                            text = if (dialogLang == NDLanguage.EN) "Eng" else "தமிழ்",
-//                            style = MaterialTheme.typography.labelLarge,
-//                            color = Color.White,
-//                            fontWeight = FontWeight.Bold
-//                        )
-//                        Switch(
-//                            checked = dialogLang == NDLanguage.TA, // Adjust enum comparison to your language enum
-//                            onCheckedChange = { isTamil ->
-//                                dialogLang = if (isTamil) NDLanguage.TA else NDLanguage.EN
-//                            },
-//                            colors = SwitchDefaults.colors(
-//                                checkedThumbColor = color1,
-//                                checkedTrackColor = Color.White,
-//                                uncheckedThumbColor = Color.White,
-//                                uncheckedTrackColor = Color.White.copy(alpha = 0.4f),
-//                                uncheckedBorderColor = Color.Transparent
-//                            )
-//                        )
-//                    }// old row ends
-                    ///
                     Box {
                         OutlinedButton(
                             onClick = {
@@ -916,7 +1140,6 @@ fun UserSetupDialog(
                             }
                         }
                     }
-                    ////
                 }
 
                 Text(

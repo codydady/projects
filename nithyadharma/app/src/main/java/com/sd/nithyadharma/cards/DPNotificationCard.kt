@@ -66,138 +66,150 @@ fun PanchangamNotificationCardContent(
         val newText = LocaleManager.getString(newKey.trim(), currentLang)
         "$oldText ➜ $newText"
     }
-    else {      // for chandrashtama or other features
+    else {      // for chandrashtama or other features like ragu kaalam
+        // since we saw that chandrashtama message has the rasi baked in as in the language
+        // of user choice , it shouldnt be localed - ss sep 18,2026
         LocaleManager.getString(rawMessage.trim(), currentLang)
+//        rawMessage.trim()
     }
 
-    // Two-column layout:
-    // Column 1 = title, message, until time
-    // Column 2 = score
-    Row(
+    // ---------------------------------------------------------
+    // OUTER COLUMN:
+    //   Row 1 = Full-width title
+    //   Row 2 = Message/Until (left) + Score (right)
+    // ---------------------------------------------------------
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
                 start = 12.dp,
                 end = 12.dp,
                 top = 8.dp,
-                bottom = 12.dp
-            ),
-        verticalAlignment = Alignment.CenterVertically
+                bottom = 8.dp
+            )
     ) {
 
         // ---------------------------------------------------------
-        // COLUMN 1: Icon + Title, Message, Until Time
+        // ROW 1: Full-width title row
         // ---------------------------------------------------------
-        Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.Start
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            // Title row
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .background(
+                        color = textColor.copy(alpha = 0.12f),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .background(
-                            color = textColor.copy(alpha = 0.12f),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = textColor,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = LocaleManager.getString(title, currentLang) ,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = textColor.copy(alpha = 0.8f),
-                        fontSize = 15.sp
-                    )
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = textColor,
+                    modifier = Modifier.size(16.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-            // Message
             Text(
-                text = displayMessage,// was LocaleManager.getString(message, currentLang),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = textColor.copy(alpha = 0.9f),
-                    lineHeight = 18.sp,
-                    fontSize = 13.sp
+                text = LocaleManager.getString(title, currentLang),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = textColor.copy(alpha = 0.8f),
+//                    fontSize = 15.sp
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Until time
-            if (!untilTime.isNullOrBlank()) {
-                Text(
-                    text = LocaleManager.getString("str_until", currentLang) + " $untilTime",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = textColor.copy(alpha = 0.7f),
-                        fontSize = 12.sp
-                    )
-                )
-            }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // ---------------------------------------------------------
-        // COLUMN 2: Dynamic Colored Score Canvas
+        // ROW 2: Message + Until Time (left) | Score Canvas (right)
         // ---------------------------------------------------------
-        Box(
-            modifier = Modifier.size(80.dp)
-                    .padding(2.dp),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(2.dp)
-            ) {
-                val strokeWidth = 6.dp.toPx()
-                val radius = (size.minDimension - strokeWidth) / 2f
 
-                drawArc(
-                    color = scoreInfo.color,
-                    startAngle = -90f,
-                    sweepAngle = (score / 100f) * 360f,
-                    useCenter = false,
-                    topLeft = Offset(
-                        strokeWidth / 2,
-                        strokeWidth / 2
+            // Left column: message + until time
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.Start
+            ) {
+                // Message
+                Text(
+                    text = displayMessage,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = textColor.copy(alpha = 0.9f),
+                        lineHeight = 18.sp,
+//                        fontSize = 13.sp
                     ),
-                    size = Size(
-                        radius * 2,
-                        radius * 2
-                    ),
-                    style = Stroke(
-                        strokeWidth,
-                        cap = StrokeCap.Round
-                    )
+                    modifier = Modifier.fillMaxWidth()
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Until time
+                if (!untilTime.isNullOrBlank()) {
+                    Text(
+                        text = LocaleManager.getString("str_until", currentLang) + " $untilTime",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = textColor.copy(alpha = 0.7f),
+                            fontSize = 12.sp
+                        )
+                    )
+                }
             }
 
-            Text(
-                text = score.toString(),
-                fontWeight = FontWeight.Bold,
-                color = scoreInfo.color,
-                style = MaterialTheme.typography.titleLarge
-//                lineHeight = 12.sp
-            )
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Right: score canvas
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(2.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(2.dp)
+                ) {
+                    val strokeWidth = 6.dp.toPx()
+                    val radius = (size.minDimension - strokeWidth) / 2f
+
+                    drawArc(
+                        color = scoreInfo.color,
+                        startAngle = -90f,
+                        sweepAngle = (score / 100f) * 360f,
+                        useCenter = false,
+                        topLeft = Offset(
+                            strokeWidth / 2,
+                            strokeWidth / 2
+                        ),
+                        size = Size(
+                            radius * 2,
+                            radius * 2
+                        ),
+                        style = Stroke(
+                            strokeWidth,
+                            cap = StrokeCap.Round
+                        )
+                    )
+                }
+
+                Text(
+                    text = score.toString(),
+                    fontWeight = FontWeight.Bold,
+                    color = scoreInfo.color,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
         }
     }
 }
@@ -215,9 +227,9 @@ fun getScoreLabelColor(
 
     val scoreColor = when {
         score >= 75 -> Color(0xFF4CAF50) // Green
-        score >= 50 -> Color(0xFFCDDC39) // Orange
-        score >= 25 -> Color(0xFF2196F3) // Red
-        else -> Color(0xFFFF5722) // Dark brown
+        score >= 50 -> Color(0xFFCDDC39) // Lime
+        score >= 25 -> Color(0xFF2196F3) // Blue
+        else -> Color(0xFFFF5722)        // Deep Orange
     }
 
     val scoreLabel = when {

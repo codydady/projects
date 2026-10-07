@@ -174,7 +174,7 @@ enum class Audio_Files(
         imageResId = R.drawable.nd_murugan
     ),
     RUDHRAM(
-        resId = R.raw.rudram,
+        resId = R.raw.rudhram,
         imageResId = R.drawable.nd_shiva
     ),
 //    SIVAMAYAMAAGHA_THERIGIRADHE(

@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -24,10 +25,13 @@ import com.sd.nithyadharma.dao.*
 import com.sd.nithyadharma.model.Audio_Files
 import com.sd.nithyadharma.model.NDLanguage
 import com.sd.nithyadharma.model.PanchangaAttr.DynamicPanchangam
+import com.sd.nithyadharma.model.PanchangaAttr.rasiName
 import com.sd.nithyadharma.util.Constants.INDIA_ZONE
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.encodeToString
@@ -44,10 +48,6 @@ import kotlin.random.Random
 
 object AlarmSlotNotificationHelpers {
 
-    fun getSelectedLanguageBlocking(preferencesManager: PreferencesManager): NDLanguage {
-        return runBlocking { preferencesManager.getSelectedLanguage().first() }
-    }
-
     object AlarmNotificationChannel{
         const val CHANNEL_ID = "nithya_dharma_channel"
         const val CHANNEL_NAME = "Daily Dharma Reminders"
@@ -56,7 +56,7 @@ object AlarmSlotNotificationHelpers {
     suspend fun checkAndSendDailyHCNotifications(appContext: Context,preferencesManager: PreferencesManager) {
         Log.d("AlarmReceiver", "Executing Daily Schedule Notifications...")
 
-        val currentLang = getSelectedLanguageBlocking(preferencesManager)
+        val currentLang = CommonFunctions.getCurrentLanguage()
 
         HinduCalendarRepository.ensureScheduleLoaded()
         val scheduleItems = HinduCalendarRepository.scheduleData.value
@@ -64,6 +64,8 @@ object AlarmSlotNotificationHelpers {
         val today = Calendar.getInstance().time
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val earlyReminderDays = preferencesManager.getEarlyReminder().first()
+
+        Log.d("AlarmReceiver", "early reminder days ${earlyReminderDays}")
 
         if (scheduleItems.isEmpty()) {
             return
@@ -85,7 +87,6 @@ object AlarmSlotNotificationHelpers {
             } ?: continue
 
             val formattedDate = outputFormat.format(eventDate)
-//            val occasionDtl = if (currentLang == NDLanguage.TA) item.occasionTa else item.occasionEn
             val occasionDtl = when (currentLang) {
                 NDLanguage.TA -> item.occasionTa
                 NDLanguage.KA -> item.occasionKa
@@ -101,7 +102,7 @@ object AlarmSlotNotificationHelpers {
     }
 
     // Standard Notification Builder
-    private fun sendNotification(context: Context, title: String, notificationText: String, notificationId: Int) {
+     fun sendNotification(context: Context, title: String, notificationText: String, notificationId: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
@@ -125,13 +126,15 @@ object AlarmSlotNotificationHelpers {
         } catch (e: Exception) {
             null
         }
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notification = NotificationCompat.Builder(context, AlarmNotificationChannel.CHANNEL_ID)
-            .setSmallIcon(R.mipmap.dakshinamurthy)  // this shows up in the top bar of the phone
-            .setLargeIcon(largeIconBitmap)
+            .setSmallIcon(R.drawable.om_notification)  // this shows up in the top bar of the phone
+//            .setLargeIcon(largeIconBitmap)
             .setContentTitle(title)
             .setContentText(notificationText)
             .setStyle(NotificationCompat.BigTextStyle().bigText(notificationText))
+            .setSound(defaultSoundUri) // Default sound
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -355,45 +358,8 @@ object AlarmSlotNotificationHelpers {
         CardRepository.saveAndAddCard(preferencesManager,card)
     } // fun saveDpAndTriggerPanchangaNotification ends
 
-    // this is to check if there is a post today in site every day at noon
-    suspend fun addDharmaTodayCard(preferencesManager: PreferencesManager) {
-        // shouldnt be checking here but dont have a better place.
-        // will move logic soon out of this
-        PostOfDayRepository.refresh()
-
-        // 2. Read the latest StateFlow value after refresh completes
-        val todaysPost = PostOfDayRepository.postOfDay.value
-
-        // 3. Early return if no post exists for today
-        if (todaysPost == null) {
-            Log.i("AlarmNotificationHelper", "Skipping card creation: No post available for today.")
-            return
-        }
-
-        try {
-            // if there is a post today in templepages site, it loads it here
-            Log.d("AlarmNotificationHelper", "addDharmaTodayCard entry")
-
-            val notificationData = mapOf(
-                "post" to JsonPrimitive("dummy as post object is collected and passed")
-            )
-            // now save it to cards
-            val card = CardFactory.makeCard(
-                mode = CardMode.WRITE_FG,
-                type = CardType.TODAYS_DHARMA,
-                expiryOffsetMillis = CardFactory.CARD_EXPIRY_OFFSET_MEDIUM,
-                customParams = notificationData
-            )
-            // this local function is a wrapper to cardfactory.saveandaddcard
-            CardRepository.saveAndAddCard(preferencesManager,card)
-        }
-        catch (e: Exception) {
-            Log.e("AlarmNotificationHelper", "Error generating Static Panchangam card", e)
-        }
-    } // fun addDharmaTodayCard ends
-
     // this is to overwrite the static panchangam every day at alarm time
-    suspend fun addRasiPalanCard(preferencesManager: PreferencesManager) {
+    suspend fun addRasiPalanCard(appContext: Context, preferencesManager: PreferencesManager) {
         try {
             val userRasi = preferencesManager.getCustomerInfo().first().rasi
 
@@ -418,6 +384,22 @@ object AlarmSlotNotificationHelpers {
             )
             // this local function is a wrapper to cardfactory.saveandaddcard
             CardRepository.saveAndAddCard(preferencesManager,card)
+
+            // lets do a notification as weall
+            // Display system tray notification in foreground and background
+            CoroutineScope(Dispatchers.IO).launch {
+                val notificationTitle = CommonFunctions.getLocaleAwareString("rasi_palan")
+                val rasiPalan = Json.decodeFromString<DailyRasiPalanReport>(reportJson!!)
+                val rasiKey = ("pa_"+userRasi).lowercase()
+                val rasiPalanScore = CommonFunctions.getLocaleAwareString(rasiKey) + " : " + rasiPalan.overallDayRating + " / 5"
+
+                sendNotification(
+                    appContext,
+                    notificationTitle, // should read something as new content in multiple languages
+                    rasiPalanScore,
+                    Random.nextInt(1, Int.MAX_VALUE)
+                )
+            }
         }
         catch (e: Exception) {
             Log.e("AlarmNotificationHelper", "Error generating Static Panchangam card", e)
@@ -455,8 +437,11 @@ object AlarmSlotNotificationHelpers {
         appContext: Context, preferencesManager: PreferencesManager) {
 
         val userRasi = preferencesManager.getCustomerInfo().first().rasi
-        val currentLang = getSelectedLanguageBlocking(preferencesManager)
-
+        val currentLang = CommonFunctions.getCurrentLanguage()
+        // send a system tray notification
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val notificationTitle = CommonFunctions.getCurrentLanguage()
+//        }
         val nowIst = CommonFunctions.getCurrentTime()
 
         // 3. Call the calculation function directly
@@ -464,21 +449,25 @@ object AlarmSlotNotificationHelpers {
 
         if ( newDp.chandrashtamaRasi == userRasi) {
             val title = LocaleManager.getString("str_cr", currentLang)
-            val notificationText = LocaleManager.getString("str_crdtl", currentLang)
+//            val notificationText = LocaleManager.getString("str_crdtl", currentLang)
+            val rasiTextInUsrLang = rasiName(userRasi, currentLang)
+            val notificationTextForAlarm = LocaleManager.getString("str_crdtl_rasi", currentLang, rasiTextInUsrLang)
+            val notificationTextForCard = "pa_${userRasi} | str_crdtl".lowercase()
+
             val notificationId = Random.nextInt(1, Int.MAX_VALUE)
 
             // send notification to show it to the user , does it work from here
             sendNotification(
                 appContext,
                 title,
-                notificationText,
+                notificationTextForAlarm,
                 notificationId
             )
 
             // also save a card to be displayed
             val notificationData = mapOf(
                 "title" to JsonPrimitive("str_cr"),
-                "message" to JsonPrimitive("str_crdtl"),
+                "message" to JsonPrimitive(notificationTextForCard),
                 "untilTime" to JsonPrimitive("11:59 PM"),
                 "score" to JsonPrimitive(newDp.score - 15 ) // chndrstma penalty is 15 pts
             )
@@ -513,7 +502,7 @@ object AlarmSlotNotificationHelpers {
         slotChangeMusicCardLoader(preferencesManager)
 
         // 3.2 sp naal kaatti card & greeting card
-        slotChange_GR_SP_TD_RT_Loader(preferencesManager)
+        slotChange_GR_SP_TD_RT_Loader(appContext, preferencesManager)
 
         return nextSlotBoundaryEpochMs
     }
@@ -528,7 +517,7 @@ object AlarmSlotNotificationHelpers {
         soundManager.release()
     }// Get singleton instance using applicationContext
 
-    private suspend fun slotChange_GR_SP_TD_RT_Loader(preferencesManager: PreferencesManager) {
+    private suspend fun slotChange_GR_SP_TD_RT_Loader(appContext: Context, preferencesManager: PreferencesManager) {
 
         // 1. Get the current day of the week
         val currentSlotId = SlotManager.currentSlot?.value?.slotId // e.g., "DAWN", "MORNING", "EVENING"
@@ -541,10 +530,10 @@ object AlarmSlotNotificationHelpers {
             }
             "MORNING" -> {
                 addNaalKaatiCardWithSP(preferencesManager)
-                addRasiPalanCard(preferencesManager)
+                addRasiPalanCard(appContext,preferencesManager)
             }
             "NOON" -> {
-                addDharmaTodayCard(preferencesManager)
+//                addDharmaTodayCard(preferencesManager) todo remove this is now done by firebase as and when a new post is added
             }
             "EVENING" -> {
                 addGreetingCard(preferencesManager)

@@ -2,257 +2,171 @@ package com.sd.nithyadharma.dao
 
 import android.util.Log
 import androidx.core.text.HtmlCompat
-import com.sd.nithyadharma.util.CommonFunctions
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import org.json.JSONArray
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
-object PostOfDayRepository {
+data class PostOfDay(
+    val title: String,
+    val slug: String,
+    val date: String? = null,
+    val author: String? = null,
+    val excerpt: String? = null,
+    val tags: List<String> = emptyList(),
+    val contentsMarkdown: String,
+    val imageUrl: String? = null,
+    val imageBytes: ByteArray?
+)
 
-    private const val WEBSITE = "https://templepages.com/"
+class PostOfDayRepository() {
 
-    private const val BASE_URL = WEBSITE + "posts/"
+    private val baseUrl = "https://www.templepages.com"
 
-    private const val POST_JSON_FILE = WEBSITE + "posts.json"
+    /**
+     * Fetches posts.json, finds the post matching [slug], populates all available
+     * metadata fields from the JSON object, downloads contents.md, updates the StateFlow,
+     * and returns the PostOfDay object.
+     */
+    suspend fun getPostBySlug(slug: String): PostOfDay? = withContext(Dispatchers.IO) {
+        Log.i("PostOfDayRepository", "getPostBySlug entry to find post of the day")
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
+        try {
+            val jsonUrl = "$baseUrl/posts.json"
+            val jsonText = URL(jsonUrl).readText()
+            val postsArray = JSONArray(jsonText)
 
-    // --------------------------------------------------------
-    // JSON structure
-    // --------------------------------------------------------
+            var matchedObject: JSONObject? = null
 
-    @Serializable
-    data class PostIndexEntry(
-        val slug: String,
-        val type: String,
-        val title: String,
-        val author: String,
-        val date: String,
-        val tags: List<String> = emptyList(),
-        val hide: Boolean? = false // Handles missing key, null, or boolean values
-    )
+            // Search for matching slug in posts.json
+            for (i in 0 until postsArray.length()) {
+                val item = postsArray.getJSONObject(i)
+                val itemSlug = item.optString("slug", "")
+                if (itemSlug.equals(slug, ignoreCase = true)) {
+                    matchedObject = item
+                    break
+                }
+            }
 
-    // --------------------------------------------------------
-    // Result used by the UI
-    // --------------------------------------------------------
+            // Extract all post metadata from matched JSON object
+            val finalSlug = matchedObject?.optString("slug", slug) ?: slug
+            val title = matchedObject?.optString("title", "Temple Page") ?: "Temple Page"
+            val date = matchedObject?.optString("date", null)
+            val author = matchedObject?.optString("author", null)
+            val excerpt = matchedObject?.optString("excerpt", null)
 
-    data class PostOfDay(
-        val slug: String,
-        val type: String,
-        val title: String,
-        val author: String,
-        val date: LocalDate,
-        val tags: List<String>,
-        val contentsMarkdown: String,
-        val imageBytes: ByteArray?,
-        val isHidden: Boolean = false // Default to false if omitted
-    )
+            // Parse tags list if present
+            val tagsList = mutableListOf<String>()
+            matchedObject?.optJSONArray("tags")?.let { tagsArray ->
+                for (j in 0 until tagsArray.length()) {
+                    tagsList.add(tagsArray.getString(j))
+                }
+            }
 
-    private val _postOfDay = MutableStateFlow<PostOfDay?>(null)
-    val postOfDay: StateFlow<PostOfDay?> = _postOfDay.asStateFlow()
+            // Download markdown contents for the specific slug
+            val markdownUrl = "$baseUrl/posts/$finalSlug/contents.md"
+            val rawMarkdown = runCatching { URL(markdownUrl).readText() }.getOrDefault("")
+            val markdownContent = rawMarkdown.cleanAndNormalizeMarkdown()
 
-    private var loadedDate: LocalDate? = null
-
-    suspend fun refresh() {
-        Log.i("PostOfDayRepository", "posts json ${POST_JSON_FILE}, baseurl ${BASE_URL}")
-
-        val today = CommonFunctions.getCurrentDate()
-
-        // Skip re-fetching if we've ALREADY checked for today (regardless of null or post)
-        // Or keep it strict: only skip if we successfully loaded a post for today
-        if (loadedDate == today && _postOfDay.value != null) {
-            Log.i("PostOfDayRepository", "refresh skipped: already fetched valid post for today")
-            return
-        }
-
-        Log.i("PostOfDayRepository", "refresh proceeding to fetch post")
-        val post = getPostOfDay(today)
-//        Log.i("PostOfDayRepository", "after post obtained: $post")
-
-        _postOfDay.value = post
-
-        // Mark today as checked so we don't spam network calls on this calendar date
-        loadedDate = today
-    }
-
-    // --------------------------------------------------------
-    // Main function
-    // --------------------------------------------------------
-
-    suspend fun getPostOfDay(
-        today: LocalDate = LocalDate.now()
-    ): PostOfDay? = withContext(Dispatchers.IO) {
-    Log.i("PostOfDayRepository", "getPostOfDay entry")
-
-        return@withContext try {
-            // --------------------------------------------
-            // 1. Download posts.json
-            // --------------------------------------------
-
-            val indexJson = downloadText(POST_JSON_FILE)
-            Log.i("PostOfDayRepository", "getPostOfDay after downloadtext")
-
-            val posts = json.decodeFromString<List<PostIndexEntry>>(indexJson)
-
-            // --------------------------------------------
-            // 2. Find today's post
-            // --------------------------------------------
-
-            val unpaddedFormatter = DateTimeFormatter.ofPattern("yyyy-M-d")
-//            val targetDate = LocalDate.of(2024,4, 11) // Or any date: LocalDate.parse("2026-08-24")
-            val targetDate = today // Or any date: LocalDate.parse("2026-08-24")
-
-            val post = posts.firstOrNull { item ->
-                runCatching {
-                    LocalDate.parse(item.date, unpaddedFormatter) == targetDate
-                }.getOrDefault(false)
-            } ?: return@withContext null
-
-            Log.i("PostOfDayRepository", "post of the day found ${post.date} in templepages.com, yay!!")
-
-            // --------------------------------------------
-            // 3. Build URLs
-            // --------------------------------------------
-            Log.i("PostOfDayRepository", "framin urls")
-
-            val postBaseUrl = BASE_URL + post.slug + "/"
-
-            val contentsUrl = postBaseUrl + "contents.md"
-
-            val imageUrl = postBaseUrl + "img1.jpg"
-
-            Log.i("PostOfDayRepository", "framin urls contentsUrl ${contentsUrl}, imageUrl ${imageUrl}")
-
-            // --------------------------------------------
-            // 4. Download contents
-            // --------------------------------------------
-
-            val contents = downloadText(contentsUrl)
-
-            // lets strip the unnecessary tags
-            val formattedSpannableContent = HtmlCompat.fromHtml(
-                contents,
-                HtmlCompat.FROM_HTML_MODE_LEGACY
-            )
-            // --------------------------------------------
-            // 5. Download image
-            //
-            // Image is optional. If it doesn't exist,
-            // the post can still be displayed.
-            // --------------------------------------------
-
+            // Image URL construction
+            val imageUrl = "$baseUrl/posts/$finalSlug/img1.jpg"
             val imageBytes = downloadBytesOrNull(imageUrl)
 
-            // --------------------------------------------
-            // 6. Return complete post
-            // --------------------------------------------
-
-            PostOfDay(
-                slug = post.slug,
-                type = post.type,
-                title = post.title,
-                author = post.author,
-                date = today,
-                tags = post.tags,
-                contentsMarkdown = formattedSpannableContent.toString(),
+            val post = PostOfDay(
+                title = title,
+                slug = finalSlug,
+                date = date,
+                author = author,
+                excerpt = excerpt,
+                tags = tagsList,
+                contentsMarkdown = markdownContent,
+                imageUrl = imageUrl,
                 imageBytes = imageBytes
             )
 
-        } catch (e: Exception) {
-
-            // No post / network problem / bad JSON /
-            // missing contents etc.
-            //
-            // We deliberately don't let this disturb
-            // the rest of the application.
-            Log.e("PostOfDayRepository", "error while trying to find post of the day", e)
-
-            null
+            Log.i("PostOfDayRepository", "post of the day found ${post.slug} in templepages.com, yay!!")
+            return@withContext post
         }
-    }
-
-    // ========================================================
-    // HTTP helpers
-    // ========================================================
-
-    private fun downloadText(
-        urlString: String
-    ): String {
-
-        val connection = URL(urlString).openConnection() as HttpURLConnection
-
-        try {
-
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 10_000
-            connection.readTimeout = 15_000
-
-            connection.setRequestProperty(
-                "Accept",
-                "text/plain, application/json"
-            )
-
-            val responseCode = connection.responseCode
-
-            if (responseCode !in 200..299) {
-                throw Exception(
-                    "HTTP $responseCode: $urlString"
-                )
-            }
-
-            return connection
-                .inputStream
-                .bufferedReader()
-                .use { it.readText() }
-
-        } finally {
-            connection.disconnect()
+        catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("PostOfDayRepository", "error while trying to find post of the day", e)
+            return@withContext null
         }
     }
 
     private fun downloadBytesOrNull(
         urlString: String
     ): ByteArray? {
-
         return try {
-
-            val connection =
-                URL(urlString).openConnection()
-                        as HttpURLConnection
+            val connection = URL(urlString).openConnection() as HttpURLConnection
 
             try {
-
                 connection.requestMethod = "GET"
-
                 connection.connectTimeout = 10_000
-
                 connection.readTimeout = 15_000
 
                 if (connection.responseCode !in 200..299) {
                     return null
                 }
-
-                connection.inputStream
-                    .use { it.readBytes() }
-
-            } finally {
-
+                connection.inputStream.use { it.readBytes() }
+            }
+            finally {
                 connection.disconnect()
             }
-
-        } catch (_: Exception) {
-
+        }
+        catch (_: Exception) {
             null
         }
+    } // downloadBytesOrNull ends
+
+
+    /**
+     * Cleans HTML markup into structured Markdown notation, converts HTML links (http/https) to Markdown,
+     * preserves literal newlines, and resolves HTML entities (&nbsp;, &amp;, &#39;, &quot;, etc.).
+     */
+    fun String.cleanAndNormalizeMarkdown(): String {
+        if (this.isEmpty()) return ""
+
+        return this
+            // 1. Convert Line & Paragraph Breaks to literal newlines (\n)
+            .replace(Regex("(?i)<br\\s*/?>"), "\n")
+            .replace(Regex("(?i)<p[^>]*>"), "")
+            .replace(Regex("(?i)</p>"), "\n\n")
+
+            // 2. Convert HTML anchor tags <a href="http(s)://...">text</a> to Markdown links [text](url)
+            .replace(Regex("(?i)<a\\s+[^>]*href=[\"']([^\"']*)[\"'][^>]*>(.*?)</a>"), "[$2]($1)")
+
+            // 3. Convert Headings (H1 to H6 -> Markdown #)
+            .replace(Regex("(?i)<h1[^>]*>(.*?)</h1>"), "\n# $1\n\n")
+            .replace(Regex("(?i)<h2[^>]*>(.*?)</h2>"), "\n## $1\n\n")
+            .replace(Regex("(?i)<h3[^>]*>(.*?)</h3>"), "\n### $1\n\n")
+            .replace(Regex("(?i)<h4[^>]*>(.*?)</h4>"), "\n#### $1\n\n")
+
+            // 4. Convert Bold and Italic tags to Markdown delimiters BEFORE removing tags
+            .replace(Regex("(?i)<(b|strong)[^>]*>(.*?)</\\1>"), "**$2**")
+            .replace(Regex("(?i)<(i|em)[^>]*>(.*?)</\\1>"), "*$2*")
+
+            // 5. Strip any remaining unsupported/unknown HTML tags
+            .replace(Regex("<[^>]*>"), "")
+
+            // 6. Protect literal newlines before HtmlCompat.fromHtml() so it doesn't swallow them
+            .replace("\n", "___NEWLINE_TOKEN___")
+
+            // 7. Decode all HTML entities (&nbsp;, &amp;, &#39;, &quot;, &#xxx;, etc.)
+            .let { raw ->
+                HtmlCompat.fromHtml(raw, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
+            }
+
+            // 8. Restore preserved newlines
+            .replace("___NEWLINE_TOKEN___", "\n")
+
+            // 9. Normalize non-breaking space characters (\u00A0) produced by &nbsp;
+            .replace('\u00A0', ' ')
+
+            // 10. Cap excessive consecutive blank lines at 2 max
+            .replace(Regex("\n{3,}"), "\n\n")
+            .trim()
     }
 }

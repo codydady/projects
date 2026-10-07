@@ -10,11 +10,9 @@ import com.sd.nithyadharma.cards.CardType
 import com.sd.nithyadharma.dao.CardRepository
 import com.sd.nithyadharma.dao.PanchangamRepository
 import com.sd.nithyadharma.model.PanchangaAttr.Rasi
-import com.sd.nithyadharma.util.FirebaseAppAnalytics
-import com.sd.nithyadharma.dao.PostOfDayRepository
 import com.sd.nithyadharma.util.AlarmSlotNotificationHelpers
+import com.sd.nithyadharma.util.FirebaseAppAnalytics
 import com.sd.nithyadharma.util.PreferencesManager
-import com.sd.nithyadharma.util.SimpleIdCipher
 import com.sd.nithyadharma.util.SlotManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +60,7 @@ class MainViewModel(
     // todo works when someone clicks the title - remove later
     suspend fun testingDummyRasiPalanCardMaker() {
         Log.d("MainViewModel", "testing testingDummyRasiPalanCardMaker")
-        AlarmSlotNotificationHelpers.addRasiPalanCard(preferencesManager)
+//        AlarmSlotNotificationHelpers.addRasiPalanCard(preferencesManager)
     }  // testingDummy ends
 
 
@@ -89,6 +87,10 @@ class MainViewModel(
             preferencesManager.saveCustomerInfo(updatedInfo)
             preferencesManager.saveSelectedLanguage(language)
         }
+        FirebaseAppAnalytics.logCardLiked(
+            "sign_in",  // since we dont have a card yet
+            "user ${newName} with rasi ${newRasi} & lang ${language} signed" // which contains the current dt
+        )
     }
 
     fun saveCustomerInfo(info: CustomerInfo) {
@@ -116,7 +118,7 @@ class MainViewModel(
 
     init {
         viewModelScope.launch(Dispatchers.Default) {
-            /*  imp the return value aint used here, will be used in future
+            /*  todo imp the return value aint used here, will be used in future
                 when sp gets built with customparams instead of argument sp
                 to naalkaatti card. but since the following lines get called
                 everytime i wake my phone , i am commenting them. its unnecessary.
@@ -157,19 +159,6 @@ class MainViewModel(
         }
     }
 
-//    init {
-//        // 🔑 Calculate future panchangam on app startup
-//        viewModelScope.launch(Dispatchers.Default) {
-//            try {
-//                val futureList = PanchangamRepository.calculateFuturePanchangam()
-//                _futurePanchangam.value = futureList
-//                Log.d("MainViewModel", "Future Panchangam loaded: ${futureList.size} days")
-//            } catch (e: Exception) {
-//                Log.e("MainViewModel", "Error calculating future panchangam", e)
-//            }
-//        }
-//    }
-
     // ----------------------------------
     // section 3 - firebase related
     // ----------------------------------
@@ -185,8 +174,10 @@ class MainViewModel(
                 .filter { name -> name.isNotBlank() }
                 .distinctUntilChanged()
                 .collect { validName ->
-                    val generatedId = SimpleIdCipher.encrypt(validName)
-                    FirebaseAppAnalytics.setUserId(generatedId)
+                    FirebaseAppAnalytics.setUser(validName) // this is for our firebase db stores and the func is provided by us
+//                    val generatedId = SimpleIdCipher.encrypt(validName)
+//                    FirebaseAppAnalytics.setUserId(generatedId) // this is for firebase purposes and the func is provided by firebase
+//                    FirebaseAppAnalytics.setUserName(validName) // this is for our firebase db stores and the func is provided by us
                 }
         }
     }
@@ -284,10 +275,5 @@ class MainViewModel(
         }
     }
 
-    // -------------------------------------
-    // section 8 - post of the day  related
-    // -------------------------------------
-
-    val postOfDay = PostOfDayRepository.postOfDay
 
 }

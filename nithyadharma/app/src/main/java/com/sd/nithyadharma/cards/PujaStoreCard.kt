@@ -24,9 +24,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.ui.platform.LocalFocusManager
-import kotlinx.coroutines.delay
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +48,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,11 +58,13 @@ import androidx.compose.ui.unit.sp
 import com.sd.nithyadharma.model.CustomerInfo
 import com.sd.nithyadharma.model.Order
 import com.sd.nithyadharma.model.Product
+import com.sd.nithyadharma.util.CommonFunctions
 import com.sd.nithyadharma.util.Constants.NITHYADHARMA_BUSINESS_NUMBER
 import com.sd.nithyadharma.util.Constants.NITHYADHARMA_BUSINESS_UPI
 import com.sd.nithyadharma.util.Constants.products
 import com.sd.nithyadharma.util.LocalAppLanguage
 import com.sd.nithyadharma.util.WhatsAppUtils
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // --- 2. CARD CONTENT COMPOSABLE ---
@@ -130,13 +130,15 @@ fun PujaStoreCardContent(
         }
     }
 
-    val shippingCost = when {
-        cartPrice == 0.0 -> 0
-        cartPrice < 500.0 -> 70
-        cartPrice < 1000.0 -> 110
-        cartPrice < 2000.0 -> 200
-        else -> 0 // Free shipping
-    }
+//    val shippingCost = when {
+//        cartPrice == 0.0 -> 0
+//        cartPrice < 500.0 -> 70
+//        cartPrice < 1000.0 -> 160
+//        cartPrice < 2000.0 -> 220
+//        else -> 0 // Free shipping
+//    }
+
+    val shippingCost = CommonFunctions.calculateShippingCost(cartPrice, pincode)
 
     // Helper to build updated CustomerInfo object
     fun buildCurrentCustomerInfo(): CustomerInfo {
@@ -454,44 +456,6 @@ fun PujaStoreCardContent(
                     fontWeight = FontWeight.Bold
                 )
             }
-
-//            Button(
-//                onClick = {
-//                    if (isFormValid) {
-//                        showErrors = false
-//                        val updatedInfo = buildCurrentCustomerInfo()
-//
-//                        // 🟢 Delegate save to ViewModel via callback
-//                        onSaveCustomerInfo(updatedInfo)
-//
-//                        showConfirmation = true
-//                    } else {
-//                        showErrors = true
-//                        // 🟢 Defer focus request until AFTER recomposition finishes drawing error borders
-//                        coroutineScope.launch {
-//                            kotlinx.coroutines.yield() // Waits 1 frame for UI recomposition
-//
-//                            when {
-//                                name.isBlank() -> nameFocus.requestFocus()
-//                                !isPhoneValid -> phoneFocus.requestFocus()
-//                                address1.isBlank() -> address1Focus.requestFocus()
-//                                city.isBlank() -> cityFocus.requestFocus()
-//                                state.isBlank() -> stateFocus.requestFocus()
-//                                pincode.isBlank() -> pincodeFocus.requestFocus()
-//                            }
-//                        }
-//                    }
-//                },
-//                enabled = cartPrice > 0,
-//                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-//                shape = RoundedCornerShape(10.dp)
-//            ) {
-//                Text(
-//                    text = LocaleManager.getString("cmn_submit", currentLang),
-//                    fontSize = 13.sp,
-//                    fontWeight = FontWeight.Bold
-//                )
-//            }
         }
     }
 

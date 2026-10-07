@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "16790082590",
+    "project_id": "nithyadharma-63097",
+    "storage_bucket": "nithyadharma-63097.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:16790082590:android:e6a27dfbff895f267fca0f",
+        "android_client_info": {
+          "package_name": "com.sd.nithyadharma"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "16790082590-jjsto6o35v2h63ecupbrb50b2d6q1625.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sd.nithyadharma",
+            "certificate_hash": "335c96ff0bde5e570a70a3c0309ed7f222886869"
+          }
+        },
+        {
+          "client_id": "16790082590-3r25gq5bp920a5s4m1294f4v0ecsphlf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnSlfZ0jK6Oh_ZRfmbKRhpDz2fPiNJYJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "16790082590-3r25gq5bp920a5s4m1294f4v0ecsphlf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

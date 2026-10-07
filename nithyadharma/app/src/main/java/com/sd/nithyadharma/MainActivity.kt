@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.messaging.FirebaseMessaging
 import com.sd.nithyadharma.model.MainViewModel
 import com.sd.nithyadharma.screen.FloatingNavMenu
 import com.sd.nithyadharma.screen.MainScreen
@@ -43,15 +44,14 @@ import com.sd.nithyadharma.util.AlarmSlotNotificationHelpers.addRasiPalanCard
 import com.sd.nithyadharma.util.LocalAppLanguage
 import com.sd.nithyadharma.util.PreferencesManager
 import com.sd.nithyadharma.util.SlotManager
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    val preferencesManager by lazy { PreferencesManager(this) }
+    private val preferencesManager: PreferencesManager
+        get() = (application as NithyaDharmaApp).preferencesManager
 
     // 🔑 Instantiate MainViewModel tied to Activity lifecycle
-    // 🔑 Clean ViewModel instantiation using Kotlin delegate
     private val mainViewModel: MainViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -65,6 +65,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 1. Put FCM subscription HERE (Outside setContent, inside onCreate)
+        FirebaseMessaging.getInstance().subscribeToTopic("updates")  // given in
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("FCM", "Subscribed to updates topic successfully")
+                } else {
+                    Log.e("FCM", "Topic subscription failed", task.exception)
+                }
+            }
+
+        // 2. setContent is strictly for rendering Jetpack Compose UI components
         setContent {
             val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -154,7 +165,6 @@ class MainActivity : ComponentActivity() {
                             } // main screen nav ends
                             composable("templeLocator") {
                                 TempleMapScreen(
-                                    preferencesManager = preferencesManager,
                                     onBackClick = { navController.popBackStack() })
                             }
                             // this alone is here, rest will be handled by FloatingNavMenu action calls
@@ -166,7 +176,7 @@ class MainActivity : ComponentActivity() {
                             onPushCard = { card -> mainViewModel.saveAndAddCard(card)  },
                             onAddRasiPalanCard = {
                                 coroutineScope.launch {
-                                    addRasiPalanCard(preferencesManager)
+                                    addRasiPalanCard(applicationContext,preferencesManager)
                                 }
                             },
                             cardColor = if (activeCardColor != Color.Unspecified) activeCardColor else Color.Black,
@@ -178,15 +188,5 @@ class MainActivity : ComponentActivity() {
         } // setContent ends
 
     } // onCreate ends
-
-    /* important - may be remove for testing only to clear the customer object
-        tied to mainviewmodel.debugResetCustomerInfo , so if one goes,
-        other goes as well
-    */
-//    override fun onResume() {
-//        super.onResume()
-//        // 🧪 DEBUG: Reset customer name on every app resume to test setup dialog
-//        mainViewModel.debugResetCustomerInfo()
-//    }
 
 } // class ends

@@ -49,13 +49,13 @@ fun NithyaDharmaTheme(
 
     // 🔑 Tamil fonts often render ~15-20% visually larger than Latin fonts.
     // Scaling by 0.85f gives a clean, comfortable match.
-//    val typography = if (currentLang == NDLanguage.TA) {
-//        baseTypography.scaleAll(0.8f)
-//    } else {
-//        baseTypography.scaleAll(1.0f)
-//    }
+    val typography = if (currentLang == NDLanguage.TA) {
+        baseTypography.scaleAll(0.8f)
+    } else {
+        baseTypography.scaleAll(0.9f)
+    }
     // scale everything to 80% of fontsize. sep 7, 2026
-    val typography = baseTypography.scaleAll(0.9f)
+//    val typography = baseTypography.scaleAll(0.9f)
 //    val colorScheme = if (darkTheme) DarkColors else LightColors
 
     MaterialTheme(

@@ -43,10 +43,10 @@ object LocaleManager {
             NDLanguage.HI to "शुभ संध्या"
         ),
         "todays_dharma" to mapOf(
-            NDLanguage.EN to "Dharma of the day",
-            NDLanguage.TA to "இன்றைய ஆன்மீகம்",
-            NDLanguage.KA to "ಇಂದಿನ ಧರ್ಮ",
-            NDLanguage.HI to "आज का धर्म"
+            NDLanguage.EN to "Discover the Divine",
+            NDLanguage.TA to "அறிவோம் ஆன்மீகம்",
+            NDLanguage.KA to "ಆಧ್ಯಾತ್ಮ ಅರಿವೋಣ",
+            NDLanguage.HI to "आध्यात्म जानें हम"
         ),
         "rating_share" to mapOf(
             NDLanguage.EN to "Rate Us & Share",
@@ -871,10 +871,16 @@ object LocaleManager {
             NDLanguage.HI to "सबमिट करें"
         ),
         "str_crdtl" to mapOf(
-            NDLanguage.EN to "Its best to be cautious about big decisions today",
+            NDLanguage.EN to "Owing to Chandrashtama, its best to be cautious about decisions today",
             NDLanguage.TA to "இன்று சந்திராஷ்டமத்தை அனுசரித்து முக்கிய முடிவுகள் எடுக்கவும்",
-            NDLanguage.KA to "ಇಂದು ದೊಡ್ಡ ನಿರ್ಧಾರಗಳ ವಿಷಯದಲ್ಲಿ ಎಚ್ಚರಿಕೆಯಿಂದಿರುವುದು ಉತ್ತಮ",
-            NDLanguage.HI to "आज बड़े निर्णयों में सावधानी बरतना उचित है"
+            NDLanguage.KA to "ಇಂದು ಚಂದ್ರಾಷ್ಟಮದ ಕಾರಣ, ದೊಡ್ಡ ನಿರ್ಧಾರಗಳ ವಿಷಯದಲ್ಲಿ ಎಚ್ಚರಿಕೆಯಿಂದಿರುವುದು ಉತ್ತಮ",
+            NDLanguage.HI to "आज चंद्राष्टम के कारण, बड़े निर्णयों में सावधानी बरतना उचित है"
+        ),
+        "str_crdtl_rasi" to mapOf(
+            NDLanguage.EN to "Its chandrashtama for your rasi %s today. Be cautious about important decisions",
+            NDLanguage.TA to "இன்று உங்கள் ராசி %s சந்திராஷ்டமம் அடைகிறது. முக்கிய முடிவுகளை எடுப்பதில் எச்சரிக்கையாக இருங்கள்",
+            NDLanguage.KA to "ಇಂದು ನಿಮ್ಮ ರಾಶಿ %s ಗೆ ಚಂದ್ರಾಷ್ಟಮ. ಪ್ರಮುಖ ನಿರ್ಧಾರಗಳಲ್ಲಿ ಎಚ್ಚರಿಕೆ ವಹಿಸಿ",
+            NDLanguage.HI to "आज आपकी राशि %s के लिए चंद्राष्टम है। महत्वपूर्ण निर्णयों में सावधानी बरतें"
         ),
         "pa_shukla" to mapOf(
             NDLanguage.EN to "Shukla",

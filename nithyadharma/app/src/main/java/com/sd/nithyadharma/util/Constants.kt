@@ -11,7 +11,7 @@ object Constants {
 //    const val SUPER_USER = "sriram" // more beta features
 //    const val OTHER_USER = "others" // or it is others
 //    const val CURRENT_USER = SUPER_USER // more beta features
-    const val PAYING_CUSTOMER = false // stable version
+    const val PAYING_CUSTOMER = true // stable version
 
     const val APP_VERSION = 14
 
@@ -34,7 +34,7 @@ object Constants {
     const val LOCATION_MIN_DISTANCE_METERS = 5000f   // 5 kms or 5000 ft = 1 km ?
     const val CHIME_COOLDOWN_MS = 10000L
 
-    const val NOTIFICATION_SCHEDULE_HOUR = 6    // for alarms to work
+    const val NOTIFICATION_SCHEDULE_HOUR = 6   // for alarms to work 6 hrs ,1 min
     const val NOTIFICATION_SCHEDULE_MINUTE = 1
 
     const val RASI_DEGREES_PER_SEGMENT = 30
@@ -71,7 +71,6 @@ object Constants {
             Product("Kungumam (50 gms)", 80, R.drawable.kunkumam) ,
             Product("Vibhuthi (100 gms)", 70, R.drawable.vibhuthi)
         )
-
 
     // --- card color JSON CONFIGURATION ---
     const val CARD_TIME_SLOTS = """

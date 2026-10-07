@@ -277,9 +277,9 @@ object RasiPalanEngine {
         rating: Double,
         isChandrashtama: Boolean
     ): String {
-        if (isChandrashtama) {
-            return "chandrashtama_warning"
-        }
+//        if (isChandrashtama) {
+//            return "chandrashtama_warning"
+//        }
         return when {
             rating >= 4.0 -> "rating_high"
             rating >= 2.8 -> "rating_moderate"

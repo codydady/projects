@@ -1,6 +1,7 @@
 package com.sd.nithyadharma.cards
 
 import android.util.Log
+import com.sd.nithyadharma.model.NDLanguage
 import com.sd.nithyadharma.util.CommonFunctions
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -55,9 +56,9 @@ data class CardModel(
 object CardFactory {
 
     // --- 1. CONSTANTS ---
-    const val CARD_EXPIRY_OFFSET_LONG = 72 * 60 * 60 * 1000L // 72 hours used by temple of day
-    const val CARD_EXPIRY_OFFSET_MEDIUM = 24 * 60 * 60 * 1000L // 1 day for normal cards
-    const val CARD_EXPIRY_OFFSET_SHORT = 4 * 60 * 60 * 1000L // 2 hours for i donno
+    const val CARD_EXPIRY_OFFSET_LONG = 72 * 60 * 60 * 1000L // 3 days used by temple of day
+    const val CARD_EXPIRY_OFFSET_MEDIUM = 25 * 60 * 60 * 1000L // 1 day + 1 hr for normal cards
+    const val CARD_EXPIRY_OFFSET_SHORT = 4 * 60 * 60 * 1000L // 4 hours for i donno
 
     fun makeCard(
         mode: CardMode,
@@ -109,23 +110,50 @@ private fun generateCardId(length: Int = 7): String {
         .joinToString("")
 }
 
-/**
- * Formats timestamp to "dd MMM, hh:mm a" (e.g., "26 Mar, 11:30 PM")
- */
-fun formatCardTimestamp(timestamp: Long): String {
-    val formatter = SimpleDateFormat("dd MMM, hh:mm a", Locale.ENGLISH)
-    return formatter.format(Date(timestamp))
-}
-
 fun Enum<*>.toEnglish(): String {
     return name.lowercase()
 }
 
+private fun getLoggingKey(
+    type: CardType,
+    customParams: Map<String, JsonElement>?
+): String = when (type) {
+    CardType.MUSIC           -> customParams?.get("audioKey")?.toString()?.trim('"')?.lowercase() ?: type.toEnglish()
+    CardType.TODAYS_DHARMA   -> customParams?.get("postExcerpt")?.toString()?.trim('"')?.lowercase() ?: type.toEnglish()
+//    CardType.DP_NOTIFICATION -> customParams?.get("message")?.toString()?.trim('"')?.lowercase() ?: type.toEnglish()
+    CardType.DP_NOTIFICATION -> {
+        val titleKey = customParams?.get("title")?.toString()?.trim('"')?.lowercase()
+        val messageKey = customParams?.get("message")?.toString()?.trim('"')?.lowercase()
+        // since this is for nd admin consumption only , it can be english
+        val currentLang =  NDLanguage.EN
+        val title = titleKey?.let { LocaleManager.getString(it, currentLang) }
+
+        val message = messageKey?.let { key ->
+            if (key.contains("|")) {
+                val (oldKey, newKey) = key.split("|")
+                val oldText = LocaleManager.getString(oldKey.trim(), currentLang)
+                val newText = LocaleManager.getString(newKey.trim(), currentLang)
+                "$oldText ➜ $newText"
+            } else {
+                LocaleManager.getString(key.trim(), currentLang)
+            }
+        }
+
+        when {
+            title != null && message != null -> "$title | $message"
+            title != null -> title
+            message != null -> message
+            else -> type.toEnglish()
+        }
+    }
+    else                     -> type.toEnglish()
+}
+
+// todo logging key to come from the source which knows what to add more relevantly
 private fun createCardWrapper(
     type: CardType,
     isPinned: Boolean = false,
     isCloseable: Boolean = true,
-    loggingKey: String = type.toEnglish(),
     expiryOffsetMillis: Long,
     customParams:  Map<String, JsonElement>? = null  //  its the responsibility of the caller to supply a json encoded string.
 ): CardModel {
@@ -133,7 +161,7 @@ private fun createCardWrapper(
 
     val cardModel = CardModel(
         id = generateCardId(),
-        loggingKey = loggingKey + CommonFunctions.getCurrentDate().toString(), // 2007-12-03.
+        loggingKey = getLoggingKey(type,customParams),
         type = type,
         isPinned = isPinned,
         isCloseable = isCloseable,

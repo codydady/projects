@@ -20,13 +20,7 @@ object WhatsAppUtils {
         order: Order
     ) {
         val orderMsg = createCustomerMessage(order.customer, order.items, order.shippingCost)
-//        val dispatcherMsg = createDispatcherMessage(order.customer, order.items)
-
         sendMessage(orderMsg)
-//        sendMessage(dispatcherMsg)
-        // Send to business the full order detail
-//        sendWhatsApp(NITHYADHARMA_BUSINESS_NUMBER, orderMsg)
-
     }
 
     fun Context.sendMessage(
@@ -36,52 +30,14 @@ object WhatsAppUtils {
         sendWhatsApp(NITHYADHARMA_BUSINESS_NUMBER, message)
     }
 
-//    private fun createDispatcherMessage(
-//        customer: CustomerInfo,
-//        products: Map<Product, Int>
-//    ): String {
-//
-//        val indentSpace = "          "
-//
-//        // Build the address section of the string first
-//        val deliveryAddress = StringBuilder()
-//        deliveryAddress.append("${indentSpace} ${customer.name}\n")
-//        deliveryAddress.append("${indentSpace} ${customer.address1}, \n")
-//
-//        // Only append address2 if it's not null or blank
-//        if (!customer.address2.isNullOrBlank()) {
-//            deliveryAddress.append("${indentSpace} ${customer.address2}, \n")
-//        }
-//
-//        deliveryAddress.append("${indentSpace} ${customer.city}\n")
-//        deliveryAddress.append("${indentSpace} ${customer.state} - ${customer.pincode}\n")
-//        deliveryAddress.append("${indentSpace} phone: ${customer.phone}")
-//
-//        return """
-//        *Delivery Address:*
-//        -------------------
-//${deliveryAddress.toString()}
-//
-//        *Items Ordered:*
-//        ----------------
-//${
-//            products.entries.withIndex().joinToString("\n") { (index, entry) ->
-//                val (product, qty) = entry
-//                val number = index + 1
-//                "${indentSpace} • $number. ${product.name} (Qty: $qty) - ₹${product.price * qty}"
-//            }
-//        }
-//
-//        """.trimIndent()
-//    }
-
     private fun createCustomerMessage(
         customer: CustomerInfo,
         products: Map<Product, Int>,
         shippingCost: Int
     ): String {
         val subtotal = products.entries.sumOf { (product, qty) -> product.price * qty }
-        val total = subtotal + shippingCost
+        val discount = subtotal * 0.10 // 10% discount
+        val total = subtotal - discount + shippingCost
         val indentSpace = "          "
 
         // Build the address section of the string first
@@ -90,7 +46,7 @@ object WhatsAppUtils {
         deliveryAddress.append("${indentSpace} ${customer.address1}, \n")
 
         // Only append address2 if it's not null or blank
-        if (!customer.address2.isNullOrBlank()) {
+        if (customer.address2.isNotBlank()) {
             deliveryAddress.append("${indentSpace} ${customer.address2}, \n")
         }
 
@@ -121,7 +77,8 @@ ${
             }
         }
         
-        *Subtotal:* ₹$subtotal      ,*Shipping:* ₹$shippingCost
+        Subtotal: ₹$subtotal ,Shipping: ₹$shippingCost
+        Discount: 10%
         *Total Amount:* ₹$total
         
         *Payment Status:* Waiting

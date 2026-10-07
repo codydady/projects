@@ -98,19 +98,17 @@ import com.sd.nithyadharma.dao.AppDatabase
 import com.sd.nithyadharma.util.PreferencesManager
 import androidx.core.graphics.createBitmap
 import com.sd.nithyadharma.R
-import com.sd.nithyadharma.model.NDLanguage
+import com.sd.nithyadharma.util.LocalAppLanguage
 
 @SuppressLint("ClickableViewAccessibility")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TempleMapScreen(
-    preferencesManager : PreferencesManager,
     onBackClick: () -> Unit = {}) {
-    val context = LocalContext.current
+    val appContext = LocalContext.current
     val scope = rememberCoroutineScope() // Coroutine scope for launching suspend functions
 
-    val currentLang by preferencesManager.getSelectedLanguage()
-        .collectAsState(initial = NDLanguage.EN)
+    val currentLang = LocalAppLanguage.current
 
     var currentLocation by remember { mutableStateOf<GeoPoint?>(null) }
     var pendingGeoPoint by remember { mutableStateOf<GeoPoint?>(null) }
@@ -120,8 +118,10 @@ fun TempleMapScreen(
     // State to control if the map should automatically track the user's location
     var isTrackingMyLocation by remember { mutableStateOf(true) }
 
-    val hideVisitedTemplesRaw by preferencesManager.getHideVisitedTemples().collectAsState(initial = false)
-    val showOnlyMarkedTemplesRaw by preferencesManager.getShowOnlyMarkedTemples().collectAsState(initial = false)
+    // todo important, if we need these in future, we must get from prefsmgr
+    // todo which is in commonfunctions
+//    val hideVisitedTemplesRaw by preferencesManager.getHideVisitedTemples().collectAsState(initial = false)
+//    val showOnlyMarkedTemplesRaw by preferencesManager.getShowOnlyMarkedTemples().collectAsState(initial = false)
 
     // Derived / overridden values (read-only)
 //    val hideVisitedTemples = if (Constants.PAYING_CUSTOMER) hideVisitedTemplesRaw else false
@@ -129,13 +129,14 @@ fun TempleMapScreen(
 
     val hideVisitedTemples = false
     val showOnlyMarkedTemples = false
+    val preferencesManager = PreferencesManager(appContext)
 
     // NEW: State for showing the debug dialog for deleted IDs
     var showDeletedIdsDialog by remember { mutableStateOf(false) }
     val deletedTempleIds by preferencesManager.getDeletedTempleIds().collectAsState(initial = "")
 
     // Access AppDatabase and TempleDao directly
-    val templeDao = remember { AppDatabase.getDatabase(context).templeDao() }
+    val templeDao = remember { AppDatabase.getDatabase(appContext).templeDao() }
 
     // State to hold the list of nearby temples fetched from the DAO.
     var nearbyTemplesState by remember { mutableStateOf<List<TempleItem>>(emptyList()) }
@@ -155,8 +156,8 @@ fun TempleMapScreen(
 
     // Configure osmdroid. This should only be done once per application lifecycle.
     Configuration.getInstance().load(
-        context,
-        context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE)
+        appContext,
+        appContext.getSharedPreferences("osmdroid", Context.MODE_PRIVATE)
     )
 
     BackHandler { onBackClick() }
@@ -171,7 +172,7 @@ fun TempleMapScreen(
 
     // Gesture detector for single taps to place a temporary marker
     val gestureDetector = remember {
-        GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        GestureDetector(appContext, object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                 try {
                     // When user taps on map, stop tracking their location
@@ -209,7 +210,7 @@ fun TempleMapScreen(
 
     // Initialize MapView within a remember block to ensure it's created once
     mapView = remember {
-        MapView(context).apply {
+        MapView(appContext).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
             controller.setZoom(DEFAULT_MAP_ZOOM_LEVEL)
@@ -239,7 +240,7 @@ fun TempleMapScreen(
         }
         canvas.drawCircle(newCenter, newCenter, baseRadius, paint)
 
-        MyLocationNewOverlay(GpsMyLocationProvider(context), mapView).apply {
+        MyLocationNewOverlay(GpsMyLocationProvider(appContext), mapView).apply {
             enableMyLocation()
             setPersonIcon(personBitmap)
             enableFollowLocation() // Set to follow location initially
@@ -293,7 +294,7 @@ fun TempleMapScreen(
         }
 
         // Check and request location permission
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ContextCompat.checkSelfPermission(appContext, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED
         ) {
             LocationTracker.getCurrentLocation { geoPoint ->
@@ -395,7 +396,7 @@ fun TempleMapScreen(
                 }
 
                 try {
-                    val drawable = ContextCompat.getDrawable(context, drawableResId)?.mutate()
+                    val drawable = ContextCompat.getDrawable(appContext, drawableResId)?.mutate()
                     val (lat, lon) = temple.latlong.split(",").map { it.trim().toDouble() }
                     val marker = Marker(mapView).apply {
                         position = GeoPoint(lat, lon)
@@ -481,7 +482,7 @@ fun TempleMapScreen(
                                             val gmmIntentUri = Uri.parse("google.navigation:q=${item.position.latitude},${item.position.longitude}")
                                             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                                             mapIntent.setPackage("com.google.android.apps.maps")
-                                            context.startActivity(mapIntent)
+                                            appContext.startActivity(mapIntent)
                                         }
                                     }
 
@@ -522,11 +523,11 @@ fun TempleMapScreen(
                                                 val attrs =
                                                     intArrayOf(android.R.attr.selectableItemBackground)
                                                 val typedArray =
-                                                    context.theme.obtainStyledAttributes(attrs)
+                                                    appContext.theme.obtainStyledAttributes(attrs)
                                                 val backgroundRes = typedArray.getResourceId(0, 0)
                                                 typedArray.recycle()
                                                 background = ContextCompat.getDrawable(
-                                                    context,
+                                                    appContext,
                                                     backgroundRes
                                                 )
                                             }
@@ -853,7 +854,7 @@ fun TempleMapScreen(
                         Text("IDs: ${deletedTempleIds.ifEmpty { "None" }}")
                         Spacer(Modifier.height(8.dp))
                         Button(onClick = {
-                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clipboardManager = appContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             val clipData = ClipData.newPlainText("Deleted Temple IDs", deletedTempleIds)
                             clipboardManager.setPrimaryClip(clipData)
                             Log.d("TempleMapScreen", "Copied deleted IDs to clipboard: $deletedTempleIds")

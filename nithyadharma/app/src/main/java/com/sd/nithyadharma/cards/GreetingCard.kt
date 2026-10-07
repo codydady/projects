@@ -1,5 +1,6 @@
 package com.sd.nithyadharma.cards
 
+import LocaleManager
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.sd.nithyadharma.util.*
+import com.sd.nithyadharma.util.Constants
 import com.sd.nithyadharma.util.LocalAppLanguage
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.contentOrNull

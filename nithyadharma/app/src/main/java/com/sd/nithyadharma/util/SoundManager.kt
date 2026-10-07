@@ -8,7 +8,6 @@ import android.util.Log
 
 enum class AppSound(@RawRes val resId: Int) {
     KUDUK(R.raw.smallkuduk),
-    SMALL_BELL(R.raw.nd_bell), // Add your new audio file here
     THREE_BELLS(R.raw.nd_temple_bell)
 }
 
@@ -72,7 +71,6 @@ class SoundManager private constructor(context: Context) {
     }
 
     fun playKuduk() = play(AppSound.KUDUK)
-    fun playSmallBell() = play(AppSound.SMALL_BELL)
     fun playThreeBells() = play(AppSound.THREE_BELLS)
 
     fun release() {

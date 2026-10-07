@@ -20,8 +20,16 @@ import kotlinx.coroutines.launch
 
 class NithyaDharmaApp : Application() {
 
+    lateinit var preferencesManager: PreferencesManager
+        private set
+
     override fun onCreate() {
         super.onCreate()
+
+        // Guarantees initialization whether app starts via UI or Background Service
+        preferencesManager = PreferencesManager(this)
+        // this is very important, it make the prefsmgr for everyone, and its clean too.
+        CommonFunctions.init(preferencesManager)
 
         // this line nukes the existing database with the new one. no more errors on update
         AppDatabase.getDatabase(applicationContext)
@@ -35,7 +43,6 @@ class NithyaDharmaApp : Application() {
         copyEphemerisFiles()
 
         PanchangamCalculator.initializeEphimeris(applicationContext)
-
 
         // todo ensure alarm mgr initialisation being in async aint
         //  broke none down the line

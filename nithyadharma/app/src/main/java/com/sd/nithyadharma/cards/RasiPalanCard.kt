@@ -1,7 +1,6 @@
 package com.sd.nithyadharma.cards
 
 import LocaleManager
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -121,9 +120,10 @@ fun RasiPalanCardContent(
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "Chandrashtama Active — Caution Required Today",
+//                        text = "Chandrashtama Active — Caution Required Today",
+                        text = LocaleManager.getString("str_crdtl", currentLang),
                         color = Color(0xFFD32F2F),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
