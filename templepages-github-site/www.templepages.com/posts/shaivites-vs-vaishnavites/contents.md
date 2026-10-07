@@ -1,0 +1,2 @@
+
+excellant clarification of the terms smartha, iyers, shaivites and iyengars to cull the long standing bitterness between the two major sects and their followers as told by Shri dushyanth sridhar, upanyasakar. YouTube link : https://youtu.be/ivt5lHy85Ho?si=pSF8CB9sa2OYZ4mF
