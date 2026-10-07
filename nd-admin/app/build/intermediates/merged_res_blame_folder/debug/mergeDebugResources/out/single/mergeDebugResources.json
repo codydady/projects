@@ -1,0 +1,102 @@
+[
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/drawable_ic_launcher.png.flat",
+        "source": "com.sd.ndadmin.app-main-85:/drawable/ic_launcher.png"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/xml_data_extraction_rules.xml.flat",
+        "source": "com.sd.ndadmin.app-main-85:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/raw_chime.aac.flat",
+        "source": "com.sd.ndadmin.app-main-85:/raw/chime.aac"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/raw_smallkuduk.wav.flat",
+        "source": "com.sd.ndadmin.app-main-85:/raw/smallkuduk.wav"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/raw_nd_bell.m4a.flat",
+        "source": "com.sd.ndadmin.app-main-85:/raw/nd_bell.m4a"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/raw_nd_temple_bell.m4a.flat",
+        "source": "com.sd.ndadmin.app-main-85:/raw/nd_temple_bell.m4a"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.sd.ndadmin.app-main-85:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/xml_backup_rules.xml.flat",
+        "source": "com.sd.ndadmin.app-main-85:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.sd.ndadmin.app-debug-83:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.sd.ndadmin.app-main-85:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    }
+]

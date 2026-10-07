@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">16790082590-3r25gq5bp920a5s4m1294f4v0ecsphlf.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">16790082590</string>
+    <string name="google_api_key" translatable="false">AIzaSyAnSlfZ0jK6Oh_ZRfmbKRhpDz2fPiNJYJs</string>
+    <string name="google_app_id" translatable="false">1:16790082590:android:ea7f619cb217d11c7fca0f</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAnSlfZ0jK6Oh_ZRfmbKRhpDz2fPiNJYJs</string>
+    <string name="google_storage_bucket" translatable="false">nithyadharma-63097.firebasestorage.app</string>
+    <string name="project_id" translatable="false">nithyadharma-63097</string>
+</resources>
