@@ -22,7 +22,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        # Simplified: Default fetch-depth: 1 is fine since we no longer inspect git history
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -61,7 +60,6 @@ jobs:
               new_slug = test_slug
               print(f"[Manual Run] Using override test slug: '{new_slug}'")
               
-              # Try finding title for manual test slug if present in posts.json
               if os.path.exists(json_path):
                   try:
                       with open(json_path, 'r', encoding='utf-8') as f:
@@ -73,7 +71,6 @@ jobs:
                   except Exception as e:
                       print(f"Warning parsing JSON title: {e}")
           else:
-              # Organic Push: Directly read the FIRST item from posts.json
               if os.path.exists(json_path):
                   try:
                       with open(json_path, 'r', encoding='utf-8') as f:
@@ -91,23 +88,28 @@ jobs:
               exit(1)
 
           # ------------------------------------------------------------------------
-          # STEP 2: ACTIVE POLLING FOR GITHUB PAGES DEPLOYMENT (HTTP 200 CHECK)
+          # STEP 2: ACTIVE POLLING FOR GITHUB PAGES DEPLOYMENT (STREAMED GET)
           # ------------------------------------------------------------------------
           image_url = f"https://www.templepages.com/posts/{new_slug}/img1.jpg"
           print(f"Polling GitHub Pages CDN for image availability: {image_url}")
+
+          http_headers = {
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          }
 
           max_attempts = 30  # 30 attempts * 10s = 5 minutes max wait time
           image_ready = False
 
           for attempt in range(1, max_attempts + 1):
               try:
-                  res = requests.head(image_url, timeout=5)
-                  if res.status_code == 200:
-                      print(f"SUCCESS: Image is live on CDN (Attempt {attempt})!")
-                      image_ready = True
-                      break
-                  else:
-                      print(f"Image not live yet (HTTP {res.status_code}). Retrying in 10s... ({attempt}/{max_attempts})")
+                  # stream=True gets status and headers without downloading the body
+                  with requests.get(image_url, headers=http_headers, stream=True, timeout=5) as res:
+                      if res.status_code == 200:
+                          print(f"SUCCESS: Image is live on CDN (HTTP 200 on Attempt {attempt})!")
+                          image_ready = True
+                          break
+                      else:
+                          print(f"Image not live yet (HTTP status: {res.status_code}). Retrying in 10s... ({attempt}/{max_attempts})")
               except Exception as e:
                   print(f"Polling error ({e}). Retrying in 10s... ({attempt}/{max_attempts})")
               
