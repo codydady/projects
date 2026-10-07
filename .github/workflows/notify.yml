@@ -14,7 +14,6 @@ on:
     branches:
       - main  # Triggers when changes are pushed to main
     paths:
-      # Action ONLY triggers when posts.json is modified
       - 'templepages-github-site/www.templepages.com/posts.json'
 
 jobs:
@@ -23,39 +22,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2 # Required to compare current commit against parent commit
-
-      - name: Extract New Slug via Git Diff or Manual Input
-        id: extract_slug
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            NEW_SLUG="${{ github.event.inputs.test_slug }}"
-            echo "Manual run triggered via UI. Using provided slug: $NEW_SLUG"
-          else
-            JSON_PATH="templepages-github-site/www.templepages.com/posts.json"
-            
-            # Isolate added lines in posts.json containing the "slug" field
-            NEW_SLUG=$(git diff HEAD~1 HEAD -- "$JSON_PATH" | grep '^+[^+]' | grep '"slug":' | sed -E 's/.*"slug": *"([^"]+)".*/\1/' | head -n 1)
-
-            if [ -z "$NEW_SLUG" ]; then
-              echo "No new slug detected in git diff."
-            else
-              echo "Detected new slug: $NEW_SLUG"
-            fi
-          fi
-
-          echo "slug=$NEW_SLUG" >> $GITHUB_OUTPUT
-
-      # ------------------------------------------------------------------------
-      # Simple 300-second delay to give all images/content time to propagate
-      # ------------------------------------------------------------------------
-      - name: Wait 5 Minutes for Site Deployment
-        if: ${{ steps.extract_slug.outputs.slug != '' }}
-        run: |
-          echo "Waiting 300 seconds for GitHub Pages deployment and image assets to go live..."
-          sleep 300
-          echo "Delay finished. Proceeding with FCM notification."
+        # Simplified: Default fetch-depth: 1 is fine since we no longer inspect git history
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -67,39 +34,91 @@ jobs:
           python -m pip install --upgrade pip
           pip install google-auth requests
 
-      - name: Send FCM Notification
+      - name: Extract Slug, Poll CDN, and Send FCM Notification
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           COMMIT_SHA: ${{ github.sha }}
-          NEW_SLUG: ${{ steps.extract_slug.outputs.slug }}
+          EVENT_NAME: ${{ github.event_name }}
+          TEST_SLUG: ${{ github.event.inputs.test_slug }}
           JSON_FILE_PATH: "templepages-github-site/www.templepages.com/posts.json"
         run: |
           python - << 'EOF'
-          import os, json, requests
+          import os, json, time, requests
           from google.oauth2 import service_account
           from google.auth.transport.requests import Request
 
-          new_slug = os.environ.get("NEW_SLUG", "").strip()
+          event_name = os.environ.get("EVENT_NAME", "")
+          test_slug = os.environ.get("TEST_SLUG", "").strip()
           json_path = os.environ.get("JSON_FILE_PATH", "")
 
-          if not new_slug:
-              print("No new slug found. Skipping FCM notification.")
-              exit(0)
-
+          new_slug = ""
           post_title = "New Temple Post"
-          try:
+
+          # ------------------------------------------------------------------------
+          # STEP 1: RESOLVE SLUG AND TITLE (READS FIRST ITEM IN POSTS.JSON)
+          # ------------------------------------------------------------------------
+          if event_name == "workflow_dispatch" and test_slug:
+              new_slug = test_slug
+              print(f"[Manual Run] Using override test slug: '{new_slug}'")
+              
+              # Try finding title for manual test slug if present in posts.json
               if os.path.exists(json_path):
-                  with open(json_path, 'r', encoding='utf-8') as f:
-                      posts = json.load(f)
-                      for post in posts:
-                          if post.get("slug") == new_slug:
-                              post_title = post.get("title", post_title)
-                              break
-          except Exception as e:
-              print(f"Error parsing post title from json: {e}")
+                  try:
+                      with open(json_path, 'r', encoding='utf-8') as f:
+                          posts = json.load(f)
+                          for post in posts:
+                              if post.get("slug") == new_slug:
+                                  post_title = post.get("title", post_title)
+                                  break
+                  except Exception as e:
+                      print(f"Warning parsing JSON title: {e}")
+          else:
+              # Organic Push: Directly read the FIRST item from posts.json
+              if os.path.exists(json_path):
+                  try:
+                      with open(json_path, 'r', encoding='utf-8') as f:
+                          posts = json.load(f)
+                          if isinstance(posts, list) and len(posts) > 0:
+                              first_post = posts[0]
+                              new_slug = first_post.get("slug", "").strip()
+                              post_title = first_post.get("title", post_title)
+                              print(f"[Organic Push] Read latest slug from posts[0]: '{new_slug}'")
+                  except Exception as e:
+                      print(f"Error reading posts.json: {e}")
 
+          if not new_slug:
+              print("ERROR: Could not resolve a valid slug. Aborting FCM notification.")
+              exit(1)
+
+          # ------------------------------------------------------------------------
+          # STEP 2: ACTIVE POLLING FOR GITHUB PAGES DEPLOYMENT (HTTP 200 CHECK)
+          # ------------------------------------------------------------------------
           image_url = f"https://www.templepages.com/posts/{new_slug}/img1.jpg"
+          print(f"Polling GitHub Pages CDN for image availability: {image_url}")
 
+          max_attempts = 30  # 30 attempts * 10s = 5 minutes max wait time
+          image_ready = False
+
+          for attempt in range(1, max_attempts + 1):
+              try:
+                  res = requests.head(image_url, timeout=5)
+                  if res.status_code == 200:
+                      print(f"SUCCESS: Image is live on CDN (Attempt {attempt})!")
+                      image_ready = True
+                      break
+                  else:
+                      print(f"Image not live yet (HTTP {res.status_code}). Retrying in 10s... ({attempt}/{max_attempts})")
+              except Exception as e:
+                  print(f"Polling error ({e}). Retrying in 10s... ({attempt}/{max_attempts})")
+              
+              time.sleep(10)
+
+          if not image_ready:
+              print("WARNING: Active polling timed out after 5 minutes. Attempting to send FCM anyway...")
+
+          # ------------------------------------------------------------------------
+          # STEP 3: DISPATCH FCM PUSH NOTIFICATION
+          # ------------------------------------------------------------------------
           raw_json = os.environ.get("SERVICE_ACCOUNT", "")
           key_data = json.loads(raw_json)
 
