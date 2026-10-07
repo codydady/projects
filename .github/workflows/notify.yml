@@ -48,28 +48,14 @@ jobs:
           echo "slug=$NEW_SLUG" >> $GITHUB_OUTPUT
 
       # ------------------------------------------------------------------------
-      # HIGHLIGHT 1: Wait for GitHub Pages to deploy img1.jpg before sending FCM
+      # Simple 300-second delay to give all images/content time to propagate
       # ------------------------------------------------------------------------
-      - name: Wait for Image Hosting on GitHub Pages
+      - name: Wait 5 Minutes for Site Deployment
         if: ${{ steps.extract_slug.outputs.slug != '' }}
         run: |
-          SLUG="${{ steps.extract_slug.outputs.slug }}"
-          IMAGE_URL="https://www.templepages.com/posts/$SLUG/img1.jpg"
-          echo "Waiting for $IMAGE_URL to go live on GitHub Pages..."
-          
-          MAX_ATTEMPTS=12
-          COUNT=0
-          until curl --output /dev/null --silent --head --fail "$IMAGE_URL" || [ $COUNT -eq $MAX_ATTEMPTS ]; do
-            echo "Image not ready yet. Retrying in 20s... ($((COUNT+1))/$MAX_ATTEMPTS)"
-            sleep 20
-            COUNT=$((COUNT+1))
-          done
-
-          if [ $COUNT -eq $MAX_ATTEMPTS ]; then
-            echo "Warning: Image check timed out, proceeding with notification anyway."
-          else
-            echo "Image is live on GitHub Pages!"
-          fi
+          echo "Waiting 300 seconds for GitHub Pages deployment and image assets to go live..."
+          sleep 300
+          echo "Delay finished. Proceeding with FCM notification."
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -100,9 +86,6 @@ jobs:
               print("No new slug found. Skipping FCM notification.")
               exit(0)
 
-          # --------------------------------------------------------------------
-          # HIGHLIGHT 2: Read Post Title directly from posts.json
-          # --------------------------------------------------------------------
           post_title = "New Temple Post"
           try:
               if os.path.exists(json_path):
@@ -115,14 +98,11 @@ jobs:
           except Exception as e:
               print(f"Error parsing post title from json: {e}")
 
-          # Build absolute image URL
           image_url = f"https://www.templepages.com/posts/{new_slug}/img1.jpg"
 
-          # 1. Parse Firebase Key from GitHub Secrets
           raw_json = os.environ.get("SERVICE_ACCOUNT", "")
           key_data = json.loads(raw_json)
 
-          # 2. Get Google OAuth2 Token
           creds = service_account.Credentials.from_service_account_info(
               key_data,
               scopes=["https://www.googleapis.com/auth/firebase.messaging"]
@@ -132,16 +112,12 @@ jobs:
           project_id = key_data["project_id"]
           commit_sha = os.environ.get("COMMIT_SHA", "")
 
-          # 3. Construct FCM v1 Request
           url = f"https://fcm.googleapis.com/v1/projects/{project_id}/messages:send"
           headers = {
               "Authorization": f"Bearer {creds.token}",
               "Content-Type": "application/json"
           }
 
-          # --------------------------------------------------------------------
-          # HIGHLIGHT 3: Extended FCM Payload with Notification & Absolute Image
-          # --------------------------------------------------------------------
           payload = {
               "message": {
                   "topic": "updates",
@@ -166,7 +142,6 @@ jobs:
               }
           }
 
-          # 5. Send Notification
           res = requests.post(url, json=payload, headers=headers)
           print("FCM Response Code:", res.status_code)
           print("FCM Response Body:", res.text)
