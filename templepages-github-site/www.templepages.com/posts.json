@@ -1,5 +1,19 @@
 [
-    {
+  {
+    "author": "Sriram Subramanian",
+    "date": "2026-10-03",
+    "hide": false,
+    "slug": "periyanaayagi-sametha-sarvatheertheswarar-temple-theerthandathanam",
+    "tags": [
+      "temples",
+      "vaipu",
+      "thevaram",
+      "ramayana-legend"
+    ],
+    "title": "Periyanaayagi sametha Sarvatheertheswarar, Theerthandathanam",
+    "type": "posts"
+  },
+  {
     "author": "Sriram Seetharaman",
     "date": "2026-10-08",
     "hide": false,
@@ -37,20 +51,6 @@
       "hinduism"
     ],
     "title": "shaivites vs vaishnavites",
-    "type": "posts"
-  },
-  {
-    "author": "Sriram Subramanian",
-    "date": "2026-10-03",
-    "hide": false,
-    "slug": "periyanaayagi-sametha-sarvatheertheswarar-temple-theerthandathanam",
-    "tags": [
-      "temples",
-      "vaipu",
-      "thevaram",
-      "ramayana-legend"
-    ],
-    "title": "Periyanaayagi sametha Sarvatheertheswarar, Theerthandathanam",
     "type": "posts"
   },
   {
