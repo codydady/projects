@@ -7,7 +7,7 @@ on:
       test_slug:
         description: 'Slug to send via FCM (e.g. test-slug-123 or an existing slug from posts.json)'
         required: true
-        default: 'test-slug-123'
+        default: 'heibabyslug'
 
   # 2. Automated trigger when posts.json is modified on main
   push:
@@ -47,6 +47,30 @@ jobs:
 
           echo "slug=$NEW_SLUG" >> $GITHUB_OUTPUT
 
+      # ------------------------------------------------------------------------
+      # HIGHLIGHT 1: Wait for GitHub Pages to deploy img1.jpg before sending FCM
+      # ------------------------------------------------------------------------
+      - name: Wait for Image Hosting on GitHub Pages
+        if: ${{ steps.extract_slug.outputs.slug != '' }}
+        run: |
+          SLUG="${{ steps.extract_slug.outputs.slug }}"
+          IMAGE_URL="https://www.templepages.com/posts/$SLUG/img1.jpg"
+          echo "Waiting for $IMAGE_URL to go live on GitHub Pages..."
+          
+          MAX_ATTEMPTS=12
+          COUNT=0
+          until curl --output /dev/null --silent --head --fail "$IMAGE_URL" || [ $COUNT -eq $MAX_ATTEMPTS ]; do
+            echo "Image not ready yet. Retrying in 20s... ($((COUNT+1))/$MAX_ATTEMPTS)"
+            sleep 20
+            COUNT=$((COUNT+1))
+          done
+
+          if [ $COUNT -eq $MAX_ATTEMPTS ]; then
+            echo "Warning: Image check timed out, proceeding with notification anyway."
+          else
+            echo "Image is live on GitHub Pages!"
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -61,8 +85,8 @@ jobs:
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           COMMIT_SHA: ${{ github.sha }}
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
           NEW_SLUG: ${{ steps.extract_slug.outputs.slug }}
+          JSON_FILE_PATH: "templepages-github-site/www.templepages.com/posts.json"
         run: |
           python - << 'EOF'
           import os, json, requests
@@ -70,10 +94,29 @@ jobs:
           from google.auth.transport.requests import Request
 
           new_slug = os.environ.get("NEW_SLUG", "").strip()
+          json_path = os.environ.get("JSON_FILE_PATH", "")
 
           if not new_slug:
               print("No new slug found. Skipping FCM notification.")
               exit(0)
+
+          # --------------------------------------------------------------------
+          # HIGHLIGHT 2: Read Post Title directly from posts.json
+          # --------------------------------------------------------------------
+          post_title = "New Temple Post"
+          try:
+              if os.path.exists(json_path):
+                  with open(json_path, 'r', encoding='utf-8') as f:
+                      posts = json.load(f)
+                      for post in posts:
+                          if post.get("slug") == new_slug:
+                              post_title = post.get("title", post_title)
+                              break
+          except Exception as e:
+              print(f"Error parsing post title from json: {e}")
+
+          # Build absolute image URL
+          image_url = f"https://www.templepages.com/posts/{new_slug}/img1.jpg"
 
           # 1. Parse Firebase Key from GitHub Secrets
           raw_json = os.environ.get("SERVICE_ACCOUNT", "")
@@ -88,7 +131,6 @@ jobs:
 
           project_id = key_data["project_id"]
           commit_sha = os.environ.get("COMMIT_SHA", "")
-          commit_msg = os.environ.get("COMMIT_MSG", "Temple updates published")
 
           # 3. Construct FCM v1 Request
           url = f"https://fcm.googleapis.com/v1/projects/{project_id}/messages:send"
@@ -97,18 +139,29 @@ jobs:
               "Content-Type": "application/json"
           }
 
-          # 4. Clean Payload containing the newly added slug
+          # --------------------------------------------------------------------
+          # HIGHLIGHT 3: Extended FCM Payload with Notification & Absolute Image
+          # --------------------------------------------------------------------
           payload = {
               "message": {
                   "topic": "updates",
+                  "notification": {
+                      "title": post_title,
+                      "body": "Tap to view full temple details",
+                      "image": image_url
+                  },
                   "data": {
                       "newslug": new_slug,
                       "version": commit_sha,
                       "url": "https://www.templepages.com/posts.json",
-                      "message": commit_msg
+                      "title": post_title,
+                      "image_url": image_url
                   },
                   "android": {
-                      "priority": "HIGH"
+                      "priority": "HIGH",
+                      "notification": {
+                          "image": image_url
+                      }
                   }
               }
           }
