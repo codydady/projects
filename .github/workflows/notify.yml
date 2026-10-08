@@ -41,6 +41,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install google-auth requests
 
+      # ------------------------------------------------------------------------
+      # DELAY STEP: Pause for 3 minutes (180 seconds) to let CDN edge cache settle
+      # ------------------------------------------------------------------------
+      - name: Wait for CDN Propagation
+        run: |
+          echo "Pausing for 3 minutes to allow CDN edge servers to update..."
+          sleep 180
+          
       - name: Extract Slug and Send FCM Notification
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
