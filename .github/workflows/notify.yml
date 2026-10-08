@@ -9,17 +9,20 @@ on:
         required: true
         default: 'heibabyslug'
 
-  # 2. Trigger after GitHub Pages deployment finishes successfully
-  deployment_status:
+  # 2. Automatically run AFTER GitHub Pages completes deployment
+  workflow_run:
+    workflows: ["pages-build-deployment"]
+    types:
+      - completed
 
 jobs:
   send-fcm-notification:
-    # Safely handle manual trigger OR successful GitHub Pages deployment
+    # Run if triggered manually OR if pages-build-deployment succeeded
     if: |
       github.event_name == 'workflow_dispatch' ||
       (
-        github.event_name == 'deployment_status' &&
-        github.event.deployment_status.state == 'success'
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success'
       )
 
     runs-on: ubuntu-latest
@@ -27,8 +30,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          # Use deployment SHA if available, otherwise default to current branch ref
-          ref: ${{ github.event.deployment.sha || github.ref }}
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -41,7 +43,7 @@ jobs:
           pip install google-auth requests
 
       # ------------------------------------------------------------------------
-      # DELAY STEP: Pause for 1 minute (60 seconds) to let CDN edge cache settle
+      # DELAY STEP: Pause for 1 minute to let CDN edge cache settle
       # ------------------------------------------------------------------------
       - name: Wait for CDN Propagation
         run: |
@@ -51,7 +53,7 @@ jobs:
       - name: Extract Slug and Send FCM Notification
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          COMMIT_SHA: ${{ github.event.deployment.sha || github.sha }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
           EVENT_NAME: ${{ github.event_name }}
           TEST_SLUG: ${{ inputs.test_slug }}
           JSON_FILE_PATH: "templepages-github-site/www.templepages.com/posts.json"
@@ -103,7 +105,7 @@ jobs:
               exit(1)
 
           # ------------------------------------------------------------------------
-          # STEP 2: BRIEF CDN WARM-UP CHECK (Safety margin for edge propagation)
+          # STEP 2: BRIEF CDN WARM-UP CHECK
           # ------------------------------------------------------------------------
           image_url = f"https://www.templepages.com/posts/{new_slug}/img1.jpg"
           print(f"Verifying CDN edge cache readiness for: {image_url}")
@@ -112,14 +114,13 @@ jobs:
               "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
           }
 
-          # Small 5-attempt check (50s max) just in case global CDN edge lags behind GitHub's deployment hook
           for attempt in range(1, 6):
               try:
                   with requests.get(image_url, headers=http_headers, stream=True, timeout=5) as res:
                       if res.status_code == 200:
                           print(f"SUCCESS: CDN confirmed ready on attempt {attempt}.")
                           break
-                      print(f"CDN status {res.status_code}. Waiting 10s for edge cache sync... ({attempt}/5)")
+                          print(f"CDN status {res.status_code}. Waiting 10s for edge cache sync... ({attempt}/5)")
               except Exception as e:
                   print(f"CDN check error ({e}). Waiting 10s... ({attempt}/5)")
               time.sleep(10)
@@ -145,8 +146,6 @@ jobs:
               "Content-Type": "application/json"
           }
 
-          # DATA-ONLY Payload: Guarantees NDFirebaseMessagingService.onMessageReceived()
-          # is ALWAYS called across all app states (Foreground, Background, Killed).
           payload = {
               "message": {
                   "topic": "updates",
