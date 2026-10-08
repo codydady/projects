@@ -42,13 +42,13 @@ jobs:
           pip install google-auth requests
 
       # ------------------------------------------------------------------------
-      # DELAY STEP: Pause for 3 minutes (180 seconds) to let CDN edge cache settle
+      # DELAY STEP: Pause for 1 minute (60 seconds) to let CDN edge cache settle
       # ------------------------------------------------------------------------
       - name: Wait for CDN Propagation
         run: |
-          echo "Pausing for 3 minutes to allow CDN edge servers to update..."
-          sleep 180
-          
+          echo "Pausing for 1 minute to allow CDN edge servers to update..."
+          sleep 60
+
       - name: Extract Slug and Send FCM Notification
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
@@ -126,7 +126,7 @@ jobs:
               time.sleep(10)
 
           # ------------------------------------------------------------------------
-          # STEP 3: DISPATCH FCM PUSH NOTIFICATION
+          # STEP 3: DISPATCH DATA-ONLY FCM PUSH NOTIFICATION
           # ------------------------------------------------------------------------
           raw_json = os.environ.get("SERVICE_ACCOUNT", "")
           key_data = json.loads(raw_json)
@@ -146,14 +146,11 @@ jobs:
               "Content-Type": "application/json"
           }
 
+          # DATA-ONLY Payload: Guarantees NDFirebaseMessagingService.onMessageReceived()
+          # is ALWAYS called across all app states (Foreground, Background, Killed).
           payload = {
               "message": {
                   "topic": "updates",
-                  "notification": {
-                      "title": post_title,
-                      "body": "Tap to view full temple details",
-                      "image": image_url
-                  },
                   "data": {
                       "newslug": new_slug,
                       "version": commit_sha,
@@ -162,10 +159,7 @@ jobs:
                       "image_url": image_url
                   },
                   "android": {
-                      "priority": "HIGH",
-                      "notification": {
-                          "image": image_url
-                      }
+                      "priority": "HIGH"
                   }
               }
           }
