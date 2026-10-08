@@ -14,13 +14,12 @@ on:
 
 jobs:
   send-fcm-notification:
-    # Safely handle both deployment_status and manual triggers
+    # Safely handle manual trigger OR successful GitHub Pages deployment
     if: |
       github.event_name == 'workflow_dispatch' ||
       (
         github.event_name == 'deployment_status' &&
-        github.event.deployment_status.state == 'success' &&
-        (github.event.deployment.environment == 'github-pages' || contains(github.event.deployment.environment, 'page'))
+        github.event.deployment_status.state == 'success'
       )
 
     runs-on: ubuntu-latest
