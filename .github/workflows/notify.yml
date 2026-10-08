@@ -1,7 +1,7 @@
 name: Notify Mobile Clients
 
 on:
-  # 1. Manual trigger via Actions UI
+  # 1. Manual trigger via Actions UI for testing
   workflow_dispatch:
     inputs:
       test_slug:
@@ -9,28 +9,19 @@ on:
         required: true
         default: 'heibabyslug'
 
-  # 2. Automatically run AFTER GitHub Pages completes deployment
-  workflow_run:
-    workflows: ["pages-build-deployment"]
-    types:
-      - completed
+  # 2. Fire ONLY when posts.json is modified and pushed
+  push:
+    branches:
+      - main  # Change to 'master' if your default branch is master
+    paths:
+      - 'templepages-github-site/www.templepages.com/posts.json'
 
 jobs:
   send-fcm-notification:
-    # Run if triggered manually OR if pages-build-deployment succeeded
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (
-        github.event_name == 'workflow_run' &&
-        github.event.workflow_run.conclusion == 'success'
-      )
-
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -42,9 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install google-auth requests
 
-      # ------------------------------------------------------------------------
-      # DELAY STEP: Pause for 1 minute to let CDN edge cache settle
-      # ------------------------------------------------------------------------
+      # Pause 60 seconds to allow GitHub Pages to build & deploy to CDN edge
       - name: Wait for CDN Propagation
         run: |
           echo "Pausing for 1 minute to allow CDN edge servers to update..."
@@ -53,7 +42,7 @@ jobs:
       - name: Extract Slug and Send FCM Notification
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          COMMIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          COMMIT_SHA: ${{ github.sha }}
           EVENT_NAME: ${{ github.event_name }}
           TEST_SLUG: ${{ inputs.test_slug }}
           JSON_FILE_PATH: "templepages-github-site/www.templepages.com/posts.json"
@@ -70,9 +59,7 @@ jobs:
           new_slug = ""
           post_title = "New Temple Post"
 
-          # ------------------------------------------------------------------------
-          # STEP 1: RESOLVE SLUG AND TITLE
-          # ------------------------------------------------------------------------
+          # Step 1: Resolve Slug and Title
           if event_name == "workflow_dispatch" and test_slug:
               new_slug = test_slug
               print(f"[Manual Run] Using test slug: '{new_slug}'")
@@ -96,7 +83,7 @@ jobs:
                               first_post = posts[0]
                               new_slug = first_post.get("slug", "").strip()
                               post_title = first_post.get("title", post_title)
-                              print(f"[Deployment Event] Read latest slug from posts[0]: '{new_slug}'")
+                              print(f"[Push Event] Read latest slug from posts[0]: '{new_slug}'")
                   except Exception as e:
                       print(f"Error reading posts.json: {e}")
 
@@ -104,14 +91,12 @@ jobs:
               print("ERROR: Could not resolve a valid slug. Aborting FCM notification.")
               exit(1)
 
-          # ------------------------------------------------------------------------
-          # STEP 2: BRIEF CDN WARM-UP CHECK
-          # ------------------------------------------------------------------------
+          # Step 2: CDN Edge Check
           image_url = f"https://www.templepages.com/posts/{new_slug}/img1.jpg"
           print(f"Verifying CDN edge cache readiness for: {image_url}")
 
           http_headers = {
-              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
           }
 
           for attempt in range(1, 6):
@@ -120,14 +105,12 @@ jobs:
                       if res.status_code == 200:
                           print(f"SUCCESS: CDN confirmed ready on attempt {attempt}.")
                           break
-                          print(f"CDN status {res.status_code}. Waiting 10s for edge cache sync... ({attempt}/5)")
+                      print(f"CDN status {res.status_code}. Waiting 10s... ({attempt}/5)")
               except Exception as e:
                   print(f"CDN check error ({e}). Waiting 10s... ({attempt}/5)")
               time.sleep(10)
 
-          # ------------------------------------------------------------------------
-          # STEP 3: DISPATCH DATA-ONLY FCM PUSH NOTIFICATION
-          # ------------------------------------------------------------------------
+          # Step 3: Dispatch Data-Only FCM Push
           raw_json = os.environ.get("SERVICE_ACCOUNT", "")
           key_data = json.loads(raw_json)
 
