@@ -1,22 +1,6 @@
 [
   {
     "author": "Sriram Seetharaman",
-    "date": "2026-10-08",
-    "hide": false,
-    "slug": "vadivudaiyamman-sametha-sametha-thyagarajaswamy-temple-thiruvotriyur",
-    "tags": [
-      "temples",
-      "hinduism",
-      "sambandhar",
-      "appar",
-      "sundharar",
-      "thevaram"
-    ],
-    "title": "Vadivudaiyamman sametha Thyagarajaswamy, Thiruvotriyur",
-    "type": "posts"
-  },
-  {
-    "author": "Sriram Seetharaman",
     "date": "2014-06-13",
     "hide": false,
     "slug": "mangalanayagi-sametha-prananatheswarar-temple-thirumangalakkudi",
@@ -31,6 +15,22 @@
       "kanjanur-sapthasthanam"
     ],
     "title": "MangaLanayagi sametha Prananatheswarar, Thirumangalakkudi",
+    "type": "posts"
+  },
+  {
+    "author": "Sriram Seetharaman",
+    "date": "2026-10-08",
+    "hide": false,
+    "slug": "vadivudaiyamman-sametha-sametha-thyagarajaswamy-temple-thiruvotriyur",
+    "tags": [
+      "temples",
+      "hinduism",
+      "sambandhar",
+      "appar",
+      "sundharar",
+      "thevaram"
+    ],
+    "title": "Vadivudaiyamman sametha Thyagarajaswamy, Thiruvotriyur",
     "type": "posts"
   },
   {
