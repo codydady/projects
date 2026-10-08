@@ -1,5 +1,20 @@
 [
   {
+    "author": "Sriram Seetharaman",
+    "date": "2008-01-08",
+    "hide": false,
+    "slug": "gnanambika-sametha-gnanaparameswarar-temple-naaloor-mayaanam",
+    "tags": [
+      "temples",
+      "hinduism",
+      "sambandhar",
+      "thevaram",
+      "mayanam"
+    ],
+    "title": "Gnanambika sametha Gnana Parameswara Swamy, Naaloor Mayaanam",
+    "type": "posts"
+  },
+  {
     "title": "Vaiththamanithi perumal, nava thiruppathi, Thirukkolur",
     "author": "Sriram Seetharaman",
     "date": "2026-10-13",
@@ -220,21 +235,6 @@
       "nallur-sapthasthanam"
     ],
     "title": "Girisundhari sametha Panchavarneswarar / KalyanaSundhareswarar, Nallur",
-    "type": "posts"
-  },
-  {
-    "author": "Sriram Seetharaman",
-    "date": "2008-01-08",
-    "hide": false,
-    "slug": "gnanambika-sametha-gnanaparameswarar-temple-naaloor-mayaanam",
-    "tags": [
-      "temples",
-      "hinduism",
-      "sambandhar",
-      "thevaram",
-      "mayanam"
-    ],
-    "title": "Gnanambika sametha Gnana Parameswara Swamy, Naaloor Mayaanam",
     "type": "posts"
   },
   {
