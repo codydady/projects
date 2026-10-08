@@ -1,27 +1,35 @@
 name: Notify Mobile Clients
 
 on:
-  # 1. Enables manual triggering from the GitHub Actions UI
+  # 1. Manual trigger via Actions UI
   workflow_dispatch:
     inputs:
       test_slug:
-        description: 'Slug to send via FCM (e.g. test-slug-123 or an existing slug from posts.json)'
+        description: 'Slug to send via FCM'
         required: true
         default: 'heibabyslug'
 
-  # 2. Automated trigger when posts.json is modified on main
-  push:
-    branches:
-      - main  # Triggers when changes are pushed to main
-    paths:
-      - 'templepages-github-site/www.templepages.com/posts.json'
+  # 2. Trigger after GitHub Pages deployment finishes successfully
+  deployment_status:
 
 jobs:
   send-fcm-notification:
+    # Safely handle both deployment_status and manual triggers
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'deployment_status' &&
+        github.event.deployment_status.state == 'success' &&
+        (github.event.deployment.environment == 'github-pages' || contains(github.event.deployment.environment, 'page'))
+      )
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          # Use deployment SHA if available, otherwise default to current branch ref
+          ref: ${{ github.event.deployment.sha || github.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -33,12 +41,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install google-auth requests
 
-      - name: Extract Slug, Poll CDN, and Send FCM Notification
+      - name: Extract Slug and Send FCM Notification
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_SHA: ${{ github.event.deployment.sha || github.sha }}
           EVENT_NAME: ${{ github.event_name }}
-          TEST_SLUG: ${{ github.event.inputs.test_slug }}
+          TEST_SLUG: ${{ inputs.test_slug }}
           JSON_FILE_PATH: "templepages-github-site/www.templepages.com/posts.json"
         run: |
           python - << 'EOF'
@@ -54,11 +62,11 @@ jobs:
           post_title = "New Temple Post"
 
           # ------------------------------------------------------------------------
-          # STEP 1: RESOLVE SLUG AND TITLE (READS FIRST ITEM IN POSTS.JSON)
+          # STEP 1: RESOLVE SLUG AND TITLE
           # ------------------------------------------------------------------------
           if event_name == "workflow_dispatch" and test_slug:
               new_slug = test_slug
-              print(f"[Manual Run] Using override test slug: '{new_slug}'")
+              print(f"[Manual Run] Using test slug: '{new_slug}'")
               
               if os.path.exists(json_path):
                   try:
@@ -79,7 +87,7 @@ jobs:
                               first_post = posts[0]
                               new_slug = first_post.get("slug", "").strip()
                               post_title = first_post.get("title", post_title)
-                              print(f"[Organic Push] Read latest slug from posts[0]: '{new_slug}'")
+                              print(f"[Deployment Event] Read latest slug from posts[0]: '{new_slug}'")
                   except Exception as e:
                       print(f"Error reading posts.json: {e}")
 
@@ -88,35 +96,26 @@ jobs:
               exit(1)
 
           # ------------------------------------------------------------------------
-          # STEP 2: ACTIVE POLLING FOR GITHUB PAGES DEPLOYMENT (STREAMED GET)
+          # STEP 2: BRIEF CDN WARM-UP CHECK (Safety margin for edge propagation)
           # ------------------------------------------------------------------------
           image_url = f"https://www.templepages.com/posts/{new_slug}/img1.jpg"
-          print(f"Polling GitHub Pages CDN for image availability: {image_url}")
+          print(f"Verifying CDN edge cache readiness for: {image_url}")
 
           http_headers = {
               "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
           }
 
-          max_attempts = 30  # 30 attempts * 10s = 5 minutes max wait time
-          image_ready = False
-
-          for attempt in range(1, max_attempts + 1):
+          # Small 5-attempt check (50s max) just in case global CDN edge lags behind GitHub's deployment hook
+          for attempt in range(1, 6):
               try:
-                  # stream=True gets status and headers without downloading the body
                   with requests.get(image_url, headers=http_headers, stream=True, timeout=5) as res:
                       if res.status_code == 200:
-                          print(f"SUCCESS: Image is live on CDN (HTTP 200 on Attempt {attempt})!")
-                          image_ready = True
+                          print(f"SUCCESS: CDN confirmed ready on attempt {attempt}.")
                           break
-                      else:
-                          print(f"Image not live yet (HTTP status: {res.status_code}). Retrying in 10s... ({attempt}/{max_attempts})")
+                      print(f"CDN status {res.status_code}. Waiting 10s for edge cache sync... ({attempt}/5)")
               except Exception as e:
-                  print(f"Polling error ({e}). Retrying in 10s... ({attempt}/{max_attempts})")
-              
+                  print(f"CDN check error ({e}). Waiting 10s... ({attempt}/5)")
               time.sleep(10)
-
-          if not image_ready:
-              print("WARNING: Active polling timed out after 5 minutes. Attempting to send FCM anyway...")
 
           # ------------------------------------------------------------------------
           # STEP 3: DISPATCH FCM PUSH NOTIFICATION
