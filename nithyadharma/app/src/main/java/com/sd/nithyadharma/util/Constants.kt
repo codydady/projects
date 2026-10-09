@@ -8,12 +8,10 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 object Constants {
-//    const val SUPER_USER = "sriram" // more beta features
-//    const val OTHER_USER = "others" // or it is others
-//    const val CURRENT_USER = SUPER_USER // more beta features
-    const val PAYING_CUSTOMER = true // stable version
 
-    const val APP_VERSION = 14
+    const val PAYING_CUSTOMER = false // stable version
+
+    const val APP_VERSION = 16  //required for about page
 
     val INDIA_ZONE = ZoneId.of("Asia/Kolkata")
     val UTC_ZONE = ZoneOffset.UTC

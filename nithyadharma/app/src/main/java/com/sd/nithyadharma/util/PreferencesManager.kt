@@ -15,7 +15,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonSerializer
 import com.google.gson.JsonPrimitive
-
 import com.sd.nithyadharma.model.BreathingTimings
 import com.sd.nithyadharma.model.CustomerInfo
 import com.sd.nithyadharma.model.NDLanguage

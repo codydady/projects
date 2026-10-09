@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sd.nithyadharma.model.CustomerInfo
 import com.sd.nithyadharma.model.Order
+import com.sd.nithyadharma.model.PanchangaAttr.Rasi
 import com.sd.nithyadharma.model.Product
 import com.sd.nithyadharma.util.CommonFunctions
 import com.sd.nithyadharma.util.Constants.NITHYADHARMA_BUSINESS_NUMBER
@@ -153,7 +154,8 @@ fun PujaStoreCardContent(
             pincode = pincode.trim(),
             dttmOfBirth = customerInfo?.dttmOfBirth ?: "",
             lat = customerInfo?.lat ?: "",
-            lon = customerInfo?.lon ?: ""
+            lon = customerInfo?.lon ?: "",
+            rasi = customerInfo?.rasi ?: Rasi.MESHA // 👈 PRESERVE USER'S SAVED RASI HERE
         )
     }
 

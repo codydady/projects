@@ -102,7 +102,13 @@ object AlarmSlotNotificationHelpers {
     }
 
     // Standard Notification Builder
-     fun sendNotification(context: Context, title: String, notificationText: String, notificationId: Int) {
+    fun sendNotification(
+        context: Context,
+        title: String,
+        notificationText: String,
+        notificationId: Int,
+        imageBitmap: Bitmap? = null
+    ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
@@ -121,32 +127,85 @@ object AlarmSlotNotificationHelpers {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val largeIconBitmap: Bitmap? = try {
-            ContextCompat.getDrawable(context, R.mipmap.ic_launcher)?.toBitmap()
-        } catch (e: Exception) {
-            null
-        }
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val notification = NotificationCompat.Builder(context, AlarmNotificationChannel.CHANNEL_ID)
-            .setSmallIcon(R.drawable.om_notification)  // this shows up in the top bar of the phone
-//            .setLargeIcon(largeIconBitmap)
+        val notificationBuilder = NotificationCompat.Builder(context, AlarmNotificationChannel.CHANNEL_ID)
+            .setSmallIcon(R.drawable.om_notification)  // shows up in the status bar
             .setContentTitle(title)
             .setContentText(notificationText)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(notificationText))
-            .setSound(defaultSoundUri) // Default sound
+            .setSound(defaultSoundUri)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .build()
+
+        // Set BigPictureStyle if image is provided; otherwise, fallback to BigTextStyle
+        if (imageBitmap != null) {
+            notificationBuilder
+                .setLargeIcon(imageBitmap)
+                .setStyle(
+                    NotificationCompat.BigPictureStyle()
+                        .bigPicture(imageBitmap)
+                        .bigLargeIcon(null as Bitmap?) // Hides the right thumbnail when notification is expanded
+                )
+        } else {
+            notificationBuilder.setStyle(
+                NotificationCompat.BigTextStyle().bigText(notificationText)
+            )
+        }
 
         try {
-            NotificationManagerCompat.from(context).notify(notificationId, notification)
+            NotificationManagerCompat.from(context).notify(notificationId, notificationBuilder.build())
         } catch (e: Exception) {
             Log.e("AlarmReceiver", "Failed to show notification", e)
         }
     }
+
+//    fun sendNotification(context: Context, title: String, notificationText: String, notificationId: Int) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+//            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+//            return
+//        }
+//
+//        createNotificationChannel(context)
+//
+//        val intent = Intent(context, MainActivity::class.java).apply {
+//            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+//        }
+//
+//        val pendingIntent = PendingIntent.getActivity(
+//            context,
+//            notificationId,
+//            intent,
+//            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+//        )
+//
+//        val largeIconBitmap: Bitmap? = try {
+//            ContextCompat.getDrawable(context, R.mipmap.ic_launcher)?.toBitmap()
+//        } catch (e: Exception) {
+//            null
+//        }
+//        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+//
+//        val notification = NotificationCompat.Builder(context, AlarmNotificationChannel.CHANNEL_ID)
+//            .setSmallIcon(R.drawable.om_notification)  // this shows up in the top bar of the phone
+////            .setLargeIcon(largeIconBitmap)
+//            .setContentTitle(title)
+//            .setContentText(notificationText)
+//            .setStyle(NotificationCompat.BigTextStyle().bigText(notificationText))
+//            .setSound(defaultSoundUri) // Default sound
+//            .setPriority(NotificationCompat.PRIORITY_HIGH)
+//            .setContentIntent(pendingIntent)
+//            .setAutoCancel(true)
+//            .setDefaults(NotificationCompat.DEFAULT_ALL)
+//            .build()
+//
+//        try {
+//            NotificationManagerCompat.from(context).notify(notificationId, notification)
+//        } catch (e: Exception) {
+//            Log.e("AlarmReceiver", "Failed to show notification", e)
+//        }
+//    }
 
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

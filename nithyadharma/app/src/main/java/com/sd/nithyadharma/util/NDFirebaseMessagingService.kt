@@ -1,6 +1,8 @@
 package com.sd.nithyadharma.util
 
-import LocaleManager
+import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
+import android.util.Base64
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -14,10 +16,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
-import android.util.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
 
+@SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class NDFirebaseMessagingService : FirebaseMessagingService() {
 
     private val TAG = "NDFirebaseMessagingService"
@@ -73,6 +75,8 @@ class NDFirebaseMessagingService : FirebaseMessagingService() {
 
     @OptIn(ExperimentalEncodingApi::class)
     private fun handleNewSlug(slug: String) {
+        Log.d(TAG, "handleNewSlug called")
+
         serviceScope.launch {
             try {
                 // Initialize repository
@@ -96,6 +100,10 @@ class NDFirebaseMessagingService : FirebaseMessagingService() {
                 )
 
                 if (post != null) {
+                    Log.d(TAG, "Post found: slug=${post.slug}, title=${post.title}, " +
+                            "imageBytes=${post.imageBytes?.size ?: "null"} bytes, " +
+                            "markdownLen=${post.contentsMarkdown.length}")
+
                     // Create and save the TODAYS_DHARMA card
                     val card = CardFactory.makeCard(
                         mode = CardMode.WRITE_FG,
@@ -103,18 +111,25 @@ class NDFirebaseMessagingService : FirebaseMessagingService() {
                         expiryOffsetMillis = CardFactory.CARD_EXPIRY_OFFSET_LONG,
                         customParams = notificationData
                     )
+                    Log.d(TAG, "Card created")
 
                     CardRepository.saveAndAddCard(preferencesManager, card)
+                    Log.d(TAG, "Card saved successfully")
+
+                    // Decode raw bytes directly to Bitmap for system tray notification
+                    val postImageBitmap = post.imageBytes?.let { bytes ->
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
 
                     // Display system tray notification in foreground and background
-                    // send a system tray notification
                     CoroutineScope(Dispatchers.IO).launch {
                         val notificationTitle = CommonFunctions.getLocaleAwareString("todays_dharma")
                         AlarmSlotNotificationHelpers.sendNotification(
                             applicationContext,
-                            notificationTitle, // should read something as new content in multiple languages
+                            notificationTitle,
                             postExcerpt,
-                            Random.nextInt(1, Int.MAX_VALUE)
+                            Random.nextInt(1, Int.MAX_VALUE),
+                            postImageBitmap // Pass Bitmap directly to BigPictureStyle
                         )
                     }
 
@@ -127,14 +142,4 @@ class NDFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-//    private fun sendNotification(title: String, notificationText: String) {
-//
-//
-//        AlarmSlotNotificationHelpers.sendNotification(
-//            applicationContext,
-//            title,
-//            notificationText,
-//            Random.nextInt(1, Int.MAX_VALUE)
-//        )
-//    }
 }
