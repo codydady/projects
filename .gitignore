@@ -16,3 +16,27 @@ local.properties
 *.aab
 github-pat-token.txt
 *.aab
+
+# Build outputs
+build/
+*/build/
+**/build/
+
+# Android Studio
+.idea/
+*.iml
+local.properties
+
+# Local db
+database/temples.db
+
+# IDE
+.idea/
+*.iml
+
+# Build outputs (defense in depth)
+build/
+**/build/
+
+# Local properties and secrets
+local.properties
