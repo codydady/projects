@@ -1,5 +1,17 @@
 [
   {
+    "author": "sriram",
+    "date": "2026-10-1",
+    "hide": false,
+    "slug": "ghhhhjjjjjjjjkk",
+    "tags": [
+      "nithyadharma",
+      "thevaram"
+    ],
+    "title": "ghhhhjjjjjjjjkk",
+    "type": "posts"
+  },
+  {
     "author": "Sriram Seetharaman",
     "date": "2014-06-13",
     "hide": false,
@@ -49,7 +61,6 @@
     "type": "posts"
   },
   {
-    "title": "Vaiththamanithi perumal, nava thiruppathi, Thirukkolur",
     "author": "Sriram Seetharaman",
     "date": "2026-10-13",
     "hide": false,
@@ -60,8 +71,9 @@
       "divyadesam",
       "navathiruppathi"
     ],
+    "title": "Vaiththamanithi perumal, nava thiruppathi, Thirukkolur",
     "type": "posts"
-  },  
+  },
   {
     "author": "Sriram Seetharaman",
     "date": "2023-06-13",
@@ -103,9 +115,9 @@
     "type": "static"
   },
   {
-    "title": "Soundharanayagi sametha Karumbeshwarar, Koyil Venni",
     "author": "Sriram Seetharaman",
     "date": "2026-10-09",
+    "hide": false,
     "slug": "soundharanayagi-sametha-karumbeshwarar-temple-koyil-venni",
     "tags": [
       "temples",
@@ -116,6 +128,7 @@
       "thanjavur-vicinity",
       "hinduism"
     ],
+    "title": "Soundharanayagi sametha Karumbeshwarar, Koyil Venni",
     "type": "posts"
   },
   {
