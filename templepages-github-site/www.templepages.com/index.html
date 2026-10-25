@@ -768,9 +768,11 @@
         }
 
         function getPinnedPosts() {
-            return CONFIG.POSTS_DATA.filter(post => post.pinned && !post.hide);
+            return CONFIG.POSTS_DATA.filter(
+                post => post.type === 'posts' && post.pinned && !post.hide
+            );
         }
-
+        
         function displayPinnedPosts() {
             const pinnedPosts = getPinnedPosts();
             const container = document.getElementById('pinnedPostsContainer');
