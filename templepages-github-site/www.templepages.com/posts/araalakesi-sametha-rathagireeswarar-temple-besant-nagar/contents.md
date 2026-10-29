@@ -1,9 +1,3 @@
-Here is a clean, structured overview formatted for easy copying into your website or mobile app database:
-
----
-
-### Sri Rathnagireeswarar Temple, Besant Nagar
-
 **Overview**
 
 Located in the quiet neighborhood of Besant Nagar (near the bus terminus), Sri Rathnagireeswarar Temple is a prominent spiritual center in Chennai, renowned for its strict adherence to Vedic traditions and community service.
@@ -28,7 +22,6 @@ This temple may look like a new temple in an affluent neighbourhood in Chennai c
 When devotees were trying to install deities by ordering them from various sources, Kanchi Maha Periyavar , Sri Chandrashekarendra Saraswathi Swamigal reportedly told them to look at the nearby Bay of Bengal for a lingam long hidden in the ocean. 
 
 With the help of fisherman, they uncovered a lingam submerged which was told to be over a 1000 years old. The Pillaiyar idol is said to have been personally under the possession of Sri Bhagawan Ramana Maharishi!
-
 
 **Location & Timings**
 
