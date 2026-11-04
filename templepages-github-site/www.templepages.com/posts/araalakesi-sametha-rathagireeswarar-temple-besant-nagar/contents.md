@@ -17,7 +17,7 @@ Located in the quiet neighborhood of Besant Nagar (near the bus terminus), Sri R
 
 **Key Specialities**
 
-This temple may look like a new temple in an affluent neighbourhood in Chennai catering to locals while more older and spiritually significant temples in nearby Thiruvanmiyur and Mylapore  sung in hymns like Thevaram , it is not.
+This temple may look like a new temple in an affluent neighbourhood in Chennai catering to locals while more older and spiritually significant temples in nearby Thiruvanmiyur and Mylapore sung in hymns like Thevaram are generally seen more important, it is not.
 
 When devotees were trying to install deities by ordering them from various sources, Kanchi Maha Periyavar , Sri Chandrashekarendra Saraswathi Swamigal reportedly told them to look at the nearby Bay of Bengal for a lingam long hidden in the ocean. 
 
