@@ -1,4 +1,3 @@
-
 Kodiyidaiyamman Sametha Maasilamaneeswarar Temple is in Thirumullaivayil, a western outskirt of Madras/Chennai between Ambattur and Avadi. In old Tamil text, this place is known as Vada-Thirumullaivayil, meaning northern Thirumullaivayil, to disambiguate from the same-named temple town near Sirkazhi in Thanjavur district.
 
 Legend says that this place exists from Krutha Yugam itself.
