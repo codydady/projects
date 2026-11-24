@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Brightness5
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Start
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,34 +39,33 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sd.nithyadharma.model.PanchangaAttr.DynamicPanchangam
-import com.sd.nithyadharma.model.PanchangaAttr.StaticPanchangam
-import com.sd.nithyadharma.model.PanchangaAttr.karanaName
-import com.sd.nithyadharma.model.PanchangaAttr.maasamName
-import com.sd.nithyadharma.model.PanchangaAttr.nakshatraName
-import com.sd.nithyadharma.model.PanchangaAttr.pakshaName
-import com.sd.nithyadharma.model.PanchangaAttr.rasiName
-import com.sd.nithyadharma.model.PanchangaAttr.tithiName
-import com.sd.nithyadharma.model.PanchangaAttr.vaaraName
-import com.sd.nithyadharma.model.PanchangaAttr.yogaName
+import com.sd.nithyadharma.model.HinduCalendarAttr.HinduCalendar
+import com.sd.nithyadharma.model.HinduCalendarAttr.ayanamName
+import com.sd.nithyadharma.model.HinduCalendarAttr.karanaName
+import com.sd.nithyadharma.model.HinduCalendarAttr.maasamName
+import com.sd.nithyadharma.model.HinduCalendarAttr.nakshatraName
+import com.sd.nithyadharma.model.HinduCalendarAttr.pakshaName
+import com.sd.nithyadharma.model.HinduCalendarAttr.rasiName
+import com.sd.nithyadharma.model.HinduCalendarAttr.ruthuName
+import com.sd.nithyadharma.model.HinduCalendarAttr.samvatsaraName
+import com.sd.nithyadharma.model.HinduCalendarAttr.tithiName
+import com.sd.nithyadharma.model.HinduCalendarAttr.vaaraName
+import com.sd.nithyadharma.model.HinduCalendarAttr.yogaName
 import com.sd.nithyadharma.model.TimeRange
 import com.sd.nithyadharma.util.CommonFunctions
 import com.sd.nithyadharma.util.LocalAppLanguage
-import com.sd.nithyadharma.util.LocaleOther
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
 @Composable
 fun PanchangamCardContent(
-    sp: StaticPanchangam?,
-    dp: DynamicPanchangam?,
+    hindCal: HinduCalendar?,
     textColor: Color
 ) {
     val currentLang = LocalAppLanguage.current
 
-    if (sp == null || dp == null) {
-        Log.w("PanchangamLog", "Data incomplete -> sp is null: ${sp == null}, dp is null: ${dp == null}")
+    if (hindCal == null) {
+        Log.w("PanchangamLog", "Data incomplete -> dp is null: ${hindCal == null}")
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,17 +77,17 @@ fun PanchangamCardContent(
         return
     }
 
-    val timeformatter = DateTimeFormatter.ofPattern("h:mm")
-    val now = CommonFunctions.getCurrentTime()
-
-    val maasam = dp.maasam?.let { maasamName(it, currentLang) } ?: "—"
-    val paksha = dp.paksha?.let { pakshaName(it, currentLang) } ?: "—"
-    val vaara = dp.vaara?.let { vaaraName(it, currentLang) } ?: "—"
-    val thithi = dp.thithi?.let { tithiName(it, currentLang) } ?: "—"
-    val nakshatra = dp.nakshatra?.let { nakshatraName(it, currentLang) } ?: "—"
-    val yoga = dp.yoga?.let { yogaName(it, currentLang) } ?: "—"
-    val karana = dp.karana?.let { karanaName(it, currentLang) } ?: "—"
-    val chandrashtamam = dp.chandrashtamaRasi?.let { rasiName(it, currentLang) } ?: "—"
+    val samvatsara = hindCal.samvatsara?.let { samvatsaraName(it, currentLang) } ?: "—"
+    val ayanam = hindCal.ayanam?.let { ayanamName(it, currentLang) } ?: "—"
+    val ruthu = hindCal.ruthu?.let { ruthuName(it, currentLang) } ?: "—"
+    val maasam = hindCal.maasam?.let { maasamName(it, currentLang) } ?: "—"
+    val paksha = hindCal.paksha?.let { pakshaName(it, currentLang) } ?: "—"
+    val vaara = hindCal.vaara?.let { vaaraName(it, currentLang) } ?: "—"
+    val thithi = hindCal.thithi?.let { tithiName(it, currentLang) } ?: "—"
+    val nakshatra = hindCal.nakshatra?.let { nakshatraName(it, currentLang) } ?: "—"
+    val yoga = hindCal.yoga?.let { yogaName(it, currentLang) } ?: "—"
+    val karana = hindCal.karana?.let { karanaName(it, currentLang) } ?: "—"
+    val chandrashtamam = hindCal.chandrashtamaRasi?.let { rasiName(it, currentLang) } ?: "—"
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -98,7 +99,7 @@ fun PanchangamCardContent(
             color = textColor.copy(alpha = 0.12f),
             shape = CircleShape
         ) {
-            if (dp.muhurthaDay == true) {
+            if (hindCal.muhurthaDay == true) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -125,6 +126,24 @@ fun PanchangamCardContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 ElegantDetailRow(
+                    icon = Icons.Default.Grain,
+                    label = LocaleManager.getString("str_samvatsara", currentLang),
+                    value = samvatsara,
+                    textColor = textColor
+                )
+                ElegantDetailRow(
+                    icon = Icons.Default.AcUnit,
+                    label = LocaleManager.getString("str_ayana", currentLang),
+                    value = ayanam,
+                    textColor = textColor
+                )
+                ElegantDetailRow(
+                    icon = Icons.Default.Start,
+                    label = LocaleManager.getString("str_ruthu", currentLang),
+                    value = ruthu,
+                    textColor = textColor
+                )
+                ElegantDetailRow(
                     icon = Icons.Default.CalendarMonth,
                     label = LocaleManager.getString("str_month", currentLang),
                     value = maasam,
@@ -139,52 +158,32 @@ fun PanchangamCardContent(
                 ElegantDetailRow(
                     icon = Icons.Default.AutoAwesome,
                     label = LocaleManager.getString("str_nk", currentLang),
-                    value = LocaleManager.getString(
-                        "str_timeend", currentLang, nakshatra,
-                        LocaleOther.getDayRelativeToNow(dp.nakshatraEndTime ?: now, currentLang),
-                        LocaleOther.getTimeSlotLocalized(dp.nakshatraEndTime ?: now, currentLang),
-                        dp.nakshatraEndTime?.format(timeformatter) ?: "—",
-                        getAmPm(dp.nakshatraEndTime ?: now)
-                    ),
+                    value = CommonFunctions.getPanchangaTimesString( nakshatra,
+                                        hindCal.nakshatraEndTime!!, currentLang ),
                     textColor = textColor
                 )
 
                 ElegantDetailRow(
                     icon = Icons.Default.Brightness5,
                     label = LocaleManager.getString("str_tt", currentLang),
-                    value = LocaleManager.getString(
-                        "str_timeend", currentLang, thithi,
-                        LocaleOther.getDayRelativeToNow(dp.thithiEndTime ?: now, currentLang),
-                        LocaleOther.getTimeSlotLocalized(dp.thithiEndTime ?: now, currentLang),
-                        dp.thithiEndTime?.format(timeformatter) ?: "—",
-                        getAmPm(dp.thithiEndTime ?: now)
-                    ),
+                    value = CommonFunctions.getPanchangaTimesString( thithi,
+                        hindCal.thithiEndTime!!, currentLang ),
                     textColor = textColor
                 )
 
                 ElegantDetailRow(
                     icon = Icons.Default.SelfImprovement,
                     label = LocaleManager.getString("str_yg", currentLang),
-                    value = LocaleManager.getString(
-                        "str_timeend", currentLang, yoga,
-                        LocaleOther.getDayRelativeToNow(dp.yogaEndTime ?: now, currentLang),
-                        LocaleOther.getTimeSlotLocalized(dp.yogaEndTime ?: now, currentLang),
-                        dp.yogaEndTime?.format(timeformatter) ?: "—",
-                        getAmPm(dp.yogaEndTime ?: now)
-                    ),
+                    value = CommonFunctions.getPanchangaTimesString( yoga,
+                        hindCal.yogaEndTime!!, currentLang ),
                     textColor = textColor
                 )
 
                 ElegantDetailRow(
                     icon = Icons.Default.Grain,
                     label = LocaleManager.getString("str_kr", currentLang),
-                    value = LocaleManager.getString(
-                        "str_timeend", currentLang, karana,
-                        LocaleOther.getDayRelativeToNow(dp.karanaEndTime ?: now, currentLang),
-                        LocaleOther.getTimeSlotLocalized(dp.karanaEndTime ?: now, currentLang),
-                        dp.karanaEndTime?.format(timeformatter) ?: "—",
-                        getAmPm(dp.karanaEndTime ?: now)
-                    ),
+                    value = CommonFunctions.getPanchangaTimesString( karana,
+                        hindCal.karanaEndTime!!, currentLang ),
                     textColor = textColor
                 )
 
@@ -204,13 +203,13 @@ fun PanchangamCardContent(
         ) {
             TimingCapsule(
                 label = LocaleManager.getString("str_rg", currentLang),
-                value = sp.rahuKalam?.toDisplayString() ?: "—",
+                value = hindCal.rahuKalam?.toDisplayString() ?: "—",
                 textColor = textColor,
                 modifier = Modifier.weight(1f)
             )
             TimingCapsule(
                 label = LocaleManager.getString("str_ya", currentLang),
-                value = sp.yamaGandam?.toDisplayString() ?: "—",
+                value = hindCal.yamaGandam?.toDisplayString() ?: "—",
                 textColor = textColor,
                 modifier = Modifier.weight(1f)
             )

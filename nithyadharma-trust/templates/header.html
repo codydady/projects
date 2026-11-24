@@ -4,6 +4,7 @@
             <a href="{{ url_for('index') }}">Table Viewer</a>
             <a href="{{ url_for('kainkaryam_entry') }}">Kainkaryam Entry</a>
             <a href="{{ url_for('reports') }}" class="text-white underline">Reports</a>
+            <a href="{{ url_for('kainkaryam_details') }}" class="{% if request.endpoint == 'kainkaryam_details' %}text-white underline{% endif %}">Kainkaryam Details</a>
         </div>
         <div class="header-stats">
             <div class="header-item">Petty Cash: ₹{{ header_data.pcbal }}</div>

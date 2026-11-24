@@ -10,6 +10,137 @@ object PanchangaAttr {
 
     // enums
 
+    enum class CalendarEvent {
+        // Monthly tithi observances
+        EKADASI,
+        SASHTI,
+        ASHTAMI,
+        THEIPIRAI_ASHTAMI,
+        PRADOSHAM,
+        POUNAMI,
+        AMAVASAI,
+        KRITHIGAI,
+
+        // Monthly and recurring special observances
+        SANKATAHARA_CHATURTHI,
+        MAASA_SHIVARATRI,
+
+        // Tamil and South Indian festivals
+        BHOGI,
+        PONGAL,
+        MAATTU_PONGAL,
+        KAANUM_PONGAL,
+        THAI_AMAVASAI,
+        THAI_POOSAM,
+        VASANTHA_PANCHAMI,
+        MAASI_MAGAM,
+        MAHA_SHIVARATRI,
+        KARADAYAN_NONBU,
+        TELUGU_NEW_YEAR,
+        SRI_RAMA_NAVAMI,
+        PANGUNI_UTHIRAM,
+        TAMIL_NEW_YEAR,
+        AKSHAYA_TRITIYA,
+        CHITRA_POURNAMI,
+        VAIGASI_VISAGAM,
+        AADI_PERUKKU,
+        AADI_AMAVASAI,
+        AADI_POORAM,
+        VARALAKSHMI_VIRATHAM,
+        AAVANI_AVITTAM,
+        GOKULASHTAMI,
+        GANESH_CHATURTHI,
+        MAHALAYA_AMAVASAI,
+        NAVARATHIRI_AARAMBAM,
+        SARASWATHI_POOJAI,
+        VIJAYA_DASAMI,
+        DEEPAVALI,
+        KANDHA_SASHTI_AARAMBAM,
+        KANDHA_SASHTI,
+        KARTHIGAI_DEEPAM,
+        VAIKUNDA_EKADASI,
+        KOODARAVALLI,
+        AARUDRA_DARSHANAM,
+        TYAGARAJAR_ARADHANAI
+    }
+    
+    enum class Samvatsara {
+        PRABHAVA,
+        VIBHAVA,
+        SHUKLA,
+        PRAMODUTA,
+        PRAJOTPATTI,
+        ANGIRASA,
+        SHRIMUKHA,
+        BHAVA,
+        YUVA,
+        DHATU,
+        ISHWARA,
+        BAHUDHANYA,
+        PRAMATHI,
+        VIKRAMA,
+        VRISHA,
+        CHITRABHANU,
+        SWABHANU,
+        TARANA,
+        PARTHIVA,
+        VYAYA,
+        SARVAJIT,
+        SARVADHARI,
+        VIRODHI,
+        VIKRUTI,
+        KHARA,
+        NANDANA,
+        VIJAYA,
+        JAYA,
+        MANMATHA,
+        DURMUKHI,
+        HEVILAMBI,
+        VILAMBI,
+        VIKARI,
+        SHARVARI,
+        PLAVA,
+        SHUBHAKRIT,
+        SHOBHAKRIT,
+        KRODHI,
+        VISHVAVASU,
+        PARABHAVA,
+        PLAVANGA,
+        KILAKA,
+        SAUMYA,
+        SADHARANA,
+        VIRODHIKRIT,
+        PARIDHAVI,
+        PRAMADICHA,
+        ANANDA,
+        RAKSHASA,
+        NALA,
+        PINGALA,
+        KALAYUKTI,
+        SIDDHARTHI,
+        RAUDRA,
+        DURMATI,
+        DUNDUBHI,
+        RUDHIRODGARI,
+        RAKTAKSHI,
+        KRODHANA,
+        AKSHAYA
+    }
+
+    enum class Ruthu {
+        VASANTHA,
+        GRISHMA,
+        VARSHA,
+        SHARAD,
+        HEMANTHA,
+        SHISHIRA
+    }
+
+    enum class Ayanam {
+        UTTARAYANAM,
+        DAKSHINAYANAM
+    }
+
     enum class Paksha {
         SHUKLA,
         KRISHNA
@@ -105,8 +236,12 @@ object PanchangaAttr {
         val calcDttm: LocalDateTime = CommonFunctions.getCurrentTime(),
         val sunrise: LocalDateTime? = null,
         val sunset: LocalDateTime? = null,
-        val paksha: Paksha? = null,
+        val tamilDay: Int? = null,
+        val samvatsara: Samvatsara? = null, // 0..59; 0 = Prabhava
+        val ruthu: Ruthu? = null,
+        val ayanam: Ayanam? = null,
         val maasam: TamilMonth? = null,
+        val paksha: Paksha? = null,
         val vaara: Vaara? = null,
         val thithi: Thithi? = null,
         val thithiEndTime: LocalDateTime? = null,
@@ -156,6 +291,33 @@ object PanchangaAttr {
         val values = Vaara.entries
         return values[(ordinal + 1) % values.size]
     }
+
+    fun samvatsaraName(
+        samvatsara: Samvatsara,
+        lang: NDLanguage
+    ): String =
+        when (lang) {
+            NDLanguage.EN -> samvatsaraEn[samvatsara]!!
+            NDLanguage.TA -> samvatsaraTa[samvatsara]!!
+            NDLanguage.KA -> samvatsaraKa[samvatsara]!!
+            NDLanguage.HI -> samvatsaraHi[samvatsara]!!
+        }
+
+    fun ruthuName(r: Ruthu, lang: NDLanguage): String =
+        when (lang) {
+            NDLanguage.EN -> ruthuEn[r]!!
+            NDLanguage.TA -> ruthuTa[r]!!
+            NDLanguage.KA -> ruthuKa[r]!!
+            NDLanguage.HI -> ruthuHi[r]!!
+        }
+
+    fun ayanamName(a: Ayanam, lang: NDLanguage): String =
+        when (lang) {
+            NDLanguage.EN -> ayanamEn[a]!!
+            NDLanguage.TA -> ayanamTa[a]!!
+            NDLanguage.KA -> ayanamKa[a]!!
+            NDLanguage.HI -> ayanamHi[a]!!
+        }
 
     fun maasamName(
         month: TamilMonth,
@@ -220,6 +382,314 @@ object PanchangaAttr {
 
     /* ---------------- DATA ---------------- */
 
+    private val samvatsaraEn = mapOf(
+        Samvatsara.PRABHAVA to "Prabhava",
+        Samvatsara.VIBHAVA to "Vibhava",
+        Samvatsara.SHUKLA to "Shukla",
+        Samvatsara.PRAMODUTA to "Pramoduta",
+        Samvatsara.PRAJOTPATTI to "Prajotpatti",
+        Samvatsara.ANGIRASA to "Angirasa",
+        Samvatsara.SHRIMUKHA to "Shrimukha",
+        Samvatsara.BHAVA to "Bhava",
+        Samvatsara.YUVA to "Yuva",
+        Samvatsara.DHATU to "Dhatu",
+        Samvatsara.ISHWARA to "Ishwara",
+        Samvatsara.BAHUDHANYA to "Bahudhanya",
+        Samvatsara.PRAMATHI to "Pramathi",
+        Samvatsara.VIKRAMA to "Vikrama",
+        Samvatsara.VRISHA to "Vrisha",
+        Samvatsara.CHITRABHANU to "Chitrabhanu",
+        Samvatsara.SWABHANU to "Swabhanu",
+        Samvatsara.TARANA to "Tarana",
+        Samvatsara.PARTHIVA to "Parthiva",
+        Samvatsara.VYAYA to "Vyaya",
+        Samvatsara.SARVAJIT to "Sarvajit",
+        Samvatsara.SARVADHARI to "Sarvadhari",
+        Samvatsara.VIRODHI to "Virodhi",
+        Samvatsara.VIKRUTI to "Vikriti",
+        Samvatsara.KHARA to "Khara",
+        Samvatsara.NANDANA to "Nandana",
+        Samvatsara.VIJAYA to "Vijaya",
+        Samvatsara.JAYA to "Jaya",
+        Samvatsara.MANMATHA to "Manmatha",
+        Samvatsara.DURMUKHI to "Durmukhi",
+        Samvatsara.HEVILAMBI to "Hevilambi",
+        Samvatsara.VILAMBI to "Vilambi",
+        Samvatsara.VIKARI to "Vikari",
+        Samvatsara.SHARVARI to "Sharvari",
+        Samvatsara.PLAVA to "Plava",
+        Samvatsara.SHUBHAKRIT to "Shubhakrit",
+        Samvatsara.SHOBHAKRIT to "Shobhakrit",
+        Samvatsara.KRODHI to "Krodhi",
+        Samvatsara.VISHVAVASU to "Vishvavasu",
+        Samvatsara.PARABHAVA to "Parabhava",
+        Samvatsara.PLAVANGA to "Plavanga",
+        Samvatsara.KILAKA to "Kilaka",
+        Samvatsara.SAUMYA to "Saumya",
+        Samvatsara.SADHARANA to "Sadharana",
+        Samvatsara.VIRODHIKRIT to "Virodhikrit",
+        Samvatsara.PARIDHAVI to "Paridhavi",
+        Samvatsara.PRAMADICHA to "Pramadicha",
+        Samvatsara.ANANDA to "Ananda",
+        Samvatsara.RAKSHASA to "Rakshasa",
+        Samvatsara.NALA to "Nala",
+        Samvatsara.PINGALA to "Pingala",
+        Samvatsara.KALAYUKTI to "Kalayukti",
+        Samvatsara.SIDDHARTHI to "Siddharthi",
+        Samvatsara.RAUDRA to "Raudra",
+        Samvatsara.DURMATI to "Durmati",
+        Samvatsara.DUNDUBHI to "Dundubhi",
+        Samvatsara.RUDHIRODGARI to "Rudhirodgari",
+        Samvatsara.RAKTAKSHI to "Raktakshi",
+        Samvatsara.KRODHANA to "Krodhana",
+        Samvatsara.AKSHAYA to "Akshaya"
+    )
+
+    private val samvatsaraTa = mapOf(
+        Samvatsara.PRABHAVA to "பிரபவ",
+        Samvatsara.VIBHAVA to "விபவ",
+        Samvatsara.SHUKLA to "சுக்ல",
+        Samvatsara.PRAMODUTA to "பிரமோதூத",
+        Samvatsara.PRAJOTPATTI to "பிரஜோற்பத்தி",
+        Samvatsara.ANGIRASA to "ஆங்கீரச",
+        Samvatsara.SHRIMUKHA to "ஸ்ரீமுக",
+        Samvatsara.BHAVA to "பவ",
+        Samvatsara.YUVA to "யுவ",
+        Samvatsara.DHATU to "தாது",
+        Samvatsara.ISHWARA to "ஈஸ்வர",
+        Samvatsara.BAHUDHANYA to "பஹுதான்ய",
+        Samvatsara.PRAMATHI to "பிரமாதி",
+        Samvatsara.VIKRAMA to "விக்கிரம",
+        Samvatsara.VRISHA to "விருஷ",
+        Samvatsara.CHITRABHANU to "சித்திரபானு",
+        Samvatsara.SWABHANU to "ஸ்வபானு",
+        Samvatsara.TARANA to "தாரண",
+        Samvatsara.PARTHIVA to "பார்த்திப",
+        Samvatsara.VYAYA to "வியய",
+        Samvatsara.SARVAJIT to "சர்வஜித்",
+        Samvatsara.SARVADHARI to "சர்வதாரி",
+        Samvatsara.VIRODHI to "விரோதி",
+        Samvatsara.VIKRUTI to "விக்ருதி",
+        Samvatsara.KHARA to "கர",
+        Samvatsara.NANDANA to "நந்தன",
+        Samvatsara.VIJAYA to "விஜய",
+        Samvatsara.JAYA to "ஜய",
+        Samvatsara.MANMATHA to "மன்மத",
+        Samvatsara.DURMUKHI to "துர்முகி",
+        Samvatsara.HEVILAMBI to "ஹேவிளம்பி",
+        Samvatsara.VILAMBI to "விளம்பி",
+        Samvatsara.VIKARI to "விகாரி",
+        Samvatsara.SHARVARI to "சார்வரி",
+        Samvatsara.PLAVA to "பிலவ",
+        Samvatsara.SHUBHAKRIT to "சுபகிருது",
+        Samvatsara.SHOBHAKRIT to "சோபகிருது",
+        Samvatsara.KRODHI to "குரோதி",
+        Samvatsara.VISHVAVASU to "விசுவாவசு",
+        Samvatsara.PARABHAVA to "பராபவ",
+        Samvatsara.PLAVANGA to "பிலவங்க",
+        Samvatsara.KILAKA to "கீலக",
+        Samvatsara.SAUMYA to "சௌமிய",
+        Samvatsara.SADHARANA to "சாதாரண",
+        Samvatsara.VIRODHIKRIT to "விரோதிகிருது",
+        Samvatsara.PARIDHAVI to "பரிதாபி",
+        Samvatsara.PRAMADICHA to "பிரமாதீச",
+        Samvatsara.ANANDA to "ஆனந்த",
+        Samvatsara.RAKSHASA to "ராட்சச",
+        Samvatsara.NALA to "நள",
+        Samvatsara.PINGALA to "பிங்கள",
+        Samvatsara.KALAYUKTI to "காளயுக்தி",
+        Samvatsara.SIDDHARTHI to "சித்தார்த்தி",
+        Samvatsara.RAUDRA to "ரௌத்திரி",
+        Samvatsara.DURMATI to "துர்மதி",
+        Samvatsara.DUNDUBHI to "துந்துபி",
+        Samvatsara.RUDHIRODGARI to "ருதிரோத்காரி",
+        Samvatsara.RAKTAKSHI to "ரக்தாட்சி",
+        Samvatsara.KRODHANA to "குரோதன",
+        Samvatsara.AKSHAYA to "அட்சய"
+    )
+
+    private val samvatsaraKa = mapOf(
+        Samvatsara.PRABHAVA to "ಪ್ರಭವ",
+        Samvatsara.VIBHAVA to "ವಿಭವ",
+        Samvatsara.SHUKLA to "ಶುಕ್ಲ",
+        Samvatsara.PRAMODUTA to "ಪ್ರಮೋದೂತ",
+        Samvatsara.PRAJOTPATTI to "ಪ್ರಜೋತ್ಪತ್ತಿ",
+        Samvatsara.ANGIRASA to "ಆಂಗೀರಸ",
+        Samvatsara.SHRIMUKHA to "ಶ್ರೀಮುಖ",
+        Samvatsara.BHAVA to "ಭವ",
+        Samvatsara.YUVA to "ಯುವ",
+        Samvatsara.DHATU to "ಧಾತು",
+        Samvatsara.ISHWARA to "ಈಶ್ವರ",
+        Samvatsara.BAHUDHANYA to "ಬಹುಧಾನ್ಯ",
+        Samvatsara.PRAMATHI to "ಪ್ರಮಾಥಿ",
+        Samvatsara.VIKRAMA to "ವಿಕ್ರಮ",
+        Samvatsara.VRISHA to "ವೃಷ",
+        Samvatsara.CHITRABHANU to "ಚಿತ್ರಭಾನು",
+        Samvatsara.SWABHANU to "ಸ್ವಭಾನು",
+        Samvatsara.TARANA to "ತಾರಣ",
+        Samvatsara.PARTHIVA to "ಪಾರ್ಥಿವ",
+        Samvatsara.VYAYA to "ವ್ಯಯ",
+        Samvatsara.SARVAJIT to "ಸರ್ವಜಿತ್",
+        Samvatsara.SARVADHARI to "ಸರ್ವಧಾರಿ",
+        Samvatsara.VIRODHI to "ವಿರೋಧಿ",
+        Samvatsara.VIKRUTI to "ವಿಕೃತಿ",
+        Samvatsara.KHARA to "ಖರ",
+        Samvatsara.NANDANA to "ನಂದನ",
+        Samvatsara.VIJAYA to "ವಿಜಯ",
+        Samvatsara.JAYA to "ಜಯ",
+        Samvatsara.MANMATHA to "ಮನ್ಮಥ",
+        Samvatsara.DURMUKHI to "ದುರ್ಮುಖಿ",
+        Samvatsara.HEVILAMBI to "ಹೇವಿಳಂಬಿ",
+        Samvatsara.VILAMBI to "ವಿಳಂಬಿ",
+        Samvatsara.VIKARI to "ವಿಕಾರಿ",
+        Samvatsara.SHARVARI to "ಶಾರ್ವರಿ",
+        Samvatsara.PLAVA to "ಪ್ಲವ",
+        Samvatsara.SHUBHAKRIT to "ಶುಭಕೃತ್",
+        Samvatsara.SHOBHAKRIT to "ಶೋಭಕೃತ್",
+        Samvatsara.KRODHI to "ಕ್ರೋಧಿ",
+        Samvatsara.VISHVAVASU to "ವಿಶ್ವಾವಸು",
+        Samvatsara.PARABHAVA to "ಪರಾಭವ",
+        Samvatsara.PLAVANGA to "ಪ್ಲವಂಗ",
+        Samvatsara.KILAKA to "ಕೀಲಕ",
+        Samvatsara.SAUMYA to "ಸೌಮ್ಯ",
+        Samvatsara.SADHARANA to "ಸಾಧಾರಣ",
+        Samvatsara.VIRODHIKRIT to "ವಿರೋಧಿಕೃತ್",
+        Samvatsara.PARIDHAVI to "ಪರಿಧಾವಿ",
+        Samvatsara.PRAMADICHA to "ಪ್ರಮಾದೀಚ",
+        Samvatsara.ANANDA to "ಆನಂದ",
+        Samvatsara.RAKSHASA to "ರಾಕ್ಷಸ",
+        Samvatsara.NALA to "ನಳ",
+        Samvatsara.PINGALA to "ಪಿಂಗಳ",
+        Samvatsara.KALAYUKTI to "ಕಾಲಯುಕ್ತಿ",
+        Samvatsara.SIDDHARTHI to "ಸಿದ್ಧಾರ್ಥಿ",
+        Samvatsara.RAUDRA to "ರೌದ್ರಿ",
+        Samvatsara.DURMATI to "ದುರ್ಮತಿ",
+        Samvatsara.DUNDUBHI to "ದುಂದುಭಿ",
+        Samvatsara.RUDHIRODGARI to "ರುಧಿರೋದ್ಗಾರಿ",
+        Samvatsara.RAKTAKSHI to "ರಕ್ತಾಕ್ಷಿ",
+        Samvatsara.KRODHANA to "ಕ್ರೋಧನ",
+        Samvatsara.AKSHAYA to "ಅಕ್ಷಯ"
+    )
+
+    private val samvatsaraHi = mapOf(
+        Samvatsara.PRABHAVA to "प्रभव",
+        Samvatsara.VIBHAVA to "विभव",
+        Samvatsara.SHUKLA to "शुक्ल",
+        Samvatsara.PRAMODUTA to "प्रमोदूत",
+        Samvatsara.PRAJOTPATTI to "प्रजोत्पत्ति",
+        Samvatsara.ANGIRASA to "आंगीरस",
+        Samvatsara.SHRIMUKHA to "श्रीमुख",
+        Samvatsara.BHAVA to "भाव",
+        Samvatsara.YUVA to "युव",
+        Samvatsara.DHATU to "धातु",
+        Samvatsara.ISHWARA to "ईश्वर",
+        Samvatsara.BAHUDHANYA to "बहुधान्य",
+        Samvatsara.PRAMATHI to "प्रमाथी",
+        Samvatsara.VIKRAMA to "विक्रम",
+        Samvatsara.VRISHA to "वृष",
+        Samvatsara.CHITRABHANU to "चित्रभानु",
+        Samvatsara.SWABHANU to "स्वभानु",
+        Samvatsara.TARANA to "तारण",
+        Samvatsara.PARTHIVA to "पार्थिव",
+        Samvatsara.VYAYA to "व्यय",
+        Samvatsara.SARVAJIT to "सर्वजित्",
+        Samvatsara.SARVADHARI to "सर्वधारी",
+        Samvatsara.VIRODHI to "विरोधी",
+        Samvatsara.VIKRUTI to "विकृति",
+        Samvatsara.KHARA to "खर",
+        Samvatsara.NANDANA to "नन्दन",
+        Samvatsara.VIJAYA to "विजय",
+        Samvatsara.JAYA to "जय",
+        Samvatsara.MANMATHA to "मन्मथ",
+        Samvatsara.DURMUKHI to "दुर्मुखी",
+        Samvatsara.HEVILAMBI to "हेविलम्बी",
+        Samvatsara.VILAMBI to "विलम्बी",
+        Samvatsara.VIKARI to "विकारी",
+        Samvatsara.SHARVARI to "शार्वरी",
+        Samvatsara.PLAVA to "प्लव",
+        Samvatsara.SHUBHAKRIT to "शुभकृत्",
+        Samvatsara.SHOBHAKRIT to "शोभकृत्",
+        Samvatsara.KRODHI to "क्रोधी",
+        Samvatsara.VISHVAVASU to "विश्वावसु",
+        Samvatsara.PARABHAVA to "पराभव",
+        Samvatsara.PLAVANGA to "प्लवंग",
+        Samvatsara.KILAKA to "कीलक",
+        Samvatsara.SAUMYA to "सौम्य",
+        Samvatsara.SADHARANA to "साधारण",
+        Samvatsara.VIRODHIKRIT to "विरोधिकृत्",
+        Samvatsara.PARIDHAVI to "परिधावी",
+        Samvatsara.PRAMADICHA to "प्रमादीच",
+        Samvatsara.ANANDA to "आनन्द",
+        Samvatsara.RAKSHASA to "राक्षस",
+        Samvatsara.NALA to "नल",
+        Samvatsara.PINGALA to "पिंगल",
+        Samvatsara.KALAYUKTI to "कालयुक्ति",
+        Samvatsara.SIDDHARTHI to "सिद्धार्थी",
+        Samvatsara.RAUDRA to "रौद्र",
+        Samvatsara.DURMATI to "दुर्मति",
+        Samvatsara.DUNDUBHI to "दुन्दुभि",
+        Samvatsara.RUDHIRODGARI to "रुधिरोद्गारी",
+        Samvatsara.RAKTAKSHI to "रक्ताक्षी",
+        Samvatsara.KRODHANA to "क्रोधन",
+        Samvatsara.AKSHAYA to "अक्षय"
+    )
+
+    private val ruthuEn = mapOf(
+        Ruthu.VASANTHA to "Vasantha",
+        Ruthu.GRISHMA to "Grishma",
+        Ruthu.VARSHA to "Varsha",
+        Ruthu.SHARAD to "Sharad",
+        Ruthu.HEMANTHA to "Hemanta",
+        Ruthu.SHISHIRA to "Shishira"
+    )
+
+    private val ruthuTa = mapOf(
+        Ruthu.VASANTHA to "வசந்தம்",
+        Ruthu.GRISHMA to "கிரீஷ்மம்",
+        Ruthu.VARSHA to "வர்ஷம்",
+        Ruthu.SHARAD to "சரத்",
+        Ruthu.HEMANTHA to "ஹேமந்தம்",
+        Ruthu.SHISHIRA to "சிசிரம்"
+    )
+
+    private val ruthuKa = mapOf(
+        Ruthu.VASANTHA to "ವಸಂತ",
+        Ruthu.GRISHMA to "ಗ್ರೀಷ್ಮ",
+        Ruthu.VARSHA to "ವರ್ಷಾ",
+        Ruthu.SHARAD to "ಶರದ್",
+        Ruthu.HEMANTHA to "ಹೇಮಂತ",
+        Ruthu.SHISHIRA to "ಶಿಶಿರ"
+    )
+
+    private val ruthuHi = mapOf(
+        Ruthu.VASANTHA to "वसंत",
+        Ruthu.GRISHMA to "ग्रीष्म",
+        Ruthu.VARSHA to "वर्षा",
+        Ruthu.SHARAD to "शरद",
+        Ruthu.HEMANTHA to "हेमंत",
+        Ruthu.SHISHIRA to "शिशिर"
+    )
+
+    private val ayanamEn = mapOf(
+        Ayanam.UTTARAYANAM to "Uttarayanam",
+        Ayanam.DAKSHINAYANAM to "Dakshinayanam"
+    )
+
+    private val ayanamTa = mapOf(
+        Ayanam.UTTARAYANAM to "உத்தராயணம்",
+        Ayanam.DAKSHINAYANAM to "தட்சிணாயணம்"
+    )
+
+    private val ayanamKa = mapOf(
+        Ayanam.UTTARAYANAM to "ಉತ್ತರಾಯಣ",
+        Ayanam.DAKSHINAYANAM to "ದಕ್ಷಿಣಾಯಣ"
+    )
+
+    private val ayanamHi = mapOf(
+        Ayanam.UTTARAYANAM to "उत्तरायण",
+        Ayanam.DAKSHINAYANAM to "दक्षिणायन"
+    )
+
     private val tamilMonthEn = mapOf(
         TamilMonth.CHITHIRAI to "Chithirai",
         TamilMonth.VAIKASI to "Vaikasi",
@@ -227,7 +697,7 @@ object PanchangaAttr {
         TamilMonth.AADI to "Aadi",
         TamilMonth.AVANI to "Avani",
         TamilMonth.PURATTASI to "Purattasi",
-        TamilMonth.IYPPASI to "Aippasi",
+        TamilMonth.IYPPASI to "Iyppasi",
         TamilMonth.KARTHIGAI to "Karthigai",
         TamilMonth.MARGAZHI to "Margazhi",
         TamilMonth.THAI to "Thai",
@@ -281,8 +751,8 @@ object PanchangaAttr {
     )
 
     private val pakshaEn = mapOf(
-        Paksha.SHUKLA to "Shukla",
-        Paksha.KRISHNA to "Krishna"
+        Paksha.SHUKLA to "Shukla Paksha",
+        Paksha.KRISHNA to "Krishna Paksha"
     )
 
     private val pakshaTa = mapOf(

@@ -586,5 +586,77 @@ def reports():
         reports_data_json_str=reports_data_json_str # The correctly serialized data string for JavaScript
     )
 
+def get_kainkaryam_details():
+    conn = get_db_connection()  #
+    detail_rows = conn.execute("""
+        SELECT
+            k.k_id,
+            k.k_dt,
+            k.dm,
+            COALESCE(t.name, k.dm) AS temple_name,
+            COALESCE(t.place, '') AS temple_place,
+            e.exp_id,
+            e.type AS expense_type,
+            e.store AS expense_store,
+            e.dt AS expense_dt,
+            e.amt AS expense_total_amt,
+            e.cmt AS expense_cmt,
+            d.don_id,
+            COALESCE(dn.name, d.donor) AS donor_name,
+            k.amt AS taken_amt,
+            k.cmt AS kainkaryam_cmt
+        FROM nd_kainkaryam k
+        JOIN nd_expense e
+            ON k.exp_id = e.exp_id
+        JOIN nd_donation d
+            ON k.don_id = d.don_id
+        LEFT JOIN nd_donors dn
+            ON d.donor = dn.name
+        LEFT JOIN temples t
+            ON k.dm = t.dm
+        ORDER BY k.k_dt DESC, k.k_id DESC
+    """).fetchall()
+
+    grouped_expenses = {}
+    for row in detail_rows:
+        exp_id = row['exp_id']
+        if exp_id not in grouped_expenses:
+            grouped_expenses[exp_id] = {
+                'exp_id': exp_id,
+                'expense_dt': row['expense_dt'],
+                'expense_type': row['expense_type'],
+                'expense_store': row['expense_store'],
+                'expense_cmt': row['expense_cmt'],
+                'expense_total_amt': safe_int_conversion(row['expense_total_amt']),
+                'latest_k_dt': row['k_dt'],
+                'group_taken_total': 0,
+                'entries': [],
+            }
+
+        taken_amt = safe_int_conversion(row['taken_amt'])
+
+        grouped_expenses[exp_id]['entries'].append({
+            'k_id': row['k_id'],
+            'k_dt': row['k_dt'],
+            'temple_name': row['temple_name'],
+            'temple_place': row['temple_place'],
+            'donor_name': row['donor_name'],
+            'taken_amt': taken_amt,
+            'cmt': row['kainkaryam_cmt'],
+        })
+        grouped_expenses[exp_id]['group_taken_total'] += taken_amt
+
+    return list(grouped_expenses.values())
+
+@app.route('/kainkaryam-details', methods=['GET'])
+def kainkaryam_details():
+    header_data = get_header_data()
+    details = get_kainkaryam_details()
+    return render_template(
+        'kainkaryam_details.html',
+        kainkaryam_details=details,
+        header_data=header_data
+    )
+
 if __name__ == '__main__':
     app.run(debug=True)
